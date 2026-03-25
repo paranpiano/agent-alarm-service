@@ -118,6 +118,7 @@ class AlarmTestGUI:
         self._image_tree.column("#0", width=160)
         self._image_tree.column("expected", width=65, anchor=tk.CENTER)
         self._image_tree.bind("<<TreeviewSelect>>", self._on_image_select)
+        self._image_tree.bind("<Double-1>", self._on_image_double_click)
 
         img_scroll = ttk.Scrollbar(left, orient=tk.VERTICAL, command=self._image_tree.yview)
         self._image_tree.configure(yscrollcommand=img_scroll.set)
@@ -187,6 +188,13 @@ class AlarmTestGUI:
     def _build_bottom_bar(self) -> None:
         bottom = ttk.Frame(self.root, padding=5)
         bottom.pack(fill=tk.X)
+
+        self._analyze_selected_btn = ttk.Button(
+            bottom, text="Analyze Selected", command=self._on_analyze_selected
+        )
+        self._analyze_selected_btn.pack(side=tk.LEFT)
+
+        ttk.Separator(bottom, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y, padx=6)
 
         self._analyze_btn = ttk.Button(bottom, text="Analyze All", command=self._on_analyze_all)
         self._analyze_btn.pack(side=tk.LEFT)
@@ -357,9 +365,73 @@ class AlarmTestGUI:
             self._detail_vars["Reason:"][0].set(error or "Unknown error")
             self._result_status_var.set("\u274c ERROR")
 
+    def _on_image_double_click(self, event=None) -> None:
+        """Double-click on an image triggers immediate single analysis."""
+        self._on_analyze_selected()
+
+    def _get_selected_image(self) -> tuple[Path, str] | None:
+        """Return (image_path, expected) for the currently selected tree item, or None."""
+        selection = self._image_tree.selection()
+        if not selection:
+            return None
+        item = selection[0]
+        parent = self._image_tree.parent(item)
+        if not parent:
+            return None  # Folder node selected
+        item_text = self._image_tree.item(item, "text")
+        expected = self._image_tree.item(item, "values")[0]
+        for path, exp in self._image_list:
+            if path.name == item_text and exp == expected:
+                return path, exp
+        return None
+
     # ------------------------------------------------------------------
     # Analysis
     # ------------------------------------------------------------------
+
+    def _on_analyze_selected(self) -> None:
+        """Analyze only the currently selected image."""
+        entry = self._get_selected_image()
+        if entry is None:
+            self._status_var.set("Select an image first")
+            return
+        image_path, expected = entry
+        self._update_api_client()
+        self._status_var.set(f"Analyzing {image_path.name}...")
+        self._analyze_selected_btn.configure(state=tk.DISABLED)
+        self._analyze_btn.configure(state=tk.DISABLED)
+
+        def _run() -> None:
+            try:
+                assert self._api_client is not None
+                result = self._api_client.analyze_single(image_path)
+                entry_result = (image_path.name, expected, result, None)
+            except Exception as exc:
+                entry_result = (image_path.name, expected, None, str(exc))
+            self.root.after(0, lambda: self._on_single_analysis_complete(entry_result))
+
+        threading.Thread(target=_run, daemon=True).start()
+
+    def _on_single_analysis_complete(
+        self, entry: tuple[str, str, JudgmentResult | None, str | None]
+    ) -> None:
+        name, expected, result, error = entry
+
+        # Update or insert into results list
+        for i, (n, e, _, _) in enumerate(self._results):
+            if n == name and e == expected:
+                self._results[i] = entry
+                break
+        else:
+            self._results.append(entry)
+
+        self._add_history(name, expected, result, error)
+        self._show_result_detail(name, expected)
+        self._status_var.set(
+            f"Done: {name} → {result.status.value if result else 'ERROR'}"
+        )
+        self._analyze_selected_btn.configure(state=tk.NORMAL)
+        self._analyze_btn.configure(state=tk.NORMAL)
 
     def _on_analyze_all(self) -> None:
         if not self._image_list:
@@ -368,6 +440,7 @@ class AlarmTestGUI:
         self._update_api_client()
         self._status_var.set("Analyzing...")
         self._analyze_btn.configure(state=tk.DISABLED)
+        self._analyze_selected_btn.configure(state=tk.DISABLED)
         threading.Thread(target=self._run_analyze_all, daemon=True).start()
 
     def _run_analyze_all(self) -> None:
@@ -392,6 +465,7 @@ class AlarmTestGUI:
 
         self._status_var.set(f"Done - {len(results)} images analyzed")
         self._analyze_btn.configure(state=tk.NORMAL)
+        self._analyze_selected_btn.configure(state=tk.NORMAL)
 
         # Auto-select first image to show result
         children = self._image_tree.get_children()
