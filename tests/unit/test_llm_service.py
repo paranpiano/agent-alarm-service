@@ -131,6 +131,11 @@ class TestBuildPrompt:
         assert "Response Format" in prompt
         assert "json" in prompt
 
+    def test_includes_critical_json_instruction(self, llm_service: LLMService) -> None:
+        prompt = llm_service._build_prompt()
+        assert "CRITICAL" in prompt
+        assert "ONLY a valid JSON object" in prompt
+
 
 # ---------------------------------------------------------------------------
 # _parse_response() tests
@@ -202,6 +207,17 @@ class TestParseResponse:
         raw = json.dumps({"status": "OK", "reason": "Fine."})
         result = llm_service._parse_response(raw)
         assert result.raw_response == raw
+
+    def test_json_with_surrounding_text(self, llm_service: LLMService) -> None:
+        raw = 'Here is the result:\n{"status": "NG", "reason": "S520 exceeded"}\nEnd.'
+        result = llm_service._parse_response(raw)
+        assert result.status == JudgmentStatus.NG
+        assert "S520 exceeded" in result.reason
+
+    def test_json_with_prefix_text_only(self, llm_service: LLMService) -> None:
+        raw = 'Analysis complete. {"status": "OK", "reason": "All normal."}'
+        result = llm_service._parse_response(raw)
+        assert result.status == JudgmentStatus.OK
 
 
 # ---------------------------------------------------------------------------

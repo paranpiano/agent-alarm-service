@@ -18,6 +18,7 @@ from typing import Optional
 from PIL import Image, ImageTk  # type: ignore[import-untyped]
 
 from client.api_client import AlarmApiClient
+from client.history_logger import HistoryLogger
 from client.models import JudgmentResult, JudgmentStatus
 from client.periodic_runner import PeriodicRunner
 
@@ -49,6 +50,8 @@ class AlarmTestGUI:
         self._image_list: list[tuple[Path, str]] = []
         self._current_photo: Optional[ImageTk.PhotoImage] = None
         self._results: list[tuple[str, str, JudgmentResult | None, str | None]] = []
+
+        self._history_logger = HistoryLogger()
 
         self._build_ui()
         self._apply_tags()
@@ -435,7 +438,13 @@ class AlarmTestGUI:
 
     def _handle_periodic_result(self, result: JudgmentResult) -> None:
         image_name = result.image_name or "periodic"
-        self._add_history(image_name, "?", result, None)
+        # Look up expected value from the image list by matching image name
+        expected = "?"
+        for path, exp in self._image_list:
+            if path.name == image_name:
+                expected = exp
+                break
+        self._add_history(image_name, expected, result, None)
         self._status_var.set(f"Periodic: {result.status.value} ({result.processing_time_ms}ms)")
 
     # ------------------------------------------------------------------
@@ -469,6 +478,16 @@ class AlarmTestGUI:
         children = self._history_tree.get_children()
         if len(children) > 100:
             self._history_tree.delete(children[-1])
+
+        # Log to CSV
+        self._history_logger.log_result(
+            image_name=image_name,
+            expected=expected.upper(),
+            actual=actual,
+            match=match_str == "\u2713",
+            reason=reason,
+            time_ms=time_ms,
+        )
 
     @staticmethod
     def _tag_for(status: JudgmentStatus, match_ok: bool) -> str:

@@ -6,6 +6,7 @@ PromptConfig, JSON response parsing, and timeout management.
 """
 
 import base64
+import io
 import json
 import logging
 import time
@@ -14,9 +15,12 @@ from typing import Any
 import yaml
 from langchain.schema import HumanMessage
 from langchain_openai import AzureChatOpenAI
+from PIL import Image
 
 from server.config import AppConfig, PromptConfig
 from server.models import JudgmentStatus, LLMResponse
+
+_MAX_IMAGE_DIMENSION = 2048
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +40,7 @@ def get_azure_vision_llm(config: AppConfig) -> AzureChatOpenAI:
         api_version=config.api_version,
         azure_deployment=config.vision_model,
         timeout=config.server.llm_timeout_seconds,
+        max_tokens=4096,
     )
 
 
@@ -75,11 +80,28 @@ class LLMService:
         """
         start_time = time.monotonic()
 
-        # 1. Base64 encode the image
+        # 1. Resize image to reduce token count (max 2048px on longest side)
+        try:
+            img = Image.open(io.BytesIO(image_bytes))
+            w, h = img.size
+            longest = max(w, h)
+            if longest > _MAX_IMAGE_DIMENSION:
+                ratio = _MAX_IMAGE_DIMENSION / longest
+                new_w = int(w * ratio)
+                new_h = int(h * ratio)
+                img = img.resize((new_w, new_h), Image.LANCZOS)
+            buf = io.BytesIO()
+            save_fmt = "JPEG" if image_format.lower() in ("jpg", "jpeg") else "PNG"
+            img.save(buf, format=save_fmt)
+            image_bytes = buf.getvalue()
+        except Exception:
+            logger.warning("Image resize failed; using original bytes")
+
+        # 2. Base64 encode the image
         b64_image = base64.b64encode(image_bytes).decode("utf-8")
         mime_type = f"image/{image_format}"
 
-        # 2. Build prompt and construct LangChain HumanMessage
+        # 3. Build prompt and construct LangChain HumanMessage
         prompt_text = self._build_prompt()
         messages = [
             HumanMessage(content=[
@@ -92,12 +114,12 @@ class LLMService:
         ]
 
         try:
-            # 3. Call LLM with timeout
+            # 4. Call LLM with timeout
             response = self.llm.predict_messages(messages)
             answer = response.content
             elapsed_ms = int((time.monotonic() - start_time) * 1000)
 
-            # 4. Parse JSON response into LLMResponse
+            # 5. Parse JSON response into LLMResponse
             return self._parse_response(answer), elapsed_ms
 
         except (TimeoutError, Exception) as exc:
@@ -153,15 +175,24 @@ class LLMService:
             default_flow_style=False,
         )
         parts.append(response_format_str.strip())
+        parts.append("")
+
+        # Critical instruction for valid JSON output
+        parts.append(
+            "CRITICAL: You MUST respond with ONLY a valid JSON object. "
+            "No markdown, no code fences, no explanation text before or "
+            "after the JSON. Start your response with { and end with }."
+        )
 
         return "\n".join(parts)
 
     def _parse_response(self, raw_response: str) -> LLMResponse:
         """Parse LLM response string into an LLMResponse object.
 
-        Attempts to extract JSON from the response. If the response contains
-        markdown code fences, strips them first. On parse failure, returns
-        LLMResponse with status=UNKNOWN.
+        Attempts to extract JSON from the response. Tries direct parsing
+        first, then strips markdown code fences, then falls back to
+        extracting text between the first ``{`` and last ``}``.
+        On parse failure, returns LLMResponse with status=UNKNOWN.
 
         Args:
             raw_response: Raw string response from the LLM.
@@ -171,24 +202,28 @@ class LLMService:
         """
         cleaned = raw_response.strip()
 
-        # Strip markdown code fences if present
-        if cleaned.startswith("```"):
-            lines = cleaned.split("\n")
-            # Remove first line (```json or ```) and last line (```)
-            if len(lines) >= 2:
-                start_idx = 1
-                end_idx = len(lines)
-                if lines[-1].strip() == "```":
-                    end_idx = -1
-                cleaned = "\n".join(lines[start_idx:end_idx]).strip()
+        # Attempt 1: direct parse
+        data = self._try_parse_json(cleaned)
 
-        try:
-            data: dict[str, Any] = json.loads(cleaned)
-        except (json.JSONDecodeError, TypeError) as exc:
-            logger.warning("Failed to parse LLM response as JSON: %s", exc)
+        # Attempt 2: strip markdown code fences
+        if data is None:
+            stripped = self._strip_code_fences(cleaned)
+            if stripped != cleaned:
+                data = self._try_parse_json(stripped)
+
+        # Attempt 3: extract substring between first { and last }
+        if data is None:
+            first = cleaned.find("{")
+            last = cleaned.rfind("}")
+            if first != -1 and last > first:
+                candidate = cleaned[first : last + 1]
+                data = self._try_parse_json(candidate)
+
+        if data is None:
+            logger.warning("Failed to parse LLM response as JSON")
             return LLMResponse(
                 status=JudgmentStatus.UNKNOWN,
-                reason=f"Failed to parse LLM response: {exc}",
+                reason=f"Failed to parse LLM response as JSON",
                 raw_response=raw_response,
             )
 
@@ -208,3 +243,26 @@ class LLMService:
             raw_response=raw_response,
             equipment_data=equipment_data,
         )
+
+    @staticmethod
+    def _try_parse_json(text: str) -> dict[str, Any] | None:
+        """Try to parse *text* as JSON, returning None on failure."""
+        try:
+            result = json.loads(text)
+            if isinstance(result, dict):
+                return result
+        except (json.JSONDecodeError, TypeError):
+            pass
+        return None
+
+    @staticmethod
+    def _strip_code_fences(text: str) -> str:
+        """Remove markdown code fences (```json ... ```) from *text*."""
+        if text.startswith("```"):
+            lines = text.split("\n")
+            start_idx = 1
+            end_idx = len(lines)
+            if lines[-1].strip() == "```":
+                end_idx = -1
+            return "\n".join(lines[start_idx:end_idx]).strip()
+        return text
