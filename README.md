@@ -30,7 +30,7 @@ Client (tkinter GUI)  →  Server (Flask)  →  Azure OpenAI GPT-4o Vision
 │   ├── logger.py                # Result storage + judgment logger
 │   ├── prompt_config.yaml       # LLM prompt & judgment criteria
 │   ├── server_config.yaml       # Server settings
-│   ├── .env.example             # Azure credentials template
+│   ├── .env                     # Azure credentials (gitignored)
 │   ├── api/
 │   │   └── routes.py            # Flask API routes
 │   └── services/
@@ -63,10 +63,7 @@ python -m pip install -r requirements.txt
 
 ### 2. Configure Azure OpenAI
 
-```bash
-cp server/.env.example server/.env
-# Edit server/.env with your Azure OpenAI credentials
-```
+Edit `server/.env` with your Azure OpenAI credentials:
 
 ```env
 AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/

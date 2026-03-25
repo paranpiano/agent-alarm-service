@@ -11,7 +11,6 @@ Client-Server 구조의 AI Alarm System POC를 구현한다. Server(Flask + wait
     - `server/`, `client/`, `tests/unit/`, `tests/property/` 디렉토리 생성
     - `requirements.txt` 작성 (flask, waitress, requests, langchain-openai, python-dotenv, PyYAML, hypothesis, pytest)
     - `.gitignore`에 `.env`, `data/`, `__pycache__/` 추가
-    - `server/.env.example` 템플릿 파일 생성
     - _Requirements: 4.1, 5.1_
 
   - [x] 1.2 공유 데이터 모델 구현 (`server/models.py`)
