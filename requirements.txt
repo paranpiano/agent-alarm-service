@@ -1,0 +1,8 @@
+flask
+waitress
+requests
+langchain-openai
+python-dotenv
+PyYAML
+hypothesis
+pytest

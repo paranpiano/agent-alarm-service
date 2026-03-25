@@ -1,0 +1,116 @@
+system_prompt: |
+  당신은 제조 장비 HMI 패널 이미지를 분석하는 AI 전문가입니다.
+  주어진 이미지에는 4개의 원격 연결 패널이 포함되어 있으며, 각 패널은 S520, S530, S540, S810 장비 중 하나입니다.
+  패널의 위치는 변경될 수 있으므로, 반드시 패널 상단의 장비 번호(S520, S530, S540, S810)를 먼저 식별하세요.
+
+equipment_definitions:
+  S520:
+    name: "S520 - Preheating & Curing"
+    description: "Curing Oven(1#~14#)과 Preheating Oven(14#~27#) 두 테이블이 있음"
+    data_extraction:
+      - table: "Curing Oven"
+        columns: "1# ~ 14#"
+        target_row: "흰색 배경 행 (누적 수량)"
+      - table: "Preheating Oven"
+        columns: "14# ~ 27#"
+        target_row: "흰색 배경 행 (누적 수량)"
+    total_values: 28
+    ng_condition: "어떤 수량이든 3000 이상이면 NG"
+
+  S530:
+    name: "S530 - Cooling"
+    description: "Cooling 1 Line(IN)과 Cooling 2 Line(Out) 두 테이블이 있음"
+    data_extraction:
+      - table: "Cooling 1 Line(IN)"
+        columns: "1# ~ 14#"
+        target_row: "흰색 배경 행 (누적 수량)"
+      - table: "Cooling 2 Line(Out)"
+        columns: "14# ~ 27#"
+        target_row: "흰색 배경 행 (누적 수량)"
+    total_values: 28
+    ng_condition: "어떤 수량이든 3000 이상이면 NG"
+
+  S540:
+    name: "S540 - Robot"
+    description: "3D 레이아웃 뷰에 1번~6번 스테이션이 있고, 각 스테이션에 2개씩(X-1, X-2) 수량 표시"
+    data_extraction:
+      - stations: "1-1, 1-2, 2-1, 2-2, 3-1, 3-2, 4-1, 4-2, 5-1, 5-2, 6-1, 6-2"
+        target: "각 스테이션 옆의 수량 값과 배경색"
+    total_values: 12
+    ng_condition: "스테이션 번호 배경색이 빨간색 또는 검은색이면 NG"
+
+  S810:
+    name: "S810 - Housing Cooling"
+    description: "Cooling 1 line과 Cooling 2 line 두 테이블이 있음"
+    data_extraction:
+      - table: "Cooling 1 line"
+        columns: "1# ~ 15#"
+        target_row: "흰색 배경 행 (누적 수량)"
+      - table: "Cooling 2 line"
+        columns: "1# ~ 15#"
+        target_row: "흰색 배경 행 (누적 수량)"
+    total_values: 30
+    ng_condition: "어떤 수량이든 3000 이상이면 NG"
+
+judgment_criteria:
+  step1_identification: |
+    이미지에서 4개의 패널을 식별하고, 각 패널 상단의 장비 번호(S520, S530, S540, S810)를 확인하세요.
+    4개 장비가 모두 식별되지 않으면 UNKNOWN으로 판단하세요.
+
+  step2_data_extraction: |
+    각 장비별로 지정된 데이터를 추출하세요:
+    - S520: Curing Oven(1#~14#) + Preheating Oven(14#~27#) 흰색 행 수량 28개
+    - S530: Cooling 1 Line(1#~14#) + Cooling 2 Line(14#~27#) 흰색 행 수량 28개
+    - S810: Cooling 1 line(1#~15#) + Cooling 2 line(1#~15#) 흰색 행 수량 30개
+    - S540: 1-1, 1-2 ~ 6-1, 6-2 스테이션별 수량 12개 + 각 스테이션 배경색
+    필요한 수량을 모두 추출하지 못하면 UNKNOWN으로 판단하세요.
+
+  step3_judgment: |
+    추출된 데이터를 기반으로 판단하세요:
+    [NG 조건]
+    - S520, S530, S810: 어떤 수량이든 3000 이상이면 NG (해당 장비와 번호 명시)
+    - S540: 스테이션 번호(1-1~6-2)의 배경색이 빨간색 또는 검은색이면 NG (해당 스테이션 명시)
+    [OK 조건]
+    - 위 NG 조건에 해당하지 않고, 모든 데이터가 정상 추출된 경우
+    [UNKNOWN 조건]
+    - 4개 장비 중 하나라도 식별 불가
+    - 필요한 수량 데이터를 모두 추출하지 못한 경우
+
+response_format:
+  type: "json"
+  schema: |
+    {
+      "status": "OK | NG | UNKNOWN",
+      "reason": "판단 이유를 한국어로 설명",
+      "equipment_data": {
+        "S520": {
+          "identified": true/false,
+          "curing_oven": {"1": 수량, "2": 수량, ..., "14": 수량},
+          "preheating_oven": {"14": 수량, "15": 수량, ..., "27": 수량},
+          "ng_items": ["항목번호: 수량 (3000 이상)"]
+        },
+        "S530": {
+          "identified": true/false,
+          "cooling_1_line": {"1": 수량, ..., "14": 수량},
+          "cooling_2_line": {"14": 수량, ..., "27": 수량},
+          "ng_items": []
+        },
+        "S540": {
+          "identified": true/false,
+          "stations": {
+            "1-1": {"count": 수량, "color": "green|red|black|white"},
+            "1-2": {"count": 수량, "color": "green|red|black|white"},
+            "...": "...",
+            "6-1": {"count": 수량, "color": "green|red|black|white"},
+            "6-2": {"count": 수량, "color": "green|red|black|white"}
+          },
+          "ng_items": ["스테이션번호: 색상 (빨간색/검은색)"]
+        },
+        "S810": {
+          "identified": true/false,
+          "cooling_1_line": {"1": 수량, ..., "15": 수량},
+          "cooling_2_line": {"1": 수량, ..., "15": 수량},
+          "ng_items": []
+        }
+      }
+    }

@@ -1,0 +1,19 @@
+server:
+  host: "0.0.0.0"
+  port: 8000
+  llm_timeout_seconds: 30
+
+client:
+  periodic_interval_seconds: 5
+
+email:
+  smtp_host: ""
+  smtp_port: 587
+  sender: ""
+  password: ""
+  recipients: []
+
+storage:
+  results_dir: "data/results"
+  logs_dir: "data/logs"
+  unknown_images_dir: "data/unknown_images"
