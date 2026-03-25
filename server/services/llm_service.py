@@ -31,7 +31,7 @@ def get_azure_vision_llm(config: AppConfig) -> AzureChatOpenAI:
         api_version=config.api_version,
         azure_deployment=config.vision_model,
         timeout=config.server.llm_timeout_seconds,
-        max_tokens=4096,
+        max_completion_tokens=4096,
     )
 
 
