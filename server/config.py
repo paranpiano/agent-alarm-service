@@ -89,6 +89,21 @@ class SnsSettings:
 
 
 @dataclass
+class ImageResizeSettings:
+    """Image resize settings loaded from environment variables.
+
+    Attributes:
+        mode: Resize mode — 'none', 'auto', or 'fixed'.
+        max_px: Maximum pixels on the longest side (used for 'auto'/'fixed').
+        quality: JPEG compression quality 1-95 (ignored for PNG).
+    """
+
+    mode: str = "auto"       # none | auto | fixed
+    max_px: int = 1536
+    quality: int = 80
+
+
+@dataclass
 class AppConfig:
     """Top-level application configuration aggregating all settings."""
 
@@ -96,6 +111,7 @@ class AppConfig:
     server: ServerSettings
     email: EmailSettings
     sns: SnsSettings
+    image_resize: ImageResizeSettings
     storage: StorageSettings
     azure_endpoint: str
     azure_api_key: str
@@ -198,6 +214,26 @@ def _load_sns_settings() -> SnsSettings:
     )
 
 
+def _load_image_resize_settings() -> ImageResizeSettings:
+    """Load image resize settings from environment variables."""
+    mode = os.getenv("IMAGE_RESIZE_MODE", "auto").lower().strip()
+    if mode not in ("none", "auto", "fixed"):
+        mode = "auto"
+
+    try:
+        max_px = int(os.getenv("IMAGE_RESIZE_MAX_PX", "1536"))
+    except ValueError:
+        max_px = 1536
+
+    try:
+        quality = int(os.getenv("IMAGE_RESIZE_QUALITY", "80"))
+        quality = max(1, min(95, quality))
+    except ValueError:
+        quality = 80
+
+    return ImageResizeSettings(mode=mode, max_px=max_px, quality=quality)
+
+
 def load_config(
     prompt_config_path: Path | None = None,
     server_config_path: Path | None = None,
@@ -224,12 +260,14 @@ def load_config(
     server_settings, email_settings, storage_settings = _load_server_config(server_config_path)
     endpoint, api_key, api_version, chat_model, vision_model = _load_env_vars()
     sns_settings = _load_sns_settings()
+    image_resize_settings = _load_image_resize_settings()
 
     return AppConfig(
         prompt=prompt,
         server=server_settings,
         email=email_settings,
         sns=sns_settings,
+        image_resize=image_resize_settings,
         storage=storage_settings,
         azure_endpoint=endpoint,
         azure_api_key=api_key,

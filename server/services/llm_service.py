@@ -17,23 +17,14 @@ from langchain.schema import HumanMessage
 from langchain_openai import AzureChatOpenAI
 from PIL import Image
 
-from server.config import AppConfig, PromptConfig
+from server.config import AppConfig, ImageResizeSettings, PromptConfig
 from server.models import JudgmentStatus, LLMResponse
-
-_MAX_IMAGE_DIMENSION = 2048
 
 logger = logging.getLogger(__name__)
 
 
 def get_azure_vision_llm(config: AppConfig) -> AzureChatOpenAI:
-    """Factory function to create an AzureChatOpenAI client.
-
-    Args:
-        config: Application configuration containing Azure credentials.
-
-    Returns:
-        Configured AzureChatOpenAI instance for vision tasks.
-    """
+    """Factory function to create an AzureChatOpenAI client."""
     return AzureChatOpenAI(
         azure_endpoint=config.azure_endpoint,
         api_key=config.azure_api_key,
@@ -42,6 +33,58 @@ def get_azure_vision_llm(config: AppConfig) -> AzureChatOpenAI:
         timeout=config.server.llm_timeout_seconds,
         max_tokens=4096,
     )
+
+
+def resize_image(image_bytes: bytes, image_format: str, settings: ImageResizeSettings) -> bytes:
+    """Resize image bytes according to ImageResizeSettings.
+
+    Args:
+        image_bytes: Raw image bytes.
+        image_format: 'png', 'jpeg', or 'jpg'.
+        settings: Resize configuration from .env.
+
+    Returns:
+        Resized image bytes (or original if mode is 'none' or resize not needed).
+    """
+    if settings.mode == "none":
+        return image_bytes
+
+    try:
+        img = Image.open(io.BytesIO(image_bytes))
+        w, h = img.size
+        longest = max(w, h)
+
+        needs_resize = (settings.mode == "fixed") or (
+            settings.mode == "auto" and longest > settings.max_px
+        )
+
+        if not needs_resize:
+            return image_bytes
+
+        ratio = settings.max_px / longest
+        new_w = int(w * ratio)
+        new_h = int(h * ratio)
+        img = img.resize((new_w, new_h), Image.LANCZOS)
+
+        buf = io.BytesIO()
+        save_fmt = "JPEG" if image_format.lower() in ("jpg", "jpeg") else "PNG"
+        save_kwargs: dict = {"format": save_fmt}
+        if save_fmt == "JPEG":
+            save_kwargs["quality"] = settings.quality
+        img.save(buf, **save_kwargs)
+
+        resized = buf.getvalue()
+        logger.debug(
+            "Image resized: %dx%d → %dx%d (mode=%s, max_px=%d, %.1f KB → %.1f KB)",
+            w, h, new_w, new_h,
+            settings.mode, settings.max_px,
+            len(image_bytes) / 1024, len(resized) / 1024,
+        )
+        return resized
+
+    except Exception:
+        logger.warning("Image resize failed; using original bytes")
+        return image_bytes
 
 
 class LLMService:
@@ -54,14 +97,10 @@ class LLMService:
     """
 
     def __init__(self, app_config: AppConfig) -> None:
-        """Initialize LLMService with application configuration.
-
-        Args:
-            app_config: Application configuration containing prompt settings,
-                Azure credentials, and timeout configuration.
-        """
+        """Initialize LLMService with application configuration."""
         self.config: PromptConfig = app_config.prompt
         self.timeout_seconds: int = app_config.server.llm_timeout_seconds
+        self.image_resize = app_config.image_resize
         self.llm: AzureChatOpenAI = get_azure_vision_llm(app_config)
 
     def analyze_image(self, image_bytes: bytes, image_format: str) -> tuple[LLMResponse, int]:
@@ -80,22 +119,8 @@ class LLMService:
         """
         start_time = time.monotonic()
 
-        # 1. Resize image to reduce token count (max 2048px on longest side)
-        try:
-            img = Image.open(io.BytesIO(image_bytes))
-            w, h = img.size
-            longest = max(w, h)
-            if longest > _MAX_IMAGE_DIMENSION:
-                ratio = _MAX_IMAGE_DIMENSION / longest
-                new_w = int(w * ratio)
-                new_h = int(h * ratio)
-                img = img.resize((new_w, new_h), Image.LANCZOS)
-            buf = io.BytesIO()
-            save_fmt = "JPEG" if image_format.lower() in ("jpg", "jpeg") else "PNG"
-            img.save(buf, format=save_fmt)
-            image_bytes = buf.getvalue()
-        except Exception:
-            logger.warning("Image resize failed; using original bytes")
+        # 1. Resize image using configured settings
+        image_bytes = resize_image(image_bytes, image_format, self.image_resize)
 
         # 2. Base64 encode the image
         b64_image = base64.b64encode(image_bytes).decode("utf-8")
