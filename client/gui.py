@@ -10,7 +10,7 @@ Layout:
 import logging
 import threading
 import tkinter as tk
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from tkinter import filedialog, ttk
 from typing import Optional
@@ -526,7 +526,7 @@ class AlarmTestGUI:
     # ------------------------------------------------------------------
 
     def _add_history(self, image_name: str, expected: str, result: JudgmentResult | None, error: str | None) -> None:
-        now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         if result is not None:
             actual = result.status.value

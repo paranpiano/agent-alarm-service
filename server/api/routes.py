@@ -8,8 +8,9 @@ Error codes: INVALID_IMAGE_FORMAT, IMAGE_TOO_LARGE, LLM_SERVICE_ERROR, MISSING_I
 """
 
 import logging
+import random
 import time
-from datetime import datetime, timezone
+from datetime import datetime
 
 from flask import Blueprint, Response, jsonify, request
 
@@ -51,15 +52,14 @@ def init_routes(
 
 def _generate_request_id() -> str:
     """Generate a unique request ID in the format req_YYYYMMDD_HHMMSS_XXXX."""
-    now = datetime.now(timezone.utc)
-    import random
+    now = datetime.now()
     suffix = f"{random.randint(0, 9999):04d}"
     return f"req_{now.strftime('%Y%m%d_%H%M%S')}_{suffix}"
 
 
-def _utc_iso_timestamp() -> str:
-    """Return the current UTC time as an ISO 8601 string."""
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+def _local_iso_timestamp() -> str:
+    """Return the current local time as an ISO 8601 string."""
+    return datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
 
 def _error_response(code: str, message: str, request_id: str, http_status: int) -> tuple[Response, int]:
@@ -79,7 +79,7 @@ def _error_response(code: str, message: str, request_id: str, http_status: int) 
             "code": code,
             "message": message,
             "request_id": request_id,
-            "timestamp": _utc_iso_timestamp(),
+            "timestamp": _local_iso_timestamp(),
         }
     }
     return jsonify(body), http_status
@@ -88,7 +88,7 @@ def _error_response(code: str, message: str, request_id: str, http_status: int) 
 @api_bp.route("/health", methods=["GET"])
 def health() -> tuple[Response, int]:
     """GET /api/v1/health — server health check."""
-    return jsonify({"status": "healthy", "timestamp": _utc_iso_timestamp()}), 200
+    return jsonify({"status": "healthy", "timestamp": _local_iso_timestamp()}), 200
 
 
 @api_bp.route("/analyze", methods=["POST"])
@@ -162,7 +162,7 @@ def analyze() -> tuple[Response, int]:
         request_id=request_id,
         status=llm_response.status,
         reason=llm_response.reason,
-        timestamp=_utc_iso_timestamp(),
+        timestamp=_local_iso_timestamp(),
         processing_time_ms=processing_time_ms,
         image_name=filename,
         equipment_data=llm_response.equipment_data,

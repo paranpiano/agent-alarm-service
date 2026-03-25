@@ -10,7 +10,7 @@ All file I/O uses encoding='utf-8' explicitly.
 
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
 from server.models import JudgmentResult
@@ -119,4 +119,4 @@ class JudgmentLogger:
             dt = datetime.fromisoformat(timestamp)
             return dt.strftime("%Y-%m-%d")
         except (ValueError, TypeError):
-            return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+            return datetime.now().strftime("%Y-%m-%d")

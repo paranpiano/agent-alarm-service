@@ -6,7 +6,7 @@ Provides:
 
 import logging
 import random
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
 import requests
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 def _generate_request_id() -> str:
     """Generate a unique request ID in the format req_YYYYMMDD_HHMMSS_XXXX."""
-    now = datetime.now(timezone.utc)
+    now = datetime.now()
     suffix = f"{random.randint(0, 9999):04d}"
     return f"req_{now.strftime('%Y%m%d_%H%M%S')}_{suffix}"
 

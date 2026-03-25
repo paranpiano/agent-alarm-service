@@ -5,7 +5,7 @@ Appends each analysis result as a row to ``data/client_history.csv``.
 
 import csv
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ class HistoryLogger:
             reason: Judgment reason text.
             time_ms: Processing time in milliseconds (as string).
         """
-        timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         try:
             with open(self._path, "a", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
