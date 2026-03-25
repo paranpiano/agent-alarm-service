@@ -80,12 +80,22 @@ class PromptConfig:
 
 
 @dataclass
+class SnsSettings:
+    """SNS notification settings loaded from environment variables."""
+
+    api_url: str = ""
+    topic_arn: str = ""
+    protocol: str = "email"
+
+
+@dataclass
 class AppConfig:
     """Top-level application configuration aggregating all settings."""
 
     prompt: PromptConfig
     server: ServerSettings
     email: EmailSettings
+    sns: SnsSettings
     storage: StorageSettings
     azure_endpoint: str
     azure_api_key: str
@@ -179,6 +189,15 @@ def _load_env_vars() -> tuple[str, str, str, str, str]:
     return endpoint, api_key, api_version, chat_model, vision_model
 
 
+def _load_sns_settings() -> SnsSettings:
+    """Load SNS notification settings from environment variables."""
+    return SnsSettings(
+        api_url=os.getenv("SNS_API_URL", ""),
+        topic_arn=os.getenv("SNS_TOPIC_ARN", ""),
+        protocol=os.getenv("SNS_PROTOCOL", "email"),
+    )
+
+
 def load_config(
     prompt_config_path: Path | None = None,
     server_config_path: Path | None = None,
@@ -204,11 +223,13 @@ def load_config(
     prompt = _load_prompt_config(prompt_config_path)
     server_settings, email_settings, storage_settings = _load_server_config(server_config_path)
     endpoint, api_key, api_version, chat_model, vision_model = _load_env_vars()
+    sns_settings = _load_sns_settings()
 
     return AppConfig(
         prompt=prompt,
         server=server_settings,
         email=email_settings,
+        sns=sns_settings,
         storage=storage_settings,
         azure_endpoint=endpoint,
         azure_api_key=api_key,

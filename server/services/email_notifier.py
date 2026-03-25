@@ -1,15 +1,15 @@
-"""Email notification module for the AI Alarm System.
+"""SNS notification module for the AI Alarm System.
 
-Sends alert emails when an UNKNOWN judgment status is detected.
-Uses smtplib (standard library) with MIMEText for email construction.
-Supports configurable SMTP settings and up to 3 retries on failure.
+Sends alert notifications via AWS SNS API Gateway when an UNKNOWN
+judgment status is detected. Replaces the previous SMTP-based approach.
+Supports up to 3 retries on failure.
 """
 
 import logging
-import smtplib
-from email.mime.text import MIMEText
 
-from server.config import EmailSettings
+import requests
+
+from server.config import SnsSettings
 from server.models import JudgmentResult
 
 logger = logging.getLogger(__name__)
@@ -18,27 +18,29 @@ _MAX_RETRIES = 3
 
 
 class EmailNotifier:
-    """Sends alert emails for UNKNOWN judgment results.
+    """Sends alert notifications for UNKNOWN judgment results via SNS API.
+
+    Despite the class name (kept for backward compatibility), this now
+    uses an AWS SNS API Gateway endpoint instead of SMTP.
 
     Attributes:
-        config: SMTP and recipient settings loaded from EmailSettings.
+        config: SNS settings (api_url, topic_arn, protocol).
     """
 
-    def __init__(self, config: EmailSettings) -> None:
-        """Initialize with SMTP configuration.
+    def __init__(self, config: SnsSettings) -> None:
+        """Initialize with SNS configuration.
 
         Args:
-            config: EmailSettings dataclass containing smtp_host, smtp_port,
-                    sender, password, and recipients.
+            config: SnsSettings with api_url, topic_arn, and protocol.
         """
         self.config = config
 
     def _build_subject(self, judgment: JudgmentResult) -> str:
-        """Build the email subject line."""
+        """Build the notification subject line."""
         return f"[AI Alarm] Unknown Status Detected - {judgment.request_id}"
 
-    def _build_body(self, judgment: JudgmentResult) -> str:
-        """Build the email body including reason, timestamp, and request_id."""
+    def _build_message(self, judgment: JudgmentResult) -> str:
+        """Build the notification message body."""
         return (
             f"An unknown status has been detected.\n"
             f"\n"
@@ -48,50 +50,61 @@ class EmailNotifier:
         )
 
     def send_alert(self, judgment: JudgmentResult) -> bool:
-        """Send an alert email for an UNKNOWN judgment result.
+        """Send an alert notification for an UNKNOWN judgment result.
 
-        Retries up to 3 times on SMTP failures. Each failure is logged.
+        Posts to the SNS API Gateway endpoint. Retries up to 3 times
+        on failure. Each failure is logged.
 
         Args:
             judgment: The JudgmentResult that triggered the alert.
 
         Returns:
-            True if the email was sent successfully, False after all retries fail.
+            True if the notification was sent successfully,
+            False after all retries fail.
         """
-        subject = self._build_subject(judgment)
-        body = self._build_body(judgment)
+        if not self.config.api_url or not self.config.topic_arn:
+            logger.warning(
+                "SNS not configured (missing api_url or topic_arn); "
+                "skipping alert for request_id=%s",
+                judgment.request_id,
+            )
+            return False
 
-        msg = MIMEText(body, "plain", "utf-8")
-        msg["Subject"] = subject
-        msg["From"] = self.config.sender
-        msg["To"] = ", ".join(self.config.recipients)
+        subject = self._build_subject(judgment)
+        message = self._build_message(judgment)
+
+        payload = {
+            "topicArn": self.config.topic_arn,
+            "subject": subject,
+            "message": message,
+            "protocol": self.config.protocol,
+        }
+
+        url = f"{self.config.api_url.rstrip('/')}?action=publishMessage"
 
         for attempt in range(1, _MAX_RETRIES + 1):
             try:
-                with smtplib.SMTP(self.config.smtp_host, self.config.smtp_port) as server:
-                    server.starttls()
-                    server.login(self.config.sender, self.config.password)
-                    server.sendmail(
-                        self.config.sender,
-                        self.config.recipients,
-                        msg.as_string(),
-                    )
+                response = requests.post(url, json=payload, timeout=10)
+                response.raise_for_status()
+                data = response.json()
                 logger.info(
-                    "Alert email sent for request_id=%s (attempt %d)",
+                    "SNS alert sent for request_id=%s (attempt %d, messageId=%s)",
                     judgment.request_id,
                     attempt,
+                    data.get("messageId", "unknown"),
                 )
                 return True
-            except smtplib.SMTPException:
-                logger.exception(
-                    "Failed to send alert email for request_id=%s (attempt %d/%d)",
+            except requests.RequestException as exc:
+                logger.warning(
+                    "Failed to send SNS alert for request_id=%s (attempt %d/%d): %s",
                     judgment.request_id,
                     attempt,
                     _MAX_RETRIES,
+                    exc,
                 )
 
         logger.error(
-            "All %d email send attempts failed for request_id=%s",
+            "All %d SNS alert attempts failed for request_id=%s",
             _MAX_RETRIES,
             judgment.request_id,
         )

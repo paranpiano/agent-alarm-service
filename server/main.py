@@ -52,8 +52,8 @@ def create_app() -> Flask:
     )
     judgment_logger = JudgmentLogger(logs_dir=config.storage.logs_dir)
 
-    # Create email notifier (may be unconfigured for POC)
-    email_notifier = EmailNotifier(config=config.email)
+    # Create SNS notifier for UNKNOWN status alerts
+    email_notifier = EmailNotifier(config=config.sns)
 
     init_routes(llm_service, result_storage, judgment_logger, email_notifier)
 

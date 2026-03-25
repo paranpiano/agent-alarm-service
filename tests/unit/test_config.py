@@ -18,6 +18,7 @@ from server.config import (
     ConfigError,
     PromptConfig,
     ServerSettings,
+    SnsSettings,
     StorageSettings,
     load_config,
 )
@@ -223,6 +224,8 @@ class TestLoadConfigErrors:
     ) -> None:
         monkeypatch.setenv("AZURE_OPENAI_API_KEY", "key")
         monkeypatch.delenv("AZURE_OPENAI_ENDPOINT", raising=False)
+        # Prevent load_dotenv from loading the real .env file
+        monkeypatch.setattr("server.config.load_dotenv", lambda **kwargs: None)
         with pytest.raises(ConfigError, match="AZURE_OPENAI_ENDPOINT"):
             load_config(
                 prompt_config_path=valid_prompt_config,
@@ -237,6 +240,7 @@ class TestLoadConfigErrors:
     ) -> None:
         monkeypatch.setenv("AZURE_OPENAI_ENDPOINT", "https://x.openai.azure.com/")
         monkeypatch.delenv("AZURE_OPENAI_API_KEY", raising=False)
+        monkeypatch.setattr("server.config.load_dotenv", lambda **kwargs: None)
         with pytest.raises(ConfigError, match="AZURE_OPENAI_API_KEY"):
             load_config(
                 prompt_config_path=valid_prompt_config,

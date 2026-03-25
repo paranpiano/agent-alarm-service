@@ -16,7 +16,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from server.config import AppConfig, EmailSettings, PromptConfig, ServerSettings, StorageSettings
+from server.config import AppConfig, EmailSettings, PromptConfig, ServerSettings, SnsSettings, StorageSettings
 from server.models import JudgmentStatus, LLMResponse
 from server.services.llm_service import LLMService
 
@@ -68,6 +68,7 @@ def app_config(prompt_config: PromptConfig) -> AppConfig:
         prompt=prompt_config,
         server=ServerSettings(host="0.0.0.0", port=8000, llm_timeout_seconds=30),
         email=EmailSettings(),
+        sns=SnsSettings(),
         storage=StorageSettings(),
         azure_endpoint="https://test.openai.azure.com/",
         azure_api_key="test-key-123",
