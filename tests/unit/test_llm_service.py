@@ -18,7 +18,7 @@ import pytest
 
 from server.config import AppConfig, EmailSettings, PromptConfig, ServerSettings, SnsSettings, StorageSettings, ImageResizeSettings
 from server.models import JudgmentStatus, LLMResponse
-from server.services.llm_service import LLMService
+from server.services.llm_service import LLMService, _uses_completion_tokens
 
 
 # ---------------------------------------------------------------------------
@@ -303,3 +303,31 @@ class TestAnalyzeImage:
 
         assert result.status == JudgmentStatus.TIMEOUT
         assert "timeout" in result.reason.lower()
+
+
+# ---------------------------------------------------------------------------
+# _uses_completion_tokens() tests
+# ---------------------------------------------------------------------------
+
+class TestUsesCompletionTokens:
+    """Tests for the model name auto-detection helper."""
+
+    def test_gpt4o_uses_max_tokens(self):
+        assert _uses_completion_tokens("gpt-4o") is False
+        assert _uses_completion_tokens("gpt-4o-korea-rag") is False
+
+    def test_gpt41_uses_max_completion_tokens(self):
+        assert _uses_completion_tokens("gpt-4.1") is True
+        assert _uses_completion_tokens("gpt-4.1-korea-agentic") is True
+
+    def test_gpt5_uses_max_completion_tokens(self):
+        assert _uses_completion_tokens("gpt-5.1-korea-agentic") is True
+        assert _uses_completion_tokens("gpt-5") is True
+
+    def test_o1_uses_max_completion_tokens(self):
+        assert _uses_completion_tokens("o1-preview") is True
+        assert _uses_completion_tokens("o3-mini") is True
+
+    def test_case_insensitive(self):
+        assert _uses_completion_tokens("GPT-4.1-KOREA") is True
+        assert _uses_completion_tokens("GPT-4O") is False

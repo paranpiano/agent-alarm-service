@@ -22,16 +22,41 @@ from server.models import JudgmentStatus, LLMResponse
 
 logger = logging.getLogger(__name__)
 
+# Models that use max_completion_tokens instead of max_tokens.
+# gpt-4o and earlier use max_tokens; gpt-4.1, gpt-5.x use max_completion_tokens.
+_USES_MAX_COMPLETION_TOKENS = ("gpt-4.1", "gpt-5", "o1", "o3")
+
+
+def _uses_completion_tokens(model_name: str) -> bool:
+    """Return True if the model requires max_completion_tokens instead of max_tokens."""
+    name = model_name.lower()
+    return any(name.startswith(prefix) or prefix in name for prefix in _USES_MAX_COMPLETION_TOKENS)
+
 
 def get_azure_vision_llm(config: AppConfig) -> AzureChatOpenAI:
-    """Factory function to create an AzureChatOpenAI client."""
+    """Factory function to create an AzureChatOpenAI client.
+
+    Automatically selects max_completion_tokens or max_tokens based on
+    the deployment model name to support both gpt-4o and gpt-4.1/gpt-5.x.
+    """
+    model = config.vision_model
+    token_kwargs: dict = (
+        {"max_completion_tokens": 4096}
+        if _uses_completion_tokens(model)
+        else {"max_tokens": 4096}
+    )
+    logger.info(
+        "LLM client: deployment=%s, token_param=%s",
+        model,
+        "max_completion_tokens" if _uses_completion_tokens(model) else "max_tokens",
+    )
     return AzureChatOpenAI(
         azure_endpoint=config.azure_endpoint,
         api_key=config.azure_api_key,
         api_version=config.api_version,
-        azure_deployment=config.vision_model,
+        azure_deployment=model,
         timeout=config.server.llm_timeout_seconds,
-        max_completion_tokens=4096,
+        **token_kwargs,
     )
 
 
