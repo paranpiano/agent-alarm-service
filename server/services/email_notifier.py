@@ -70,6 +70,14 @@ class EmailNotifier:
             )
             return False
 
+        if not self.config.enabled:
+            logger.info(
+                "SNS alerts disabled (SNS_ENABLED=false); "
+                "skipping alert for request_id=%s",
+                judgment.request_id,
+            )
+            return False
+
         subject = self._build_subject(judgment)
         message = self._build_message(judgment)
 

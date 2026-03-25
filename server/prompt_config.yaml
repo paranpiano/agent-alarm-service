@@ -7,28 +7,28 @@ equipment_definitions:
   S520:
     name: "S520 - Preheating & Curing"
     description: |
-      Contains TWO tables:
-      - Table 1 (Curing Oven): columns labeled 1# through 14# (14 columns total)
-      - Table 2 (Preheating Oven): columns labeled 27# down to 14# (14 columns total, right-to-left order)
-      Each table has TWO rows: a CYAN/blue row (ignore) and a WHITE row (extract this one).
-      Extract the WHITE row values only.
+      Contains TWO tables (Curing Oven, Preheating Oven).
+      Numeric values are provided via OCR — use them AS-IS.
+      Also scan the entire panel image for any RED background areas.
     extraction_rules:
-      curing_oven: "Read WHITE row values for columns 1# 2# 3# 4# 5# 6# 7# 8# 9# 10# 11# 12# 13# 14# (14 values)"
-      preheating_oven: "Read WHITE row values for columns 27# 26# 25# 24# 23# 22# 21# 20# 19# 18# 17# 16# 15# 14# (14 values)"
-    ng_rule: "NG if ANY single value in curing_oven OR preheating_oven is STRICTLY GREATER THAN OR EQUAL TO 3000. Threshold = 3000. Value must be >= 3000 to be NG."
+      curing_oven: "Use OCR mapped values for keys 1..14"
+      preheating_oven: "Use OCR mapped values for keys 14..27"
+    ng_rule: |
+      NG if ANY numeric value >= 3000.
+      NG if ANY red background area is visible — read the text label in that area and add to ng_items as "RED: <label text>".
 
   S530:
     name: "S530 - Cooling"
     description: |
-      Contains TWO tables:
-      - Table 1 (Cooling 1 Line IN): columns labeled 1# through 14# (14 columns total)
-      - Table 2 (Cooling 2 Line Out): columns labeled 14# through 27# (14 columns total)
-      Each table has TWO rows: a CYAN/blue row (ignore) and a WHITE row (extract this one).
-      Extract the WHITE row values only.
+      Contains TWO tables (Cooling 1 Line IN, Cooling 2 Line Out).
+      Numeric values are provided via OCR — use them AS-IS.
+      Also scan the entire panel image for any RED background areas.
     extraction_rules:
-      cooling_1_line: "Read WHITE row values for columns 1# 2# 3# 4# 5# 6# 7# 8# 9# 10# 11# 12# 13# 14# (14 values)"
-      cooling_2_line: "Read WHITE row values for columns 14# 15# 16# 17# 18# 19# 20# 21# 22# 23# 24# 25# 26# 27# (14 values)"
-    ng_rule: "NG if ANY single value in cooling_1_line OR cooling_2_line is STRICTLY GREATER THAN OR EQUAL TO 3000. Threshold = 3000. Value must be >= 3000 to be NG."
+      cooling_1_line: "Use OCR mapped values for keys 1..14"
+      cooling_2_line: "Use OCR mapped values for keys 1..14"
+    ng_rule: |
+      NG if ANY numeric value >= 3000.
+      NG if ANY red background area is visible — read the text label in that area and add to ng_items as "RED: <label text>".
 
   S540:
     name: "S540 - Robot"
@@ -37,7 +37,7 @@ equipment_definitions:
       Each station number X has TWO sub-stations: X-1 and X-2.
       Total 12 stations: 1-1, 1-2, 2-1, 2-2, 3-1, 3-2, 4-1, 4-2, 5-1, 5-2, 6-1, 6-2.
       Each station label has a background color (green = normal, red or black = alarm).
-      Also read the numeric count value displayed near each station.
+      Read count values and colors directly from the image.
     extraction_rules:
       stations: "For each of the 12 stations, record: count (numeric value) and color (green/red/black/white)"
     ng_rule: "NG if ANY station label background color is RED or BLACK. Green = OK."
@@ -45,15 +45,15 @@ equipment_definitions:
   S810:
     name: "S810 - Housing Cooling"
     description: |
-      Contains TWO tables:
-      - Table 1 (Cooling 1 line): columns labeled 15# down to 1# (15 columns, right-to-left)
-      - Table 2 (Cooling 2 line): columns labeled 15# down to 1# (15 columns, right-to-left)
-      Each table has TWO rows: a CYAN/blue row (ignore) and a WHITE row (extract this one).
-      Extract the WHITE row values only.
+      Contains TWO tables (Cooling 1 line, Cooling 2 line).
+      Numeric values are provided via OCR — use them AS-IS.
+      Also scan the entire panel image for any RED background areas.
     extraction_rules:
-      cooling_1_line: "Read WHITE row values for columns 1# 2# 3# 4# 5# 6# 7# 8# 9# 10# 11# 12# 13# 14# 15# (15 values)"
-      cooling_2_line: "Read WHITE row values for columns 1# 2# 3# 4# 5# 6# 7# 8# 9# 10# 11# 12# 13# 14# 15# (15 values)"
-    ng_rule: "NG if ANY single value in cooling_1_line OR cooling_2_line is STRICTLY GREATER THAN OR EQUAL TO 3000. Threshold = 3000. Value must be >= 3000 to be NG."
+      cooling_1_line: "Use OCR mapped values for keys 1..15"
+      cooling_2_line: "Use OCR mapped values for keys 1..15"
+    ng_rule: |
+      NG if ANY numeric value >= 3000.
+      NG if ANY red background area is visible — read the text label in that area and add to ng_items as "RED: <label text>".
 
 judgment_criteria:
   step1_identification: |
@@ -62,36 +62,32 @@ judgment_criteria:
     If any of the 4 equipment panels cannot be identified, set status = UNKNOWN.
 
   step2_data_extraction: |
-    For each identified equipment, extract ALL required values:
-    - S520: 14 values from curing_oven + 14 values from preheating_oven = 28 total
-    - S530: 14 values from cooling_1_line + 14 values from cooling_2_line = 28 total
-    - S810: 15 values from cooling_1_line + 15 values from cooling_2_line = 30 total
-    - S540: count + color for all 12 stations (1-1 through 6-2)
+    You are analyzing a SINGLE equipment panel image.
+    The equipment type is identified by the title bar (S520, S530, S540, or S810).
 
-    IMPORTANT: If you cannot read a value clearly, use your best estimate.
-    Only set UNKNOWN if the panel itself is not visible or completely unreadable.
+    For S520, S530, S810 (numeric panels):
+    - Numeric values: copy directly from the OCR data provided — do NOT re-read from image.
+    - Color check: scan the entire panel image for any RED background areas.
+      If you see a red background anywhere, read the text label inside or near that area.
+      Add each red area to ng_items as "RED: <label text>".
+
+    For S540 (robot panel):
+    - Read count and color for all 12 stations (1-1 through 6-2) directly from the image.
+    - Record background color as green, red, or black.
+
+    Only set identified=false if the panel title is completely unreadable.
 
   step3_ng_check: |
     Apply NG rules STRICTLY:
 
-    S520 NG check:
-    - Go through EACH value in curing_oven and preheating_oven
-    - If value >= 3000: add to ng_items as "X#: VALUE"
-    - Example: if 14# = 3435, add "14#: 3435 (>= 3000)"
+    For S520, S530, S810:
+    - Check each numeric value as INTEGER against 3000.
+      Only add to ng_items if value >= 3000. (2999 = NOT NG, 3000 = NG)
+    - Also add any red background areas found in step2 as "RED: <label>".
 
-    S530 NG check:
-    - Go through EACH value in cooling_1_line and cooling_2_line
-    - If value >= 3000: add to ng_items as "X#: VALUE"
-
-    S810 NG check:
-    - Go through EACH value in cooling_1_line and cooling_2_line
-    - If value >= 3000: add to ng_items as "X#: VALUE"
-    - CRITICAL: 2552 < 3000 = NOT NG. 2999 < 3000 = NOT NG. Only >= 3000 is NG.
-
-    S540 NG check:
-    - Check background color of each station label (1-1 through 6-2)
-    - If color is RED or BLACK: add to ng_items as "STATION: COLOR"
-    - Green background = OK, do NOT add to ng_items
+    For S540:
+    - If station background color is RED or BLACK: add "STATION <id>: <color>" to ng_items.
+    - Green = OK.
 
   step4_final_judgment: |
     - If ANY equipment has ng_items with at least one entry: status = "NG"
@@ -102,44 +98,15 @@ response_format:
   type: "json"
   schema: |
     {
-      "status": "OK | NG | UNKNOWN",
-      "reason": "Explain in Korean: which equipment triggered NG and why, or why OK/UNKNOWN",
-      "equipment_data": {
-        "S520": {
-          "identified": true,
-          "curing_oven": {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0, "13": 0, "14": 0},
-          "preheating_oven": {"14": 0, "15": 0, "16": 0, "17": 0, "18": 0, "19": 0, "20": 0, "21": 0, "22": 0, "23": 0, "24": 0, "25": 0, "26": 0, "27": 0},
-          "ng_items": []
-        },
-        "S530": {
-          "identified": true,
-          "cooling_1_line": {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0, "13": 0, "14": 0},
-          "cooling_2_line": {"14": 0, "15": 0, "16": 0, "17": 0, "18": 0, "19": 0, "20": 0, "21": 0, "22": 0, "23": 0, "24": 0, "25": 0, "26": 0, "27": 0},
-          "ng_items": []
-        },
-        "S540": {
-          "identified": true,
-          "stations": {
-            "1-1": {"count": 0, "color": "green"},
-            "1-2": {"count": 0, "color": "green"},
-            "2-1": {"count": 0, "color": "green"},
-            "2-2": {"count": 0, "color": "green"},
-            "3-1": {"count": 0, "color": "green"},
-            "3-2": {"count": 0, "color": "green"},
-            "4-1": {"count": 0, "color": "green"},
-            "4-2": {"count": 0, "color": "green"},
-            "5-1": {"count": 0, "color": "green"},
-            "5-2": {"count": 0, "color": "green"},
-            "6-1": {"count": 0, "color": "green"},
-            "6-2": {"count": 0, "color": "green"}
-          },
-          "ng_items": []
-        },
-        "S810": {
-          "identified": true,
-          "cooling_1_line": {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0, "13": 0, "14": 0, "15": 0},
-          "cooling_2_line": {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0, "9": 0, "10": 0, "11": 0, "12": 0, "13": 0, "14": 0, "15": 0},
-          "ng_items": []
+      "equipment_id": "S520 or S530 or S540 or S810 (read from title bar)",
+      "red_areas_found": true or false,
+      "red_areas": [
+        {
+          "location": "description of where in the panel",
+          "text": "all text visible in/near the red area",
+          "reasoning": "why this is considered an alarm"
         }
-      }
+      ],
+      "overall_reasoning": "step-by-step explanation of your visual inspection",
+      "ng": true or false
     }

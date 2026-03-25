@@ -12,7 +12,7 @@ import random
 import time
 from datetime import datetime
 
-from flask import Blueprint, Response, jsonify, request
+from flask import Blueprint, Response, current_app, jsonify, request
 
 from server.models import JudgmentResult, JudgmentStatus
 from server.services.image_validator import ImageValidator
@@ -168,8 +168,16 @@ def analyze() -> tuple[Response, int]:
         equipment_data=llm_response.equipment_data,
     )
 
-    # 6. Persist result and log judgment
-    if _result_storage is not None:
+    debug_mode = current_app.debug
+
+    # 6. Persist result and log judgment (debug mode only for file storage)
+    if _judgment_logger is not None:
+        try:
+            _judgment_logger.log_judgment(result)
+        except Exception:
+            logger.exception("Failed to log judgment for request_id=%s", request_id)
+
+    if debug_mode and _result_storage is not None:
         try:
             _result_storage.save_result(result)
             if result.status == JudgmentStatus.UNKNOWN:
@@ -177,15 +185,15 @@ def analyze() -> tuple[Response, int]:
         except Exception:
             logger.exception("Failed to persist result for request_id=%s", request_id)
 
-    if _judgment_logger is not None:
-        try:
-            _judgment_logger.log_judgment(result)
-        except Exception:
-            logger.exception("Failed to log judgment for request_id=%s", request_id)
-
     # 7. Send email alert for UNKNOWN status
     if _email_notifier is not None and result.status == JudgmentStatus.UNKNOWN:
         try:
+            if result.equipment_data:
+                logger.warning(
+                    "UNKNOWN status equipment_data for request_id=%s: %s",
+                    request_id,
+                    result.equipment_data,
+                )
             _email_notifier.send_alert(result)
         except Exception:
             logger.exception("Failed to send email alert for request_id=%s", request_id)

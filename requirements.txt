@@ -7,3 +7,5 @@ PyYAML
 hypothesis
 pytest
 Pillow
+azure-ai-formrecognizer
+azure-core

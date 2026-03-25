@@ -4,15 +4,16 @@ Layout:
 - Top bar: Server URL, auto health-check indicator, status
 - Tab 1 (Analysis): Left=image list, Center=image preview, Right=result detail
 - Tab 2 (History): Full-width recent history table
-- Bottom bar: Analyze All, Periodic controls
+- Bottom bar: Analyze All, Analyze Batch, Periodic controls
 """
 
 import logging
+import shutil
 import threading
 import tkinter as tk
 from datetime import datetime
 from pathlib import Path
-from tkinter import filedialog, ttk
+from tkinter import filedialog, messagebox, ttk
 from typing import Optional
 
 from PIL import Image, ImageTk  # type: ignore[import-untyped]
@@ -26,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 _IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg"}
 _EXPECTED_FOLDERS = {"ok", "ng", "unknown"}
+_BATCH_FOLDER = "batch"
 
 # Default test_images path relative to workspace root
 _DEFAULT_TEST_IMAGES = Path(__file__).resolve().parent.parent / "test_images"
@@ -91,6 +93,8 @@ class AlarmTestGUI:
         ttk.Button(top, text="Browse Folder...", command=self._on_browse_folder).pack(side=tk.LEFT)
         self._folder_label = ttk.Label(top, text=str(_DEFAULT_TEST_IMAGES) if _DEFAULT_TEST_IMAGES.is_dir() else "(no folder)")
         self._folder_label.pack(side=tk.LEFT, padx=4)
+
+        ttk.Button(top, text="⟳ Refresh", command=self._scan_images).pack(side=tk.LEFT, padx=(8, 0))
 
     def _build_notebook(self) -> None:
         self._notebook = ttk.Notebook(self.root)
@@ -199,6 +203,16 @@ class AlarmTestGUI:
         self._analyze_btn = ttk.Button(bottom, text="Analyze All", command=self._on_analyze_all)
         self._analyze_btn.pack(side=tk.LEFT)
 
+        ttk.Separator(bottom, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y, padx=6)
+
+        self._batch_btn = ttk.Button(bottom, text="Analyze Batch", command=self._on_analyze_batch)
+        self._batch_btn.pack(side=tk.LEFT)
+
+        self._batch_random_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(bottom, text="Random", variable=self._batch_random_var).pack(side=tk.LEFT, padx=(6, 2))
+        self._batch_random_n_var = tk.StringVar(value="100")
+        ttk.Entry(bottom, textvariable=self._batch_random_n_var, width=5).pack(side=tk.LEFT)
+
         ttk.Separator(bottom, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y, padx=10)
 
         ttk.Label(bottom, text="Periodic:").pack(side=tk.LEFT)
@@ -263,6 +277,7 @@ class AlarmTestGUI:
         if self._test_root is None or not self._test_root.is_dir():
             return
 
+        # Scan expected result folders (ok/ng/unknown)
         for subfolder_name in sorted(_EXPECTED_FOLDERS):
             subfolder = self._test_root / subfolder_name
             if not subfolder.is_dir():
@@ -272,6 +287,22 @@ class AlarmTestGUI:
                 if img_path.suffix.lower() in _IMAGE_EXTENSIONS:
                     self._image_tree.insert(parent_id, tk.END, text=img_path.name, values=(subfolder_name,))
                     self._image_list.append((img_path, subfolder_name))
+
+        # Scan batch folder (images without expected classification)
+        batch_folder = self._test_root / _BATCH_FOLDER
+        if batch_folder.is_dir():
+            batch_images = [
+                p for p in sorted(batch_folder.iterdir())
+                if p.is_file() and p.suffix.lower() in _IMAGE_EXTENSIONS
+            ]
+            if batch_images:
+                parent_id = self._image_tree.insert(
+                    "", tk.END, text=f"{_BATCH_FOLDER} ({len(batch_images)})",
+                    values=(_BATCH_FOLDER,), open=True,
+                )
+                for img_path in batch_images:
+                    self._image_tree.insert(parent_id, tk.END, text=img_path.name, values=(_BATCH_FOLDER,))
+                    self._image_list.append((img_path, _BATCH_FOLDER))
 
     def _on_image_select(self, event=None) -> None:
         selection = self._image_tree.selection()
@@ -474,6 +505,120 @@ class AlarmTestGUI:
             if first_child_children:
                 self._image_tree.selection_set(first_child_children[0])
                 self._on_image_select()
+
+    # ------------------------------------------------------------------
+    # Batch analysis
+    # ------------------------------------------------------------------
+
+    def _on_analyze_batch(self) -> None:
+        """Run batch analysis on the batch folder already loaded in the tree."""
+        if self._test_root is None:
+            self._status_var.set("No folder loaded")
+            return
+
+        batch_path = self._test_root / _BATCH_FOLDER
+        if not batch_path.is_dir():
+            self._status_var.set("No batch folder found")
+            return
+
+        images = sorted(
+            p for p in batch_path.iterdir()
+            if p.is_file() and p.suffix.lower() in _IMAGE_EXTENSIONS
+        )
+
+        if not images:
+            messagebox.showinfo("Analyze Batch", f"No images found in {batch_path}")
+            return
+
+        # Random sampling
+        if self._batch_random_var.get():
+            try:
+                n = int(self._batch_random_n_var.get())
+                n = max(1, n)
+            except ValueError:
+                n = 100
+            if n < len(images):
+                import random
+                images = random.sample(images, n)
+                images = sorted(images)
+
+        self._update_api_client()
+        self._batch_btn.configure(state=tk.DISABLED)
+        self._analyze_btn.configure(state=tk.DISABLED)
+        self._analyze_selected_btn.configure(state=tk.DISABLED)
+        self._status_var.set(f"Batch: 0 / {len(images)}")
+
+        threading.Thread(
+            target=self._run_batch,
+            args=(batch_path, images),
+            daemon=True,
+        ).start()
+
+    def _run_batch(self, batch_path: Path, images: list[Path]) -> None:
+        assert self._api_client is not None
+
+        # Create output subfolders
+        out_dirs = {
+            "ok":      batch_path / "ok",
+            "ng":      batch_path / "ng",
+            "unknown": batch_path / "unknown",
+        }
+        for d in out_dirs.values():
+            d.mkdir(exist_ok=True)
+
+        total = len(images)
+        counts = {"ok": 0, "ng": 0, "unknown": 0, "error": 0}
+
+        for i, img_path in enumerate(images, 1):
+            self.root.after(0, lambda i=i: self._status_var.set(f"Batch: {i} / {total} — {img_path.name}"))
+            try:
+                result = self._api_client.analyze_single(img_path)
+                status_key = result.status.value.lower()
+                if status_key not in out_dirs:
+                    status_key = "unknown"
+
+                out_dir = out_dirs[status_key]
+
+                # Move image to result folder
+                dest_img = out_dir / img_path.name
+                shutil.move(str(img_path), dest_img)
+
+                # Save response JSON alongside the image
+                json_name = img_path.stem + ".json"
+                dest_json = out_dir / json_name
+                import json as _json
+                with open(dest_json, "w", encoding="utf-8") as f:
+                    _json.dump(result.to_dict(), f, ensure_ascii=False, indent=2)
+
+                counts[status_key] += 1
+                self._add_history_threadsafe(img_path.name, "batch", result, None)
+                logger.info("Batch [%d/%d] %s → %s", i, total, img_path.name, status_key)
+            except Exception as exc:
+                counts["error"] += 1
+                self._add_history_threadsafe(img_path.name, "batch", None, str(exc))
+                logger.error("Batch error for %s: %s", img_path.name, exc)
+
+        summary = (
+            f"Batch complete — {total} images\n"
+            f"  OK: {counts['ok']}  NG: {counts['ng']}  "
+            f"UNKNOWN: {counts['unknown']}  ERROR: {counts['error']}\n"
+            f"Results saved to: {batch_path}"
+        )
+        self.root.after(0, lambda: self._on_batch_complete(summary))
+
+    def _add_history_threadsafe(
+        self, name: str, expected: str, result: JudgmentResult | None, error: str | None
+    ) -> None:
+        self.root.after(0, lambda: self._add_history(name, expected, result, error))
+
+    def _on_batch_complete(self, summary: str) -> None:
+        self._status_var.set(summary.split("\n")[0])
+        self._batch_btn.configure(state=tk.NORMAL)
+        self._analyze_btn.configure(state=tk.NORMAL)
+        self._analyze_selected_btn.configure(state=tk.NORMAL)
+        # Refresh tree to reflect moved images
+        self._scan_images()
+        messagebox.showinfo("Analyze Batch Complete", summary)
 
     # ------------------------------------------------------------------
     # Periodic mode

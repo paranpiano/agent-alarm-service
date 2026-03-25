@@ -80,12 +80,26 @@ class PromptConfig:
 
 
 @dataclass
+class DocumentIntelligenceSettings:
+    """Azure Document Intelligence settings loaded from environment variables."""
+
+    endpoint: str = ""
+    api_key: str = ""
+
+    @property
+    def enabled(self) -> bool:
+        """Return True if both endpoint and api_key are configured."""
+        return bool(self.endpoint and self.api_key)
+
+
+@dataclass
 class SnsSettings:
     """SNS notification settings loaded from environment variables."""
 
     api_url: str = ""
     topic_arn: str = ""
     protocol: str = "email"
+    enabled: bool = True  # Set SNS_ENABLED=false in .env to disable all alerts
 
 
 @dataclass
@@ -113,6 +127,7 @@ class AppConfig:
     sns: SnsSettings
     image_resize: ImageResizeSettings
     storage: StorageSettings
+    document_intelligence: DocumentIntelligenceSettings
     azure_endpoint: str
     azure_api_key: str
     api_version: str
@@ -207,10 +222,13 @@ def _load_env_vars() -> tuple[str, str, str, str, str]:
 
 def _load_sns_settings() -> SnsSettings:
     """Load SNS notification settings from environment variables."""
+    enabled_str = os.getenv("SNS_ENABLED", "true").lower().strip()
+    enabled = enabled_str not in ("false", "0", "no", "off")
     return SnsSettings(
         api_url=os.getenv("SNS_API_URL", ""),
         topic_arn=os.getenv("SNS_TOPIC_ARN", ""),
         protocol=os.getenv("SNS_PROTOCOL", "email"),
+        enabled=enabled,
     )
 
 
@@ -232,6 +250,14 @@ def _load_image_resize_settings() -> ImageResizeSettings:
         quality = 80
 
     return ImageResizeSettings(mode=mode, max_px=max_px, quality=quality)
+
+
+def _load_document_intelligence_settings() -> DocumentIntelligenceSettings:
+    """Load Azure Document Intelligence settings from environment variables."""
+    return DocumentIntelligenceSettings(
+        endpoint=os.getenv("AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT", ""),
+        api_key=os.getenv("AZURE_DOCUMENT_INTELLIGENCE_KEY", ""),
+    )
 
 
 def load_config(
@@ -261,6 +287,7 @@ def load_config(
     endpoint, api_key, api_version, chat_model, vision_model = _load_env_vars()
     sns_settings = _load_sns_settings()
     image_resize_settings = _load_image_resize_settings()
+    doc_intelligence_settings = _load_document_intelligence_settings()
 
     return AppConfig(
         prompt=prompt,
@@ -269,6 +296,7 @@ def load_config(
         sns=sns_settings,
         image_resize=image_resize_settings,
         storage=storage_settings,
+        document_intelligence=doc_intelligence_settings,
         azure_endpoint=endpoint,
         azure_api_key=api_key,
         api_version=api_version,
