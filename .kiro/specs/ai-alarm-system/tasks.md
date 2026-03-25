@@ -185,7 +185,7 @@ Client-Server 구조의 AI Alarm System POC를 구현한다. Server(Flask + wait
     - Client: 폴더 선택 → 이미지 목록 → 단건/주기적 분석 → 결과 테이블 표시 전체 흐름 연결
     - _Requirements: 전체_
 
-- [-] 10. 최종 체크포인트
+- [x] 10. 최종 체크포인트
   - 모든 테스트 통과 확인, 사용자에게 질문이 있으면 확인
 
 ## Notes
