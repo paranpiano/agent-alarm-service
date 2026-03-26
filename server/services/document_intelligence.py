@@ -64,15 +64,11 @@ class ExtractedTable:
         }
 
     def white_row_values(self) -> list[int]:
-        """Return all numeric values from the WHITE row (row index 2) as a plain list.
-
-        Order and direction do not matter — we only need the values to check
-        whether any exceed the NG threshold (>= 3000).
-        """
+        """Return all numeric values from the WHITE row (row index 2) as a plain list."""
         if self.row_count < 3:
             return []
         return [
-            int(c["content"].strip())
+            int(float(c["content"].replace(",", "").replace(" ", "").strip()))
             for c in self.cells
             if c["row"] == 2 and _is_numeric(c["content"].strip())
         ]
@@ -88,7 +84,7 @@ class ExtractedTable:
         return sorted(keys)
 
     def infer_field_name(self, equipment_id: str) -> str:
-        """Infer field name from sub_label only."""
+        """Kept for compatibility — field assignment is now done by table index in _merge_results."""
         return _normalize_field_name(self.sub_label) or ""
 
 
@@ -151,7 +147,7 @@ class DocumentExtractionResult:
 
 def _is_numeric(value: str) -> bool:
     try:
-        float(value.replace(",", "").strip())
+        float(value.replace(",", "").replace(" ", "").strip())
         return True
     except ValueError:
         return False
@@ -322,18 +318,24 @@ class DocumentIntelligenceService:
             logger.error("DI extraction failed for panel %s: %s", position, exc)
             return position, PanelExtractionResult()
 
-    def extract(self, image_bytes: bytes, content_type: str = "image/png") -> DocumentExtractionResult:
-        """Crop image into 4 panels and extract tables from each in parallel.
+    def extract(self, image_bytes: bytes, content_type: str = "image/png", single_panel: bool = False) -> DocumentExtractionResult:
+        """Extract tables from image.
 
         Args:
-            image_bytes: Full HMI screenshot bytes (PNG or JPEG).
+            image_bytes: HMI screenshot bytes (PNG or JPEG).
             content_type: Unused — kept for API compatibility.
+            single_panel: If True, send image as-is (no 4-way crop).
 
         Returns:
             DocumentExtractionResult with per-panel OCR data.
         """
         if not self._available:
             return DocumentExtractionResult()
+
+        if single_panel:
+            # Send image as-is — it's already a single panel
+            _, panel_result = self._extract_panel(image_bytes, "top_left")
+            return DocumentExtractionResult(panels={"top_left": panel_result})
 
         # Crop 4 panels
         panel_bytes: dict[str, bytes] = {}

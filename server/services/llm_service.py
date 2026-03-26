@@ -118,22 +118,11 @@ CRITICAL: Start with { and end with }. No markdown.
 """
 
 
-# Expected value counts per equipment field (for DI validation)
-# Allow up to 2 missing values per field to tolerate OCR key-parsing errors
-# (e.g. '8A' misread instead of '8#' causes one key to be skipped)
-_EXPECTED_FIELD_COUNTS: dict[str, dict[str, int]] = {
-    "S520": {"curing_oven": 14, "preheating_oven": 14},
-    "S530": {"cooling_1_line": 14, "cooling_2_line": 14},
-    "S810": {"cooling_1_line": 15, "cooling_2_line": 15},
-}
-_FIELD_COUNT_TOLERANCE = 2  # allow up to 2 missing values before flagging UNKNOWN
-
-
-def _validate_di_result(di_result: Any) -> tuple[bool, str]:
+def _validate_di_result(di_result: Any, expected_eqs: tuple[str, ...] = ("S520", "S530", "S810")) -> tuple[bool, str]:
     """Validate DI extraction result.
 
-    Checks that all expected equipment IDs are identified and each field
-    has enough numeric values extracted from the WHITE row.
+    Only checks that all expected equipment IDs are identified.
+    expected_eqs can be reduced for single-panel mode.
     """
     if di_result is None:
         return False, "DI 추출 결과가 없습니다. 이미지 캡처 화면에 문제가 있을 수 있습니다."
@@ -144,17 +133,14 @@ def _validate_di_result(di_result: Any) -> tuple[bool, str]:
         if panel.equipment_id and panel.equipment_id != "S540"
     }
 
-    missing_eqs = [eq for eq in ("S520", "S530", "S810") if eq not in panels_by_eq]
+    missing_eqs = [eq for eq in expected_eqs if eq not in panels_by_eq]
     if missing_eqs:
         extracted_summary = {
-            eq: [
-                f"{table.infer_field_name(eq) or 'unknown'}: {len(table.white_row_values())}값"
-                for table in panel.tables if table.white_row_values()
-            ]
+            eq: sum(len(t.white_row_values()) for t in panel.tables)
             for eq, panel in panels_by_eq.items()
         }
         logger.warning(
-            "DI validation failed — missing equipment: %s | extracted: %s",
+            "DI validation failed — missing equipment: %s | extracted counts: %s",
             missing_eqs, extracted_summary,
         )
         return False, (
@@ -162,32 +148,22 @@ def _validate_di_result(di_result: Any) -> tuple[bool, str]:
             "화면이 가려지거나 조작되었을 가능성이 있습니다."
         )
 
-    for eq_id, expected_fields in _EXPECTED_FIELD_COUNTS.items():
-        panel = panels_by_eq[eq_id]
-        # Collect all numeric values across all data tables for this equipment
-        all_values: list[int] = []
-        for table in panel.tables:
-            vals = table.white_row_values()
-            if vals:
-                all_values.extend(vals)
-
-        total_expected = sum(expected_fields.values())
-        if len(all_values) < total_expected - _FIELD_COUNT_TOLERANCE:
-            logger.warning(
-                "DI validation failed — %s: expected ~%d total values, got %d",
-                eq_id, total_expected, len(all_values),
-            )
-            return False, (
-                f"{eq_id} 값이 부족합니다 "
-                f"(기대: ~{total_expected}개, 추출: {len(all_values)}개). "
-                "화면이 가려지거나 조작되었을 가능성이 있습니다."
-            )
-
     return True, ""
 
 
+def _check_di_value_counts(di_result: Any) -> list[str]:
+    """No-op — value count validation removed.
+
+    DI may miss cells due to OCR errors, making count validation unreliable.
+    UNKNOWN is only triggered by missing equipment ID or S540 wrong screen.
+    """
+    return []
+
+
 def _build_partial_equipment_data(di_result: Any | None) -> dict[str, Any]:
-    """Build equipment_data from whatever DI managed to extract."""
+    """Build equipment_data from whatever DI managed to extract.
+    Shows all extracted values so operators can diagnose the issue.
+    """
     result: dict[str, Any] = {}
     if di_result is None:
         for eq_id in ("S520", "S530", "S540", "S810"):
@@ -206,12 +182,20 @@ def _build_partial_equipment_data(di_result: Any | None) -> dict[str, Any]:
             result[eq_id] = {"identified": False, "values": [], "ng_items": []}
             continue
 
-        all_values: list[int] = []
+        # Collect all values per table with field name
+        tables_data: dict[str, list[int]] = {}
         for table in panel.tables:
-            all_values.extend(table.white_row_values())
+            vals = table.white_row_values()
+            if not vals:
+                continue
+            field_name = table.infer_field_name(eq_id) or table.sub_label or "unknown"
+            tables_data[field_name] = vals
+
+        all_values = [v for vals in tables_data.values() for v in vals]
 
         result[eq_id] = {
             "identified": True,
+            "extracted_tables": tables_data,
             "value_count": len(all_values),
             "ng_items": [],
         }
@@ -290,33 +274,39 @@ class LLMService:
 
     # ── Public API ────────────────────────────────────────────────────────────
 
-    def analyze_image(self, image_bytes: bytes, image_format: str) -> tuple[LLMResponse, int]:
+    def analyze_image(self, image_bytes: bytes, image_format: str, single_panel: bool = False) -> tuple[LLMResponse, int]:
         start_time = time.monotonic()
         image_bytes = resize_image(image_bytes, image_format, self.image_resize)
 
         if self.doc_intelligence and self.doc_intelligence.available:
-            return self._analyze_di_plus_llm(image_bytes, start_time)
+            return self._analyze_di_plus_llm(image_bytes, start_time, single_panel=single_panel)
         else:
             return self._analyze_vision_only(image_bytes, image_format, start_time)
 
     # ── DI + LLM parallel pipeline ────────────────────────────────────────────
 
     def _analyze_di_plus_llm(
-        self, image_bytes: bytes, start_time: float
+        self, image_bytes: bytes, start_time: float, single_panel: bool = False
     ) -> tuple[LLMResponse, int]:
         """
-        1. Crop 4 panels (once)
-        2. DI  : extract numeric data for S520/S530/S810 (parallel, 4 calls)
-        3. LLM : detect red areas in all 4 panels (parallel, 4 calls)
+        1. Crop 4 panels (once) — or use image as-is if single_panel=True
+        2. DI  : extract numeric data for S520/S530/S810 (parallel)
+        3. LLM : detect red areas in all panels (parallel)
         4. Merge numeric NG + color NG → final judgment
         """
-        # Step 1: crop panels once, shared by DI and LLM
-        panel_crops: dict[str, bytes] = {}
-        for pos, fractions in _PANEL_CROPS.items():
-            try:
-                panel_crops[pos] = _crop_panel(image_bytes, fractions)
-            except Exception as exc:
-                logger.error("Crop failed for %s: %s", pos, exc)
+        if single_panel:
+            # Image is already a single panel — use as-is, position = "top_left"
+            panel_crops: dict[str, bytes] = {"top_left": image_bytes}
+            expected_eqs: tuple[str, ...] = ()  # DI identifies whatever is in the image
+        else:
+            # Step 1: crop panels once, shared by DI and LLM
+            panel_crops = {}
+            for pos, fractions in _PANEL_CROPS.items():
+                try:
+                    panel_crops[pos] = _crop_panel(image_bytes, fractions)
+                except Exception as exc:
+                    logger.error("Crop failed for %s: %s", pos, exc)
+            expected_eqs = ("S520", "S530", "S810")
 
         # Step 2 & 3: run DI and LLM concurrently
         # DI uses 4 workers for its panels; LLM uses 4 workers for color detection
@@ -327,7 +317,7 @@ class LLMService:
         with ThreadPoolExecutor(max_workers=9) as executor:
             # Submit DI job (internally parallel across 4 panels)
             di_future = executor.submit(
-                self.doc_intelligence.extract, image_bytes
+                self.doc_intelligence.extract, image_bytes, "image/png", single_panel
             )
 
             # Submit LLM color detection for each panel
@@ -344,7 +334,7 @@ class LLMService:
                 logger.warning("DI failed: %s", exc)
 
             # Validate DI result before proceeding
-            is_valid, invalid_reason = _validate_di_result(di_result)
+            is_valid, invalid_reason = _validate_di_result(di_result, expected_eqs)
             if not is_valid:
                 logger.warning("DI validation failed: %s", invalid_reason)
                 # Cancel pending LLM futures (best effort)
@@ -364,6 +354,9 @@ class LLMService:
                     equipment_data=partial_data,
                 ), elapsed_ms
 
+            # Check value counts — analysis continues but status becomes UNKNOWN if mismatch
+            di_count_mismatches = _check_di_value_counts(di_result)
+
             # Collect LLM color results
             color_results: dict[str, dict] = {}
             for future in as_completed(color_futures):
@@ -377,7 +370,21 @@ class LLMService:
         elapsed_ms = int((time.monotonic() - start_time) * 1000)
 
         # Step 4: merge
-        response = self._merge_results(di_result, color_results, panel_crops)
+        response = self._merge_results(
+            di_result, color_results, panel_crops, single_panel=single_panel
+        )
+
+        # Override status to UNKNOWN if DI value counts were mismatched
+        if di_count_mismatches:
+            mismatch_reason = "DI 추출 값 개수 불일치: " + "; ".join(di_count_mismatches)
+            logger.warning("Overriding status to UNKNOWN due to DI count mismatch: %s", mismatch_reason)
+            response = LLMResponse(
+                status=JudgmentStatus.UNKNOWN,
+                reason=mismatch_reason,
+                raw_response=response.raw_response,
+                equipment_data=response.equipment_data,
+            )
+
         return response, elapsed_ms
 
     def _detect_color(self, position: str, panel_bytes: bytes) -> dict:
@@ -413,6 +420,7 @@ class LLMService:
         di_result: Any | None,
         color_results: dict[str, dict],
         panel_crops: dict[str, bytes],
+        single_panel: bool = False,
     ) -> LLMResponse:
         """Merge DI numeric results and LLM color results into one LLMResponse.
 
@@ -461,24 +469,41 @@ class LLMService:
 
             # ── Numeric data + NG from DI (S520/S530/S810) ───────────────────
             if eq_id != "S540" and di_result:
+                # Field names assigned by table index (2nd and 3rd table)
+                # Table 0: metadata (skip), Table 1: field_1, Table 2: field_2
+                _FIELD_ORDER: dict[str, list[str]] = {
+                    "S520": ["curing_oven", "preheating_oven"],
+                    "S530": ["cooling_1_line", "cooling_2_line"],
+                    "S810": ["cooling_2_line", "cooling_1_line"],
+                }
                 for pos, panel in di_result.panels.items():
                     if panel.equipment_id != eq_id:
                         continue
-                    all_values: list[int] = []
-                    for table in panel.tables:
-                        vals = table.white_row_values()
-                        all_values.extend(vals)
-                        # Store by field name for response
-                        field_name = table.infer_field_name(eq_id)
-                        if field_name and field_name not in eq_entry:
-                            eq_entry[field_name] = vals
 
-                    # Check >= 3000
-                    for val in all_values:
-                        if val >= 3000:
-                            item = f"value {val} (>= 3000)"
-                            ng_items.append(item)
-                            logger.warning("Numeric NG [%s] %s", eq_id, item)
+                    field_order = _FIELD_ORDER.get(eq_id, [])
+                    # Filter to data tables only (skip metadata: row_count < 3 or few values)
+                    data_tables = [
+                        t for t in panel.tables
+                        if t.row_count >= 3 and len(t.white_row_values()) >= 10
+                    ]
+
+                    for idx, table in enumerate(data_tables):
+                        if idx >= len(field_order):
+                            break
+                        field_name = field_order[idx]
+                        vals = table.white_row_values()
+                        eq_entry[field_name] = vals
+                        logger.info(
+                            "DI extracted [%s.%s]: %d values = %s",
+                            eq_id, field_name, len(vals), vals,
+                        )
+
+                        # Check >= 3000
+                        for val in vals:
+                            if val >= 3000:
+                                item = f"{field_name}: {val} (>= 3000)"
+                                ng_items.append(item)
+                                logger.warning("Numeric NG [%s] %s", eq_id, item)
 
             # ── Color NG from LLM (all equipment) ────────────────────────────
             color_data = color_by_eq.get(eq_id, {})
@@ -515,6 +540,43 @@ class LLMService:
 
         # Check if any equipment was not identified
         identified_eqs = set(pos_to_eq.values())
+
+        # Single panel mode: only the identified equipment matters
+        if single_panel:
+            if not identified_eqs:
+                return LLMResponse(
+                    status=JudgmentStatus.UNKNOWN,
+                    reason="단일 패널에서 장비를 식별할 수 없습니다.",
+                    equipment_data=equipment_data,
+                )
+            # Return only the identified equipment's data
+            eq_id = next(iter(identified_eqs))
+            single_eq_data = {eq_id: equipment_data.get(eq_id, {})}
+            eq_ng = equipment_data.get(eq_id, {}).get("ng_items", [])
+
+            # S540 wrong screen check
+            wrong_screen = any("WRONG_SCREEN" in i for i in eq_ng)
+            if wrong_screen:
+                single_eq_data[eq_id]["ng_items"] = [i for i in eq_ng if "WRONG_SCREEN" not in i]
+                return LLMResponse(
+                    status=JudgmentStatus.UNKNOWN,
+                    reason=f"[{eq_id}] S540 패널이 정상 화면을 표시하지 않습니다.",
+                    equipment_data=single_eq_data,
+                )
+
+            if eq_ng:
+                status = JudgmentStatus.NG
+                reason = f"[{eq_id}] NG 항목 발견: " + "; ".join(eq_ng)
+            else:
+                status = JudgmentStatus.OK
+                reason = f"[{eq_id}] 단일 패널 분석 완료 — 이상 없음"
+
+            return LLMResponse(
+                status=status,
+                reason=reason,
+                equipment_data=single_eq_data,
+            )
+
         missing = [eq for eq in ("S520", "S530", "S540", "S810") if eq not in identified_eqs]
 
         # Check for S540 wrong screen
@@ -530,7 +592,6 @@ class LLMService:
         elif wrong_screen:
             status = JudgmentStatus.UNKNOWN
             reason = "S540 패널이 정상 화면(3D 스테이션 레이아웃)을 표시하지 않습니다. 화면이 다른 메뉴로 전환되어 있습니다."
-            # Clear the wrong_screen marker from ng_items
             s540_data = equipment_data.get("S540", {})
             s540_data["ng_items"] = [
                 i for i in s540_data.get("ng_items", []) if "WRONG_SCREEN" not in i

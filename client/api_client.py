@@ -43,21 +43,11 @@ class AlarmApiClient:
     def analyze_single(self, image_path: Path) -> JudgmentResult:
         """Send a single image for analysis with up to 3 retries.
 
-        The image is uploaded as ``multipart/form-data`` to
-        ``POST /api/v1/analyze``.  On connection or timeout errors the
-        request is retried up to ``_MAX_RETRIES`` times.
+        The server automatically detects whether the image is a single panel
+        or a full 4-panel composite based on aspect ratio.
 
         Args:
             image_path: Path to the image file (PNG or JPEG).
-
-        Returns:
-            A :class:`JudgmentResult` parsed from the server response.
-
-        Raises:
-            FileNotFoundError: If *image_path* does not exist.
-            requests.ConnectionError: If the server is unreachable after all retries.
-            requests.Timeout: If the request times out after all retries.
-            ValueError: If the server response cannot be parsed.
         """
         if not image_path.exists():
             raise FileNotFoundError(f"Image file not found: {image_path}")
@@ -72,7 +62,7 @@ class AlarmApiClient:
 
         for attempt in range(1, self._MAX_RETRIES + 1):
             files = {"image": (filename, image_bytes)}
-            data = {"request_id": request_id}
+            data: dict = {"request_id": request_id}
 
             try:
                 response = requests.post(

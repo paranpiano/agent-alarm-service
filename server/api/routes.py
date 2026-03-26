@@ -7,12 +7,14 @@ Provides:
 Error codes: INVALID_IMAGE_FORMAT, IMAGE_TOO_LARGE, LLM_SERVICE_ERROR, MISSING_IMAGE.
 """
 
+import io
 import logging
 import random
 import time
 from datetime import datetime
 
 from flask import Blueprint, Response, current_app, jsonify, request
+from PIL import Image
 
 from server.models import JudgmentResult, JudgmentStatus
 from server.services.image_validator import ImageValidator
@@ -55,6 +57,23 @@ def _generate_request_id() -> str:
     now = datetime.now()
     suffix = f"{random.randint(0, 9999):04d}"
     return f"req_{now.strftime('%Y%m%d_%H%M%S')}_{suffix}"
+
+
+def _is_single_panel_image(image_bytes: bytes) -> bool:
+    """Detect whether the image is a single panel (not a 4-panel composite).
+
+    Full 4-panel HMI images are 1920x1170 (~2.25M px).
+    Single panel crops are 960x585 (~0.56M px) — same aspect ratio, but 1/4 the area.
+    Threshold: total pixels < 1,000,000 → single panel.
+    """
+    try:
+        img = Image.open(io.BytesIO(image_bytes))
+        w, h = img.size
+        is_single = (w * h) < 1_000_000
+        logger.info("Auto panel detection: %dx%d (%d px) → %s", w, h, w * h, "single" if is_single else "4-panel")
+        return is_single
+    except Exception:
+        return False
 
 
 def _local_iso_timestamp() -> str:
@@ -144,9 +163,24 @@ def analyze() -> tuple[Response, int]:
     ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else "png"
     image_format = "jpeg" if ext in ("jpg", "jpeg") else "png"
 
+    # single_panel mode: image is already a cropped panel (no 4-way split needed)
+    # "auto" (default): detect automatically from image aspect ratio
+    # "single_panel": force single panel mode
+    # anything else: force 4-panel mode
+    mode = request.form.get("mode", "auto").lower()
+    if mode == "single_panel":
+        single_panel = True
+    elif mode == "auto":
+        single_panel = _is_single_panel_image(image_bytes)
+        logger.info("Auto single_panel detection: %s (mode=auto)", single_panel)
+    else:
+        single_panel = False
+
     # 4. Call LLM analysis
     try:
-        llm_response, processing_time_ms = _llm_service.analyze_image(image_bytes, image_format)
+        llm_response, processing_time_ms = _llm_service.analyze_image(
+            image_bytes, image_format, single_panel=single_panel
+        )
     except Exception as exc:
         processing_time_ms = int((time.monotonic() - start_time) * 1000)
         logger.error("LLM service error: %s", exc)

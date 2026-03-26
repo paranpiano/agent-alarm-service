@@ -99,7 +99,16 @@ class JudgmentLogger:
         log_date = self._extract_date(result.timestamp)
         filepath = self._logs_dir / f"{log_date}.log"
 
-        entry = f"{result.timestamp} | {result.request_id} | {result.status.value} | {result.reason}\n"
+        entry = f"{result.timestamp} | {result.request_id} | {result.image_name} | {result.status.value} | {result.reason}\n"
+
+        # Append DI extracted values for traceability
+        if result.equipment_data:
+            for eq_id, eq_data in result.equipment_data.items():
+                if eq_id == "S540":
+                    continue
+                for field_name, vals in eq_data.items():
+                    if isinstance(vals, list) and vals:
+                        entry += f"  [{eq_id}.{field_name}] ({len(vals)}개): {vals}\n"
 
         try:
             with open(filepath, "a", encoding="utf-8") as f:
