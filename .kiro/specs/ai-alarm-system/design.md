@@ -38,9 +38,10 @@ AI Alarm System POC는 Client-Server 구조로, Client가 로컬 이미지를 Se
 ```
 
 ### DI 검증 (UNKNOWN 조기 반환)
-DI 추출 후 장비 ID 누락 또는 값 개수 부족 시 LLM 호출 없이 즉시 UNKNOWN 반환:
+DI 추출 후 장비 ID 누락 시 LLM 호출 없이 즉시 UNKNOWN 반환:
 - 추출된 부분 데이터를 `equipment_data`에 포함하여 로그 기록
 - 이메일 알림 발송 (SNS_ENABLED=true 시)
+- 값 개수 검증은 OCR 오류 내성을 위해 제거됨 (`_check_di_value_counts` no-op)
 
 ### S540 화면 모드 감지
 S540 패널이 정상 3D 스테이션 레이아웃이 아닌 다른 화면(Setup & Parameters 등)을 표시하면 UNKNOWN 반환.
@@ -85,8 +86,8 @@ client/
 ├── gui.py               # tkinter GUI (Analysis/History 탭, Batch 분석)
 ├── api_client.py        # Server HTTP 통신 (재시도 3회)
 ├── periodic_runner.py   # 주기적 요청 관리
-├── history_logger.py    # CSV 이력 기록
-└── models.py            # 데이터 모델
+├── history_logger.py    # CSV 분석 이력 기록 (data/client_history.csv)
+└── models.py            # 데이터 모델 (server.models re-export)
 ```
 
 #### 테스트 이미지 폴더 구조
@@ -185,7 +186,8 @@ document_intelligence.py
 
 ```
 llm_service.py
-├── _validate_di_result()         # DI 결과 검증 (장비 ID + 값 개수)
+├── _validate_di_result()         # DI 결과 검증 (장비 ID 누락만 확인)
+├── _check_di_value_counts()      # no-op — 값 개수 검증 제거 (OCR 오류 내성)
 ├── _build_partial_equipment_data() # UNKNOWN 시 부분 데이터 조립
 ├── LLMService
 │   ├── analyze_image()           # 메인 진입점
@@ -256,8 +258,7 @@ data/
 |-----------|----------|
 | 이미지 형식 오류 | 400 Bad Request |
 | DI 장비 미식별 | UNKNOWN + 이메일 알림 |
-| DI 값 부족 | UNKNOWN + 이메일 알림 |
-| S540 화면 오류 | UNKNOWN + 이메일 알림 |
+| S540 wrong screen | UNKNOWN + 이메일 알림 |
 | LLM 타임아웃 | TIMEOUT 상태 반환 |
 | LLM 응답 파싱 실패 | UNKNOWN 처리 |
 | 설정 파일 누락 | 서버 시작 중단 |
