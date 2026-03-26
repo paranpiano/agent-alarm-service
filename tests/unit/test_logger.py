@@ -212,7 +212,7 @@ class TestJudgmentLogger:
         log_file = tmp_path / "logs" / "2024-06-15.log"
         content = log_file.read_text(encoding="utf-8").strip()
         parts = content.split(" | ")
-        assert len(parts) == 4
+        assert len(parts) == 5
 
     def test_log_all_statuses(self, tmp_path: Path) -> None:
         """All judgment statuses can be logged."""

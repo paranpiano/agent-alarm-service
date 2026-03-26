@@ -16,7 +16,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from server.config import AppConfig, EmailSettings, PromptConfig, ServerSettings, SnsSettings, StorageSettings, ImageResizeSettings
+from server.config import AppConfig, DocumentIntelligenceSettings, EmailSettings, PromptConfig, ServerSettings, SnsSettings, StorageSettings
 from server.models import JudgmentStatus, LLMResponse
 from server.services.llm_service import LLMService, _uses_completion_tokens
 
@@ -69,8 +69,8 @@ def app_config(prompt_config: PromptConfig) -> AppConfig:
         server=ServerSettings(host="0.0.0.0", port=8000, llm_timeout_seconds=30),
         email=EmailSettings(),
         sns=SnsSettings(),
-        image_resize=ImageResizeSettings(mode="none"),  # no resize in tests
         storage=StorageSettings(),
+        document_intelligence=DocumentIntelligenceSettings(),
         azure_endpoint="https://test.openai.azure.com/",
         azure_api_key="test-key-123",
         api_version="2024-12-01-preview",
@@ -94,46 +94,46 @@ def llm_service(app_config: AppConfig) -> LLMService:
 # ---------------------------------------------------------------------------
 
 class TestBuildPrompt:
-    """Tests for LLMService._build_prompt()."""
+    """Tests for LLMService._build_full_prompt()."""
 
     def test_includes_system_prompt(self, llm_service: LLMService) -> None:
-        prompt = llm_service._build_prompt()
+        prompt = llm_service._build_full_prompt()
         assert "You are an AI expert analyzing HMI panel images." in prompt
 
     def test_includes_equipment_definitions(self, llm_service: LLMService) -> None:
-        prompt = llm_service._build_prompt()
+        prompt = llm_service._build_full_prompt()
         assert "S520 - Preheating & Curing" in prompt
         assert "S540 - Robot" in prompt
 
     def test_includes_all_judgment_criteria_steps(self, llm_service: LLMService) -> None:
-        prompt = llm_service._build_prompt()
+        prompt = llm_service._build_full_prompt()
         assert "step1_identification" in prompt
         assert "step2_data_extraction" in prompt
         assert "step3_judgment" in prompt
 
     def test_includes_ng_conditions(self, llm_service: LLMService) -> None:
-        prompt = llm_service._build_prompt()
+        prompt = llm_service._build_full_prompt()
         assert "NG conditions" in prompt
         assert "quantity >= 3000 is NG" in prompt
         assert "red or black background is NG" in prompt
 
     def test_includes_ok_conditions(self, llm_service: LLMService) -> None:
-        prompt = llm_service._build_prompt()
+        prompt = llm_service._build_full_prompt()
         assert "OK conditions" in prompt
         assert "No NG conditions and all data extracted" in prompt
 
     def test_includes_unknown_conditions(self, llm_service: LLMService) -> None:
-        prompt = llm_service._build_prompt()
+        prompt = llm_service._build_full_prompt()
         assert "UNKNOWN conditions" in prompt
         assert "Any equipment not identified" in prompt
 
     def test_includes_response_format(self, llm_service: LLMService) -> None:
-        prompt = llm_service._build_prompt()
+        prompt = llm_service._build_full_prompt()
         assert "Response Format" in prompt
         assert "json" in prompt
 
     def test_includes_critical_json_instruction(self, llm_service: LLMService) -> None:
-        prompt = llm_service._build_prompt()
+        prompt = llm_service._build_full_prompt()
         assert "CRITICAL" in prompt
         assert "ONLY a valid JSON object" in prompt
 
@@ -226,44 +226,32 @@ class TestParseResponse:
 # ---------------------------------------------------------------------------
 
 class TestAnalyzeImage:
-    """Tests for LLMService.analyze_image()."""
+    """Tests for LLMService.analyze_image() — vision-only fallback path."""
 
     def test_constructs_correct_human_message(self, llm_service: LLMService) -> None:
         """Verify that analyze_image builds a HumanMessage with text + image_url."""
         image_bytes = b"\x89PNG\r\n\x1a\n" + b"\x00" * 100
         expected_b64 = base64.b64encode(image_bytes).decode("utf-8")
 
-        # Mock LLM response
         mock_response = MagicMock()
-        mock_response.content = json.dumps({
-            "status": "OK",
-            "reason": "All normal.",
-        })
-        llm_service.llm.predict_messages = MagicMock(return_value=mock_response)
+        mock_response.content = json.dumps({"status": "OK", "reason": "All normal."})
+        llm_service.llm.invoke = MagicMock(return_value=mock_response)
 
-        result, elapsed_ms = llm_service.analyze_image(image_bytes, "png")
+        llm_service.analyze_image(image_bytes, "png")
 
-        # Verify predict_messages was called once
-        llm_service.llm.predict_messages.assert_called_once()
-
-        # Get the messages argument
-        call_args = llm_service.llm.predict_messages.call_args
+        llm_service.llm.invoke.assert_called_once()
+        call_args = llm_service.llm.invoke.call_args
         messages = call_args[0][0]
 
-        # Should be a list with one HumanMessage
         assert len(messages) == 1
         msg = messages[0]
-
-        # Content should be a list with text and image_url parts
         assert isinstance(msg.content, list)
         assert len(msg.content) == 2
 
-        # First part: text prompt
         text_part = msg.content[0]
         assert text_part["type"] == "text"
         assert "You are an AI expert" in text_part["text"]
 
-        # Second part: image_url with base64 data
         image_part = msg.content[1]
         assert image_part["type"] == "image_url"
         assert image_part["image_url"]["url"] == f"data:image/png;base64,{expected_b64}"
@@ -274,7 +262,7 @@ class TestAnalyzeImage:
             "status": "NG",
             "reason": "S520 value exceeded threshold.",
         })
-        llm_service.llm.predict_messages = MagicMock(return_value=mock_response)
+        llm_service.llm.invoke = MagicMock(return_value=mock_response)
 
         result, elapsed_ms = llm_service.analyze_image(b"\xff\xd8\xff\xe0", "jpeg")
 
@@ -283,21 +271,19 @@ class TestAnalyzeImage:
         assert elapsed_ms >= 0
 
     def test_jpeg_mime_type(self, llm_service: LLMService) -> None:
-        """Verify JPEG images use the correct MIME type."""
         mock_response = MagicMock()
         mock_response.content = json.dumps({"status": "OK", "reason": "Fine."})
-        llm_service.llm.predict_messages = MagicMock(return_value=mock_response)
+        llm_service.llm.invoke = MagicMock(return_value=mock_response)
 
         llm_service.analyze_image(b"\xff\xd8\xff\xe0", "jpeg")
 
-        call_args = llm_service.llm.predict_messages.call_args
+        call_args = llm_service.llm.invoke.call_args
         messages = call_args[0][0]
         image_part = messages[0].content[1]
         assert "data:image/jpeg;base64," in image_part["image_url"]["url"]
 
     def test_timeout_returns_timeout_status(self, llm_service: LLMService) -> None:
-        """Verify TimeoutError produces TIMEOUT status."""
-        llm_service.llm.predict_messages = MagicMock(side_effect=TimeoutError("timed out"))
+        llm_service.llm.invoke = MagicMock(side_effect=TimeoutError("timed out"))
 
         result, elapsed_ms = llm_service.analyze_image(b"\x00" * 10, "png")
 

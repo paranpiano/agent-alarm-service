@@ -236,9 +236,6 @@ AZURE_DOCUMENT_INTELLIGENCE_KEY=your-di-key
 SNS_ENABLED=true
 SNS_API_URL=https://your-api-gateway.amazonaws.com/prod
 SNS_TOPIC_ARN=arn:aws:sns:region:account:topic
-
-# 이미지 리사이즈 (HMI 패널은 none 권장)
-IMAGE_RESIZE_MODE=none
 ```
 
 ## 데이터 저장

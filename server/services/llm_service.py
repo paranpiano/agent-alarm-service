@@ -41,7 +41,6 @@ Fallback (DI 미설정 시):
 """
 
 import base64
-import io
 import json
 import logging
 import time
@@ -51,9 +50,8 @@ from typing import Any
 import yaml
 from langchain.schema import HumanMessage
 from langchain_openai import AzureChatOpenAI
-from PIL import Image
 
-from server.config import AppConfig, ImageResizeSettings, PromptConfig
+from server.config import AppConfig, PromptConfig
 from server.models import JudgmentStatus, LLMResponse
 from server.services.document_intelligence import (
     DocumentIntelligenceService,
@@ -226,39 +224,12 @@ def get_azure_vision_llm(config: AppConfig) -> AzureChatOpenAI:
     )
 
 
-def resize_image(image_bytes: bytes, image_format: str, settings: ImageResizeSettings) -> bytes:
-    if settings.mode == "none":
-        return image_bytes
-    try:
-        img = Image.open(io.BytesIO(image_bytes))
-        w, h = img.size
-        longest = max(w, h)
-        needs_resize = (settings.mode == "fixed") or (
-            settings.mode == "auto" and longest > settings.max_px
-        )
-        if not needs_resize:
-            return image_bytes
-        ratio = settings.max_px / longest
-        img = img.resize((int(w * ratio), int(h * ratio)), Image.LANCZOS)
-        buf = io.BytesIO()
-        save_fmt = "JPEG" if image_format.lower() in ("jpg", "jpeg") else "PNG"
-        save_kwargs: dict = {"format": save_fmt}
-        if save_fmt == "JPEG":
-            save_kwargs["quality"] = settings.quality
-        img.save(buf, **save_kwargs)
-        return buf.getvalue()
-    except Exception:
-        logger.warning("Image resize failed; using original bytes")
-        return image_bytes
-
-
 class LLMService:
     """Analyzes HMI panel images using parallel DI (numeric) + LLM (color) pipeline."""
 
     def __init__(self, app_config: AppConfig) -> None:
         self.config: PromptConfig = app_config.prompt
         self.timeout_seconds: int = app_config.server.llm_timeout_seconds
-        self.image_resize = app_config.image_resize
         self.llm: AzureChatOpenAI = get_azure_vision_llm(app_config)
 
         di = app_config.document_intelligence
@@ -276,7 +247,6 @@ class LLMService:
 
     def analyze_image(self, image_bytes: bytes, image_format: str, single_panel: bool = False) -> tuple[LLMResponse, int]:
         start_time = time.monotonic()
-        image_bytes = resize_image(image_bytes, image_format, self.image_resize)
 
         if self.doc_intelligence and self.doc_intelligence.available:
             return self._analyze_di_plus_llm(image_bytes, start_time, single_panel=single_panel)
