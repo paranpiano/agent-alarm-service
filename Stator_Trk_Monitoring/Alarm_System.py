@@ -308,7 +308,7 @@ def main():
                 alarm_pop_up("UNKNOWN", UI_Images)
             else:
                 alarm_pop_up("OK", UI_Images)
-        time.sleep(600)
+        time.sleep(30)
 
 def test():
     print("test thread start")
