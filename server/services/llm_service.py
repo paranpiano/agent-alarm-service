@@ -48,7 +48,7 @@ from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from typing import Any
 
 import yaml
-from langchain.schema import HumanMessage
+from langchain_core.messages import HumanMessage
 from langchain_openai import AzureChatOpenAI
 
 from server.config import AppConfig, PromptConfig
