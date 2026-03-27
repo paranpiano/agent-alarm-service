@@ -107,8 +107,8 @@ def send_http(img):
         return "UNKNOWN"
 
 def pause_timer():
-    print("waiting for 60 sec")
-    time.sleep(60)
+    print("waiting for 10 min")
+    time.sleep(600)
     pause_event.set()
 
 
@@ -308,7 +308,7 @@ def main():
                 alarm_pop_up("UNKNOWN", UI_Images)
             else:
                 alarm_pop_up("OK", UI_Images)
-        time.sleep(60)
+        time.sleep(600)
 
 def test():
     print("test thread start")
@@ -324,6 +324,6 @@ def test():
         time.sleep(5)
 
 if __name__ == "__main__":
-    # threading.Thread(target=main, daemon=True).start()
-    threading.Thread(target=test, daemon=True).start()
+    threading.Thread(target=main, daemon=True).start()
+    # threading.Thread(target=test, daemon=True).start()
     root.mainloop()
