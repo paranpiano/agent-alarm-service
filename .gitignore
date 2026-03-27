@@ -10,3 +10,5 @@ __pycache__/
 *.pyo
 
 /test_images
+/Stator_Trk_Monitoring/Ref_Images/
+/Stator_Trk_Monitoring/Target_images/
