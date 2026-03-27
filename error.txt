@@ -1,0 +1,11 @@
+python -m server.main --dev
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\uiv14138\agent-alarm-service\server\main.py", line 23, in <module>
+    from server.api.routes import api_bp, init_routes
+  File "C:\Users\uiv14138\agent-alarm-service\server\api\routes.py", line 21, in <module>
+    from server.services.llm_service import LLMService
+  File "C:\Users\uiv14138\agent-alarm-service\server\services\llm_service.py", line 51, in <module>
+    from langchain.schema import HumanMessage
+ModuleNotFoundError: No module named 'langchain.schema'
