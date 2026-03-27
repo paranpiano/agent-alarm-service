@@ -138,6 +138,13 @@ def alarm_pop_up(flag, UI_Images):
             except:
                 pass
             del open_windows["UNKNOWN"]
+            
+        if "Machine_Missing" in open_windows:
+            try:
+                open_windows["Machine_Missing"].destroy()
+            except:
+                pass
+            del open_windows["Machine_Missing"]
 
         if flag in open_windows:
             return
@@ -153,7 +160,7 @@ def alarm_pop_up(flag, UI_Images):
         win.focus_force()
 
         label = tk.Label(
-            win, image=UI_Images[flag]
+            win, image=UI_Images[flag], borderwidth=0, highlightthickness=0
         )
         label.image = UI_Images[flag]
         label.pack(pady=10)
@@ -175,10 +182,17 @@ def alarm_pop_up(flag, UI_Images):
             play_sound(sound_path)
         except Exception as e:
             print("Sound play error:", e)
-
+            
         if flag in open_windows or "NG" in open_windows:
             return
-
+            
+        if "Machine_Missing" in open_windows:
+            try:
+                open_windows["Machine_Missing"].destroy()
+            except:
+                pass
+            del open_windows["Machine_Missing"]
+            
         win = tk.Toplevel(root)
         win.title(flag)
         win.configure(bg="yellow")
@@ -191,7 +205,7 @@ def alarm_pop_up(flag, UI_Images):
 
         open_windows[flag] = win
         label = tk.Label(
-            win, image=UI_Images[flag]
+            win, image=UI_Images[flag], borderwidth=0, highlightthickness=0
         )
         label.image = UI_Images[flag]
         label.pack(pady=10)
@@ -213,10 +227,17 @@ def alarm_pop_up(flag, UI_Images):
             play_sound(sound_path)
         except Exception as e:
             print("Sound play error:", e)
-
+            
         if flag in open_windows or "NG" in open_windows or "UNKNOWN" in open_windows:
             return
 
+        if "UNKNOWN" in open_windows:
+            try:
+                open_windows["UNKNOWN"].destroy()
+            except:
+                pass
+            del open_windows["UNKNOWN"]
+            
         win = tk.Toplevel(root)
         win.title(flag)
         win.configure(bg="yellow")
@@ -230,7 +251,7 @@ def alarm_pop_up(flag, UI_Images):
         open_windows[flag] = win
 
         label = tk.Label(
-            win, image=UI_Images[flag]
+            win, image=UI_Images[flag], borderwidth=0, highlightthickness=0
         )
         label.image = UI_Images[flag]
         label.pack(pady=10)
@@ -298,7 +319,6 @@ def test():
         "Machine_Missing": ImageTk.PhotoImage(Image.open(os.path.join(os.getcwd(), "UI_Images", "Machine_Missing.png")))
     }
     while True:
-        
         pause_event.wait()
         alarm_pop_up(flag[random.randint(0, 3)], UI_Images)
         time.sleep(5)
