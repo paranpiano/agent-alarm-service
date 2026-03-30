@@ -8,12 +8,17 @@ from PIL import Image, ImageTk
 global open_windows, pause_event
 global Logging_path, target_path, Trk_ref_image_path
 
-Logging_path = r'AAAAAAAAAAAAAAAAAAA'
+# Logging_path = r'AAAAAAAAAAAAAAAAAAA'
 target_path = r'C:\Users\uiv14247\OneDrive - Vitesco Technologies\Desktop\Stator_Trk_Monitoring'
-Trk_ref_image_path = r'AAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+# Trk_ref_image_path = r'AAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 
 user32 = ctypes.windll.user32
 open_windows = {}
+
+
+playing_sound_threads = {}
+stop_sound_events = {}
+
 
 pause_event = threading.Event()
 pause_event.set()
@@ -33,6 +38,24 @@ def loading_target_images():
     target_list = glob.glob(os.path.join(target_path, "*.png"))
     target_img_list = [[cv2.imread(a), os.path.basename(a).replace(".png","")] for a in target_list]
     return target_img_list
+
+
+def loop_sound(flag, sound_path):
+    global stop_sound_events
+
+    # 이벤트가 없으면 생성
+    if flag not in stop_sound_events:
+        stop_sound_events[flag] = threading.Event()
+
+    event = stop_sound_events[flag]
+
+    # 반복
+    while not event.is_set():
+        try:
+            play_sound(sound_path)
+        except:
+            pass
+        time.sleep(5)
 
 # Windows sound
 def play_sound(sound_path):
@@ -117,20 +140,38 @@ def alarm_pop_up(flag, UI_Images):
     print(flag)
 
     if flag == "OK":
+        for f, event in stop_sound_events.items():
+            try:
+                event.set()
+            except:
+                pass
+        stop_sound_events.clear()
+        playing_sound_threads.clear()
+
         for win in list(open_windows.values()):
             try:
                 win.destroy()
-            except:
-                pass
+            except Exception as e:
+                print(e)
         open_windows.clear()
-        return
+        
+        
+        root.update_idletasks()
+        root.update()
+
 
     elif flag == "NG":
         sound_path = os.path.join(os.getcwd(), "Sound", "Circulation_Error.wav")
-        try:
-            play_sound(sound_path)
-        except Exception as e:
-            print("Sound play error:", e)
+        
+        if flag in stop_sound_events:
+            stop_sound_events[flag].set()
+            
+        stop_sound_events[flag] = threading.Event()
+        
+        
+        t = threading.Thread(target=loop_sound, args=(flag, sound_path), daemon=True)
+        playing_sound_threads[flag] = t
+        t.start()
 
         if "UNKNOWN" in open_windows:
             try:
@@ -158,7 +199,8 @@ def alarm_pop_up(flag, UI_Images):
         win.attributes("-topmost", True)
         win.lift()
         win.focus_force()
-
+        
+        open_windows[flag] = win
         label = tk.Label(
             win, image=UI_Images[flag], borderwidth=0, highlightthickness=0
         )
@@ -166,6 +208,9 @@ def alarm_pop_up(flag, UI_Images):
         label.pack(pady=10)
 
         def on_check():
+            if flag in stop_sound_events:
+                stop_sound_events[flag].set()
+
             if flag in open_windows:
                 del open_windows[flag]
             win.destroy()
@@ -178,10 +223,16 @@ def alarm_pop_up(flag, UI_Images):
 
     elif flag == "UNKNOWN":
         sound_path = os.path.join(os.getcwd(), "Sound", "Check_Remote_viewer_and_Scroll.wav")
-        try:
-            play_sound(sound_path)
-        except Exception as e:
-            print("Sound play error:", e)
+        
+        if flag in stop_sound_events:
+            stop_sound_events[flag].set()
+            
+        stop_sound_events[flag] = threading.Event()
+        
+        
+        t = threading.Thread(target=loop_sound, args=(flag, sound_path), daemon=True)
+        playing_sound_threads[flag] = t
+        t.start()
             
         if flag in open_windows or "NG" in open_windows:
             return
@@ -211,6 +262,8 @@ def alarm_pop_up(flag, UI_Images):
         label.pack(pady=10)
 
         def on_check():
+            if flag in stop_sound_events:
+                stop_sound_events[flag].set()
             if flag in open_windows:
                 del open_windows[flag]
             win.destroy()
@@ -223,10 +276,16 @@ def alarm_pop_up(flag, UI_Images):
 
     elif flag == "Machine_Missing":
         sound_path = os.path.join(os.getcwd(), "Sound", "Machine_Missing.wav")
-        try:
-            play_sound(sound_path)
-        except Exception as e:
-            print("Sound play error:", e)
+        
+        if flag in stop_sound_events:
+            stop_sound_events[flag].set()
+            
+        stop_sound_events[flag] = threading.Event()
+        
+        
+        t = threading.Thread(target=loop_sound, args=(flag, sound_path), daemon=True)
+        playing_sound_threads[flag] = t
+        t.start()
             
         if flag in open_windows or "NG" in open_windows or "UNKNOWN" in open_windows:
             return
@@ -257,6 +316,8 @@ def alarm_pop_up(flag, UI_Images):
         label.pack(pady=10)
 
         def on_check():
+            if flag in stop_sound_events:
+                stop_sound_events[flag].set()
             if flag in open_windows:
                 del open_windows[flag]
             win.destroy()
@@ -320,10 +381,12 @@ def test():
     }
     while True:
         pause_event.wait()
-        alarm_pop_up(flag[random.randint(0, 3)], UI_Images)
-        time.sleep(5)
+        alarm_pop_up(flag[random.randint(1, 3)], UI_Images)
+        time.sleep(20)
+        alarm_pop_up("OK", UI_Images)
+        time.sleep(20)
 
 if __name__ == "__main__":
-    threading.Thread(target=main, daemon=True).start()
-    # threading.Thread(target=test, daemon=True).start()
+    # threading.Thread(target=main, daemon=True).start()
+    threading.Thread(target=test, daemon=True).start()
     root.mainloop()
