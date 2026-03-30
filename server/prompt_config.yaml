@@ -28,6 +28,23 @@ equipment_definitions:
     ng_rule: |
       NG if ANY red background area is visible — read the text label in that area and add to ng_items as "RED: <label text>".
 
+  S510:
+    name: "S510 - Robot 1"
+    description: |
+      Contains a 3D layout view showing robot stations.
+      Each station label has a background color (green = normal, red or black = alarm).
+      Read colors directly from the image.
+    extraction_rules:
+      stations: "For each station, record: count (numeric value) and color (green/red/black/white)"
+    ng_rule: "NG if ANY station label background color is RED or BLACK. Green = OK."
+
+  S310:
+    name: "S310 - Hairpin Insertion"
+    description: |
+      Scan the entire panel image for any RED background areas indicating alarms.
+    ng_rule: |
+      NG if ANY red background area is visible — read the text label in that area and add to ng_items as "RED: <label text>".
+
   S540:
     name: "S540 - Robot"
     description: |

@@ -70,13 +70,13 @@ _COLOR_DETECTION_PROMPT = """You are a visual inspector analyzing an HMI panel i
 Your ONLY task is to detect RED background areas in this panel image.
 
 Instructions:
-1. First, identify the equipment from the title bar (S520, S530, S540, or S810).
+1. First, identify the equipment from the title bar (S520, S530, S540, S510, S310, or S810).
 
-2. For S540 panels ONLY — check the screen mode:
+2. For S540 and S510 panels ONLY — check the screen mode:
    - NORMAL mode: shows a 3D layout with station labels (1-1, 1-2, 2-1 ... 6-2) and numeric counts.
    - WRONG mode: shows any other screen such as "Setup & Parameters", "Machine Parameter",
      "BypassMES", "BypassCamera", "BypassScanner", "DripBypass", or any menu/settings page.
-   If the S540 panel is NOT showing the normal 3D station layout, set:
+   If the panel is NOT showing the normal 3D station layout, set:
      "wrong_screen": true, "ng": false
    This will be treated as UNKNOWN by the system.
 
@@ -98,7 +98,7 @@ Instructions:
 
 Respond with ONLY a valid JSON object:
 {
-  "equipment_id": "S520 or S530 or S540 or S810 (read from title bar)",
+  "equipment_id": "S520 or S530 or S540 or S510 or S310 or S810 (read from title bar)",
   "wrong_screen": false,
   "red_areas_found": true or false,
   "red_areas": [
@@ -116,6 +116,11 @@ CRITICAL: Start with { and end with }. No markdown.
 """
 
 
+_ALL_EQUIPMENT_IDS = ("S520", "S530", "S540", "S510", "S310", "S810")
+# Equipment IDs that use LLM color detection only (no DI numeric extraction)
+_COLOR_ONLY_IDS = ("S540", "S510", "S310")
+
+
 def _validate_di_result(di_result: Any, expected_eqs: tuple[str, ...] = ("S520", "S530", "S810")) -> tuple[bool, str]:
     """Validate DI extraction result.
 
@@ -128,7 +133,7 @@ def _validate_di_result(di_result: Any, expected_eqs: tuple[str, ...] = ("S520",
     panels_by_eq: dict[str, Any] = {
         panel.equipment_id: panel
         for panel in di_result.panels.values()
-        if panel.equipment_id and panel.equipment_id != "S540"
+        if panel.equipment_id and panel.equipment_id not in ("S540", "S510", "S310")
     }
 
     missing_eqs = [eq for eq in expected_eqs if eq not in panels_by_eq]
@@ -164,7 +169,7 @@ def _build_partial_equipment_data(di_result: Any | None) -> dict[str, Any]:
     """
     result: dict[str, Any] = {}
     if di_result is None:
-        for eq_id in ("S520", "S530", "S540", "S810"):
+        for eq_id in _ALL_EQUIPMENT_IDS:
             result[eq_id] = {"identified": False, "values": [], "ng_items": []}
         return result
 
@@ -174,7 +179,7 @@ def _build_partial_equipment_data(di_result: Any | None) -> dict[str, Any]:
         if panel.equipment_id
     }
 
-    for eq_id in ("S520", "S530", "S540", "S810"):
+    for eq_id in _ALL_EQUIPMENT_IDS:
         panel = panels_by_eq.get(eq_id)
         if panel is None:
             result[eq_id] = {"identified": False, "values": [], "ng_items": []}
@@ -411,9 +416,9 @@ class LLMService:
             if r.get("equipment_id") and pos not in pos_to_eq:
                 pos_to_eq[pos] = r["equipment_id"]
 
-        # Normalize color result equipment_ids to canonical IDs (S520/S530/S540/S810)
+        # Normalize color result equipment_ids to canonical IDs
         # LLM may return e.g. "S540-Robot-2" instead of "S540"
-        _CANONICAL_IDS = ("S520", "S530", "S540", "S810")
+        _CANONICAL_IDS = _ALL_EQUIPMENT_IDS
         def _normalize_eq_id(raw: str) -> str:
             for cid in _CANONICAL_IDS:
                 if cid in raw:
@@ -434,12 +439,12 @@ class LLMService:
         equipment_data: dict[str, Any] = {}
         all_ng_items: list[str] = []
 
-        for eq_id in ("S520", "S530", "S540", "S810"):
+        for eq_id in _ALL_EQUIPMENT_IDS:
             eq_entry: dict[str, Any] = {"identified": True, "ng_items": []}
             ng_items: list[str] = []
 
             # ── Numeric data + NG from DI (S520/S530/S810) ───────────────────
-            if eq_id != "S540" and di_result:
+            if eq_id not in _COLOR_ONLY_IDS and di_result:
                 # Field names assigned by table index (2nd and 3rd table)
                 # Table 0: metadata (skip), Table 1: field_1, Table 2: field_2
                 _FIELD_ORDER: dict[str, list[str]] = {
@@ -479,18 +484,16 @@ class LLMService:
             # ── Color NG from LLM (all equipment) ────────────────────────────
             color_data = color_by_eq.get(eq_id, {})
             if color_data:
-                # S540 wrong screen → UNKNOWN
-                if eq_id == "S540" and color_data.get("wrong_screen"):
+                # S540/S510 wrong screen → UNKNOWN
+                if eq_id in ("S540", "S510") and color_data.get("wrong_screen"):
                     logger.warning(
-                        "S540 wrong screen detected: %s",
-                        color_data.get("overall_reasoning", ""),
+                        "%s wrong screen detected: %s",
+                        eq_id, color_data.get("overall_reasoning", ""),
                     )
-                    elapsed_ms = 0  # will be set by caller
-                    # Signal UNKNOWN via a special ng_item
-                    ng_items.append("WRONG_SCREEN: S540이 정상 화면(3D 스테이션 레이아웃)을 표시하지 않습니다.")
+                    ng_items.append(f"WRONG_SCREEN: {eq_id}이 정상 화면(3D 스테이션 레이아웃)을 표시하지 않습니다.")
 
-                # S540: store station data from LLM response
-                if eq_id == "S540":
+                # Color-only equipment: store station data from LLM response
+                if eq_id in _COLOR_ONLY_IDS:
                     stations = color_data.get("stations")
                     if stations:
                         eq_entry["stations"] = stations
@@ -525,13 +528,13 @@ class LLMService:
             single_eq_data = {eq_id: equipment_data.get(eq_id, {})}
             eq_ng = equipment_data.get(eq_id, {}).get("ng_items", [])
 
-            # S540 wrong screen check
+            # wrong screen check (for color-only equipment)
             wrong_screen = any("WRONG_SCREEN" in i for i in eq_ng)
             if wrong_screen:
                 single_eq_data[eq_id]["ng_items"] = [i for i in eq_ng if "WRONG_SCREEN" not in i]
                 return LLMResponse(
                     status=JudgmentStatus.UNKNOWN,
-                    reason=f"[{eq_id}] S540 패널이 정상 화면을 표시하지 않습니다.",
+                    reason=f"[{eq_id}] 패널이 정상 화면을 표시하지 않습니다.",
                     equipment_data=single_eq_data,
                 )
 
@@ -548,24 +551,25 @@ class LLMService:
                 equipment_data=single_eq_data,
             )
 
-        missing = [eq for eq in ("S520", "S530", "S540", "S810") if eq not in identified_eqs]
+        missing = [eq for eq in _ALL_EQUIPMENT_IDS if eq not in identified_eqs]
 
-        # Check for S540 wrong screen
-        wrong_screen = any(
-            "WRONG_SCREEN" in item
-            for item in equipment_data.get("S540", {}).get("ng_items", [])
+        # Check for wrong screen in any color-only equipment
+        wrong_screen_eq = next(
+            (eq for eq in _COLOR_ONLY_IDS
+             if any("WRONG_SCREEN" in item for item in equipment_data.get(eq, {}).get("ng_items", []))),
+            None,
         )
 
         if missing:
             logger.warning("Unidentified panels: %s", missing)
             status = JudgmentStatus.UNKNOWN
             reason = f"패널 식별 불가: {', '.join(missing)}"
-        elif wrong_screen:
+        elif wrong_screen_eq:
             status = JudgmentStatus.UNKNOWN
-            reason = "S540 패널이 정상 화면(3D 스테이션 레이아웃)을 표시하지 않습니다. 화면이 다른 메뉴로 전환되어 있습니다."
-            s540_data = equipment_data.get("S540", {})
-            s540_data["ng_items"] = [
-                i for i in s540_data.get("ng_items", []) if "WRONG_SCREEN" not in i
+            reason = f"{wrong_screen_eq} 패널이 정상 화면(3D 스테이션 레이아웃)을 표시하지 않습니다. 화면이 다른 메뉴로 전환되어 있습니다."
+            eq_data = equipment_data.get(wrong_screen_eq, {})
+            eq_data["ng_items"] = [
+                i for i in eq_data.get("ng_items", []) if "WRONG_SCREEN" not in i
             ]
         elif all_ng_items:
             status = JudgmentStatus.NG
