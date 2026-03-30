@@ -3,16 +3,22 @@ import numpy as np
 import tkinter as tk
 import requests
 import concurrent.futures
+from PIL import Image, ImageTk
 
 global open_windows, pause_event
 global Logging_path, target_path, Trk_ref_image_path
 
-Logging_path = r'AAAAAAAAAAAAAAAAAAA'
+# Logging_path = r'AAAAAAAAAAAAAAAAAAA'
 target_path = r'C:\Users\uiv14247\OneDrive - Vitesco Technologies\Desktop\Stator_Trk_Monitoring'
-Trk_ref_image_path = r'AAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+# Trk_ref_image_path = r'AAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 
 user32 = ctypes.windll.user32
 open_windows = {}
+
+
+playing_sound_threads = {}
+stop_sound_events = {}
+
 
 pause_event = threading.Event()
 pause_event.set()
@@ -32,6 +38,24 @@ def loading_target_images():
     target_list = glob.glob(os.path.join(target_path, "*.png"))
     target_img_list = [[cv2.imread(a), os.path.basename(a).replace(".png","")] for a in target_list]
     return target_img_list
+
+
+def loop_sound(flag, sound_path):
+    global stop_sound_events
+
+    # 이벤트가 없으면 생성
+    if flag not in stop_sound_events:
+        stop_sound_events[flag] = threading.Event()
+
+    event = stop_sound_events[flag]
+
+    # 반복
+    while not event.is_set():
+        try:
+            play_sound(sound_path)
+        except:
+            pass
+        time.sleep(7)
 
 # Windows sound
 def play_sound(sound_path):
@@ -106,30 +130,48 @@ def send_http(img):
         return "UNKNOWN"
 
 def pause_timer():
-    print("waiting for 60 sec")
-    time.sleep(60)
+    print("waiting for 10 min")
+    time.sleep(600)
     pause_event.set()
 
 
-def alarm_pop_up(flag):
+def alarm_pop_up(flag, UI_Images):
     global open_windows
     print(flag)
 
     if flag == "OK":
+        for f, event in stop_sound_events.items():
+            try:
+                event.set()
+            except:
+                pass
+        stop_sound_events.clear()
+        playing_sound_threads.clear()
+
         for win in list(open_windows.values()):
             try:
                 win.destroy()
-            except:
-                pass
+            except Exception as e:
+                print(e)
         open_windows.clear()
-        return
+        
+        
+        root.update_idletasks()
+        root.update()
+
 
     elif flag == "NG":
         sound_path = os.path.join(os.getcwd(), "Sound", "Circulation_Error.wav")
-        try:
-            play_sound(sound_path)
-        except Exception as e:
-            print("Sound play error:", e)
+        
+        if flag in stop_sound_events:
+            stop_sound_events[flag].set()
+            
+        stop_sound_events[flag] = threading.Event()
+        
+        
+        t = threading.Thread(target=loop_sound, args=(flag, sound_path), daemon=True)
+        playing_sound_threads[flag] = t
+        t.start()
 
         if "UNKNOWN" in open_windows:
             try:
@@ -137,6 +179,13 @@ def alarm_pop_up(flag):
             except:
                 pass
             del open_windows["UNKNOWN"]
+            
+        if "Machine_Missing" in open_windows:
+            try:
+                open_windows["Machine_Missing"].destroy()
+            except:
+                pass
+            del open_windows["Machine_Missing"]
 
         if flag in open_windows:
             return
@@ -150,29 +199,18 @@ def alarm_pop_up(flag):
         win.attributes("-topmost", True)
         win.lift()
         win.focus_force()
-
+        
         open_windows[flag] = win
-
-        # 라벨을 Bold 체로 변경
         label = tk.Label(
-            win,
-            text="Circulation",
-            fg="red",
-            bg="yellow",
-            font=("Arial", 200, "bold")
+            win, image=UI_Images[flag], borderwidth=0, highlightthickness=0
         )
-        label.pack(pady=20)
-
-        label = tk.Label(
-            win,
-            text="Error",
-            fg="red",
-            bg="yellow",
-            font=("Arial", 200, "bold")
-        )
-        label.pack(pady=20)
+        label.image = UI_Images[flag]
+        label.pack(pady=10)
 
         def on_check():
+            if flag in stop_sound_events:
+                stop_sound_events[flag].set()
+
             if flag in open_windows:
                 del open_windows[flag]
             win.destroy()
@@ -185,14 +223,27 @@ def alarm_pop_up(flag):
 
     elif flag == "UNKNOWN":
         sound_path = os.path.join(os.getcwd(), "Sound", "Check_Remote_viewer_and_Scroll.wav")
-        try:
-            play_sound(sound_path)
-        except Exception as e:
-            print("Sound play error:", e)
-
+        
+        if flag in stop_sound_events:
+            stop_sound_events[flag].set()
+            
+        stop_sound_events[flag] = threading.Event()
+        
+        
+        t = threading.Thread(target=loop_sound, args=(flag, sound_path), daemon=True)
+        playing_sound_threads[flag] = t
+        t.start()
+            
         if flag in open_windows or "NG" in open_windows:
             return
-
+            
+        if "Machine_Missing" in open_windows:
+            try:
+                open_windows["Machine_Missing"].destroy()
+            except:
+                pass
+            del open_windows["Machine_Missing"]
+            
         win = tk.Toplevel(root)
         win.title(flag)
         win.configure(bg="yellow")
@@ -204,37 +255,15 @@ def alarm_pop_up(flag):
         win.focus_force()
 
         open_windows[flag] = win
-
-        # 라벨을 Bold 체로 변경
         label = tk.Label(
-            win,
-            text="Check",
-            fg="red",
-            bg="yellow",
-            font=("Arial", 160, "bold")
+            win, image=UI_Images[flag], borderwidth=0, highlightthickness=0
         )
-        label.pack(pady=10)
-        
-        
-        label = tk.Label(
-            win,
-            text="Remote Viewer",
-            fg="red",
-            bg="yellow",
-            font=("Arial", 160, "bold")
-        )
-        label.pack(pady=10)
-
-        label = tk.Label(
-            win,
-            text="and Scroll",
-            fg="red",
-            bg="yellow",
-            font=("Arial", 160, "bold")
-        )
+        label.image = UI_Images[flag]
         label.pack(pady=10)
 
         def on_check():
+            if flag in stop_sound_events:
+                stop_sound_events[flag].set()
             if flag in open_windows:
                 del open_windows[flag]
             win.destroy()
@@ -247,14 +276,27 @@ def alarm_pop_up(flag):
 
     elif flag == "Machine_Missing":
         sound_path = os.path.join(os.getcwd(), "Sound", "Machine_Missing.wav")
-        try:
-            play_sound(sound_path)
-        except Exception as e:
-            print("Sound play error:", e)
-
+        
+        if flag in stop_sound_events:
+            stop_sound_events[flag].set()
+            
+        stop_sound_events[flag] = threading.Event()
+        
+        
+        t = threading.Thread(target=loop_sound, args=(flag, sound_path), daemon=True)
+        playing_sound_threads[flag] = t
+        t.start()
+            
         if flag in open_windows or "NG" in open_windows or "UNKNOWN" in open_windows:
             return
 
+        if "UNKNOWN" in open_windows:
+            try:
+                open_windows["UNKNOWN"].destroy()
+            except:
+                pass
+            del open_windows["UNKNOWN"]
+            
         win = tk.Toplevel(root)
         win.title(flag)
         win.configure(bg="yellow")
@@ -267,36 +309,15 @@ def alarm_pop_up(flag):
 
         open_windows[flag] = win
 
-        # 라벨을 Bold 체로 변경
         label = tk.Label(
-            win,
-            text="Check",
-            fg="red",
-            bg="yellow",
-            font=("Arial", 200, "bold")
+            win, image=UI_Images[flag], borderwidth=0, highlightthickness=0
         )
-        label.pack(pady=10)
-
-        label = tk.Label(
-            win,
-            text="Remote",
-            fg="red",
-            bg="yellow",
-            font=("Arial", 200, "bold")
-        )
-        label.pack(pady=10)
-        
-
-        label = tk.Label(
-            win,
-            text="Viewer",
-            fg="red",
-            bg="yellow",
-            font=("Arial", 200, "bold")
-        )
+        label.image = UI_Images[flag]
         label.pack(pady=10)
 
         def on_check():
+            if flag in stop_sound_events:
+                stop_sound_events[flag].set()
             if flag in open_windows:
                 del open_windows[flag]
             win.destroy()
@@ -306,82 +327,14 @@ def alarm_pop_up(flag):
 
         btn = tk.Button(win, text="Check", command=on_check, font=("Arial", 40))
         btn.pack(pady=30)
-        
-def NG_Detecting(images, target_img_list, ref_images):
-    global Logging_path
-    threshold = 0.8
-    idx = 0
-    now_str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")[2:]
-    master_flag = False
-    for img in images:
-        temp_flag = False
-        is_Trk_Flag = False
-        idx = idx + 1
-        display_img = img.copy()
-        NG_text = ''
-        
-        # Trk_ref_Check
-        result = cv2.matchTemplate(img, ref_images['Trk'], cv2.TM_CCOEFF_NORMED)
-        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-        if max_val >= threshold:
-            is_Trk_Flag = True
-                
-        for target_img in target_img_list:
-            if not is_Trk_Flag and target_img[1] == "Trk_red_bar":
-                continue
-            
-            result = cv2.matchTemplate(img, target_img[0], cv2.TM_CCOEFF_NORMED)
-            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-            if max_val >= threshold:
-                master_flag = True
-                temp_flag = True
-                NG_text.append(target_img[1])
-                h, w = target_img[0].shape[:2]
-                top_left = max_loc
-                bottom_right = (top_left[0] + w, top_left[1] + h)
-                cv2.rectangle(display_img, top_left, bottom_right, (255, 0, 0), 2)
-        if temp_flag:
-            cv2.imwrite(os.path.join(Logging_path, f"{now_str}_{"_".join(NG_text)}_idx{idx}.png"), display_img)
-    if master_flag:
-        return "NG"
-    else:
-        return "OK"
-
-def main():
-    ref_images = loading_ref_images()
-    target_img_list = loading_target_images()
-    flag = "OK"
-    flag = []
-    while True:
-        pause_event.wait()
-        windows_images = []
-        
-        windows = enum_windows()
-        windows = [a for a in windows if "hmi_panel" in a[1]]
-
-        if len(windows) < 4:
-            flag = "Machine_Missing"
-            alarm_pop_up("Machine_Missing")
-        elif len(windows) >= 4:
-            windows.sort()
-            for w in windows:
-                windows_images.append(capturing(w[0]))
-            # flag = NG_Detecting(windows_images, target_img_list, ref_images)
-            for win_img in windows_images:
-                flag.append(send_http(win_img))
-            if "NG" in flag:
-                alarm_pop_up("NG")
-            elif "UNKNOWN" in flag:
-                alarm_pop_up("UNKNOWN")
-            else:
-                alarm_pop_up("OK")
-        time.sleep(60)
     
-def main2():
-    #ref_images = loading_ref_images()
-    #target_img_list = loading_target_images()
+def main():
+    UI_Images = {
+        "NG": ImageTk.PhotoImage(Image.open(os.path.join(os.getcwd(), "UI_Images", "Circulation_Error.png"))),
+        "UNKNOWN": ImageTk.PhotoImage(Image.open(os.path.join(os.getcwd(), "UI_Images", "Check_Remote_viewer_and_Scroll.png"))),
+        "Machine_Missing": ImageTk.PhotoImage(Image.open(os.path.join(os.getcwd(), "UI_Images", "Machine_Missing.png")))
+    }
     flag = "OK"
-    flag = []
     while True:
         pause_event.wait()
         windows_images = []
@@ -391,7 +344,7 @@ def main2():
 
         if len(windows) < 4:
             flag = "Machine_Missing"
-            alarm_pop_up("Machine_Missing")
+            alarm_pop_up("Machine_Missing", UI_Images)
         elif len(windows) >= 4:
             windows.sort()
             for w in windows:
@@ -411,23 +364,29 @@ def main2():
                         result = "UNKNOWN"
                     flag.append(result)
             if "NG" in flag:
-                alarm_pop_up("NG")
+                alarm_pop_up("NG", UI_Images)
             elif "UNKNOWN" in flag:
-                alarm_pop_up("UNKNOWN")
+                alarm_pop_up("UNKNOWN", UI_Images)
             else:
-                alarm_pop_up("OK")
-        time.sleep(60)
+                alarm_pop_up("OK", UI_Images)
+        time.sleep(30)
 
 def test():
     print("test thread start")
     flag = ["OK", "NG", "UNKNOWN", "Machine_Missing"]
+    UI_Images = {
+        "NG": ImageTk.PhotoImage(Image.open(os.path.join(os.getcwd(), "UI_Images", "Circulation_Error.png"))),
+        "UNKNOWN": ImageTk.PhotoImage(Image.open(os.path.join(os.getcwd(), "UI_Images", "Check_Remote_viewer_and_Scroll.png"))),
+        "Machine_Missing": ImageTk.PhotoImage(Image.open(os.path.join(os.getcwd(), "UI_Images", "Machine_Missing.png")))
+    }
     while True:
-        
         pause_event.wait()
-        alarm_pop_up(flag[random.randint(0, 3)])
-        time.sleep(5)
+        alarm_pop_up(flag[random.randint(1, 3)], UI_Images)
+        time.sleep(20)
+        alarm_pop_up("OK", UI_Images)
+        time.sleep(20)
 
 if __name__ == "__main__":
-    threading.Thread(target=main2, daemon=True).start()
-    #threading.Thread(target=test, daemon=True).start()
+    threading.Thread(target=main, daemon=True).start()
+    # threading.Thread(target=test, daemon=True).start()
     root.mainloop()
