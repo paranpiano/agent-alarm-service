@@ -55,7 +55,7 @@ def loop_sound(flag, sound_path):
             play_sound(sound_path)
         except:
             pass
-        time.sleep(5)
+        time.sleep(7)
 
 # Windows sound
 def play_sound(sound_path):
@@ -387,6 +387,6 @@ def test():
         time.sleep(20)
 
 if __name__ == "__main__":
-    # threading.Thread(target=main, daemon=True).start()
-    threading.Thread(target=test, daemon=True).start()
+    threading.Thread(target=main, daemon=True).start()
+    # threading.Thread(target=test, daemon=True).start()
     root.mainloop()
