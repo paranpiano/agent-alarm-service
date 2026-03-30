@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 680" font-family="'Segoe UI', Arial, sans-serif">
+  <!-- Background -->
+  <rect width="1000" height="680" fill="#f0f4f8"/>
+
+  <!-- Title -->
+  <rect x="0" y="0" width="1000" height="60" fill="#1a2744"/>
+  <text x="500" y="38" text-anchor="middle" fill="white" font-size="22" font-weight="bold">AI Alarm System — 시스템 개요</text>
+
+  <!-- HMI Panel -->
+  <rect x="40" y="100" width="160" height="200" rx="12" fill="#2d6a9f" stroke="#1a4a7a" stroke-width="2"/>
+  <text x="120" y="130" text-anchor="middle" fill="white" font-size="13" font-weight="bold">HMI 패널</text>
+  <text x="120" y="150" text-anchor="middle" fill="#cce0f5" font-size="11">제조 장비 화면</text>
+  <rect x="60" y="165" width="120" height="80" rx="6" fill="#1a4a7a"/>
+  <text x="120" y="185" text-anchor="middle" fill="#7ec8e3" font-size="10">1920 × 1170</text>
+  <text x="120" y="202" text-anchor="middle" fill="white" font-size="10">HMI Screenshot</text>
+  <text x="120" y="219" text-anchor="middle" fill="#aad4f0" font-size="9">S520 | S530</text>
+  <text x="120" y="234" text-anchor="middle" fill="#aad4f0" font-size="9">S540 | S810</text>
+  <text x="120" y="280" text-anchor="middle" fill="#cce0f5" font-size="10">📷 화면 캡처</text>
+
+  <!-- Arrow HMI -> Agent -->
+  <line x1="200" y1="200" x2="270" y2="200" stroke="#f59e0b" stroke-width="3" marker-end="url(#arrow-gold)"/>
+  <text x="235" y="190" text-anchor="middle" fill="#92400e" font-size="10">이미지 전송</text>
+
+  <!-- Agent AI Server Box -->
+  <rect x="270" y="80" width="460" height="380" rx="16" fill="white" stroke="#6366f1" stroke-width="3"/>
+  <rect x="270" y="80" width="460" height="44" rx="16" fill="#6366f1"/>
+  <rect x="270" y="108" width="460" height="16" fill="#6366f1"/>
+  <text x="500" y="108" text-anchor="middle" fill="white" font-size="15" font-weight="bold">🤖 Agent AI Server</text>
+
+  <!-- Step 1: Crop -->
+  <rect x="310" y="140" width="380" height="55" rx="8" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="500" y="162" text-anchor="middle" fill="#5b21b6" font-size="12" font-weight="bold">① 패널 크롭 (1회)</text>
+  <text x="500" y="180" text-anchor="middle" fill="#7c3aed" font-size="11">전체 이미지 → 4개 패널 분할 (top_left / top_right / bottom_left / bottom_right)</text>
+
+  <!-- Arrow down -->
+  <line x1="500" y1="195" x2="500" y2="215" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arrow-purple)"/>
+
+  <!-- Parallel processing -->
+  <rect x="290" y="215" width="180" height="110" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="380" y="238" text-anchor="middle" fill="#1e40af" font-size="12" font-weight="bold">② DI Agent</text>
+  <text x="380" y="256" text-anchor="middle" fill="#1d4ed8" font-size="10">Azure Document Intelligence</text>
+  <text x="380" y="273" text-anchor="middle" fill="#1e40af" font-size="10">숫자 추출 (OCR)</text>
+  <text x="380" y="290" text-anchor="middle" fill="#374151" font-size="9">S520: 28값 / S530: 28값</text>
+  <text x="380" y="305" text-anchor="middle" fill="#374151" font-size="9">S810: 30값</text>
+
+  <rect x="490" y="215" width="180" height="110" rx="8" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="580" y="238" text-anchor="middle" fill="#14532d" font-size="12" font-weight="bold">② LLM Agent</text>
+  <text x="580" y="256" text-anchor="middle" fill="#15803d" font-size="10">Azure OpenAI GPT-4o Vision</text>
+  <text x="580" y="273" text-anchor="middle" fill="#14532d" font-size="10">색상 감지 (Vision)</text>
+  <text x="580" y="290" text-anchor="middle" fill="#374151" font-size="9">S520/S530/S810: 빨간 영역</text>
+  <text x="580" y="305" text-anchor="middle" fill="#374151" font-size="9">S540: 12개 스테이션 색상</text>
+
+  <!-- Parallel label -->
+  <text x="500" y="210" text-anchor="middle" fill="#9333ea" font-size="10" font-style="italic">⚡ 병렬 실행 (동시)</text>
+
+  <!-- Arrows to merge -->
+  <line x1="380" y1="325" x2="380" y2="355" stroke="#6b7280" stroke-width="1.5"/>
+  <line x1="580" y1="325" x2="580" y2="355" stroke="#6b7280" stroke-width="1.5"/>
+  <line x1="380" y1="355" x2="580" y2="355" stroke="#6b7280" stroke-width="1.5"/>
+  <line x1="500" y1="355" x2="500" y2="375" stroke="#6b7280" stroke-width="2" marker-end="url(#arrow-gray)"/>
+
+  <!-- Merge -->
+  <rect x="360" y="375" width="280" height="55" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="500" y="397" text-anchor="middle" fill="#92400e" font-size="12" font-weight="bold">③ 최종 판정 병합</text>
+  <text x="500" y="415" text-anchor="middle" fill="#78350f" font-size="10">숫자 NG (≥3000) + 색상 NG (RED 영역) → OK / NG / UNKNOWN</text>
+
+  <!-- Arrow Agent -> Results -->
+  <line x1="730" y1="270" x2="800" y2="270" stroke="#f59e0b" stroke-width="3" marker-end="url(#arrow-gold)"/>
+
+  <!-- Results -->
+  <rect x="800" y="100" width="160" height="360" rx="12" fill="white" stroke="#d1d5db" stroke-width="2"/>
+  <rect x="800" y="100" width="160" height="36" rx="12" fill="#374151"/>
+  <rect x="800" y="120" width="160" height="16" fill="#374151"/>
+  <text x="880" y="122" text-anchor="middle" fill="white" font-size="12" font-weight="bold">판정 결과</text>
+
+  <rect x="820" y="150" width="120" height="60" rx="8" fill="#dcfce7" stroke="#22c55e" stroke-width="2"/>
+  <text x="880" y="175" text-anchor="middle" fill="#14532d" font-size="20">✅</text>
+  <text x="880" y="198" text-anchor="middle" fill="#14532d" font-size="13" font-weight="bold">OK (정상)</text>
+
+  <rect x="820" y="225" width="120" height="60" rx="8" fill="#fee2e2" stroke="#ef4444" stroke-width="2"/>
+  <text x="880" y="250" text-anchor="middle" fill="#991b1b" font-size="20">❌</text>
+  <text x="880" y="273" text-anchor="middle" fill="#991b1b" font-size="13" font-weight="bold">NG (이상)</text>
+
+  <rect x="820" y="300" width="120" height="60" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+  <text x="880" y="325" text-anchor="middle" fill="#92400e" font-size="20">⚠️</text>
+  <text x="880" y="348" text-anchor="middle" fill="#92400e" font-size="13" font-weight="bold">UNKNOWN</text>
+
+  <rect x="820" y="375" width="120" height="60" rx="8" fill="#f3f4f6" stroke="#9ca3af" stroke-width="2"/>
+  <text x="880" y="400" text-anchor="middle" fill="#374151" font-size="20">⏱️</text>
+  <text x="880" y="423" text-anchor="middle" fill="#374151" font-size="13" font-weight="bold">TIMEOUT</text>
+
+  <!-- Email notification -->
+  <rect x="800" y="480" width="160" height="50" rx="8" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="880" y="500" text-anchor="middle" fill="#5b21b6" font-size="11">📧 이메일 알림</text>
+  <text x="880" y="518" text-anchor="middle" fill="#7c3aed" font-size="10">UNKNOWN 시 자동 발송</text>
+  <line x1="880" y1="360" x2="880" y2="480" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-purple)"/>
+
+  <!-- Client GUI -->
+  <rect x="40" y="380" width="160" height="120" rx="12" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+  <text x="120" y="408" text-anchor="middle" fill="white" font-size="13" font-weight="bold">Client GUI</text>
+  <text x="120" y="428" text-anchor="middle" fill="#94a3b8" font-size="10">tkinter 모니터링</text>
+  <rect x="60" y="438" width="120" height="45" rx="4" fill="#0f172a"/>
+  <text x="120" y="455" text-anchor="middle" fill="#22c55e" font-size="9">● 단건 분석</text>
+  <text x="120" y="470" text-anchor="middle" fill="#60a5fa" font-size="9">● 주기적 분석 (5s/10s)</text>
+  <text x="120" y="485" text-anchor="middle" fill="#f59e0b" font-size="9">● 이력 CSV 기록</text>
+
+  <!-- Arrow Client -> Agent -->
+  <line x1="200" y1="440" x2="270" y2="350" stroke="#60a5fa" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arrow-blue)"/>
+
+  <!-- Processing time badge -->
+  <rect x="310" y="455" width="360" height="30" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="490" y="474" text-anchor="middle" fill="#475569" font-size="11">⏱ 평균 처리 시간: 약 7~9초 (DI + LLM 병렬)</text>
+
+  <!-- Legend -->
+  <rect x="40" y="560" width="920" height="100" rx="10" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="500" y="582" text-anchor="middle" fill="#374151" font-size="12" font-weight="bold">기술 스택</text>
+  <rect x="60" y="592" width="12" height="12" fill="#3b82f6"/>
+  <text x="80" y="603" fill="#374151" font-size="10">Azure Document Intelligence (OCR)</text>
+  <rect x="260" y="592" width="12" height="12" fill="#22c55e"/>
+  <text x="280" y="603" fill="#374151" font-size="10">Azure OpenAI GPT-4o Vision (LLM)</text>
+  <rect x="480" y="592" width="12" height="12" fill="#6366f1"/>
+  <text x="500" y="603" fill="#374151" font-size="10">Flask REST API Server (Python)</text>
+  <rect x="700" y="592" width="12" height="12" fill="#1e293b"/>
+  <text x="720" y="603" fill="#374151" font-size="10">tkinter GUI Client</text>
+  <rect x="60" y="618" width="12" height="12" fill="#8b5cf6"/>
+  <text x="80" y="629" fill="#374151" font-size="10">AWS SNS 이메일 알림</text>
+  <rect x="260" y="618" width="12" height="12" fill="#f59e0b"/>
+  <text x="280" y="629" fill="#374151" font-size="10">PyYAML 설정 관리</text>
+  <rect x="480" y="618" width="12" height="12" fill="#ef4444"/>
+  <text x="500" y="629" fill="#374151" font-size="10">pytest 테스트 자동화</text>
+  <rect x="700" y="618" width="12" height="12" fill="#0ea5e9"/>
+  <text x="720" y="629" fill="#374151" font-size="10">CSV 분석 이력 기록</text>
+
+  <!-- Arrow markers -->
+  <defs>
+    <marker id="arrow-gold" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#f59e0b"/>
+    </marker>
+    <marker id="arrow-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#8b5cf6"/>
+    </marker>
+    <marker id="arrow-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/>
+    </marker>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#60a5fa"/>
+    </marker>
+  </defs>
+</svg>
