@@ -4,6 +4,7 @@ import logging
 import shutil
 import threading
 import tkinter as tk
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
@@ -190,11 +191,6 @@ class AlarmTestGUI:
 
         ttk.Separator(bottom, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y, padx=6)
 
-        self._analyze_btn = ttk.Button(bottom, text="Analyze All", command=self._on_analyze_all)
-        self._analyze_btn.pack(side=tk.LEFT)
-
-        ttk.Separator(bottom, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y, padx=6)
-
         self._batch_random_var = tk.BooleanVar(value=False)
         ttk.Checkbutton(bottom, text="Random", variable=self._batch_random_var).pack(side=tk.LEFT, padx=(0, 2))
         self._batch_random_n_var = tk.StringVar(value="100")
@@ -359,9 +355,12 @@ class AlarmTestGUI:
         if not selection:
             return None
         item = selection[0]
-        if not self._image_tree.parent(item):
-            return None
         item_text = self._image_tree.item(item, "text")
+        # folder node has children — skip unless filter is active (flat list)
+        if self._image_tree.get_children(item):
+            return None
+        if not any(item_text.endswith(ext) for ext in _IMAGE_EXTENSIONS):
+            return None
         for path, folder_name in self._image_list:
             if path.name == item_text:
                 return path, folder_name
@@ -435,6 +434,11 @@ class AlarmTestGUI:
         return result
 
     def _get_folder_path(self, node_id: str) -> Path:
+        # Collect all image paths under this node and derive the common folder
+        images = self._get_images_under(node_id)
+        if images:
+            return images[0][0].parent
+        # fallback: reconstruct from tree node labels
         parts = []
         current = node_id
         while current:
@@ -449,7 +453,6 @@ class AlarmTestGUI:
 
     def _set_buttons_state(self, state: str) -> None:
         self._analyze_selected_btn.configure(state=state)
-        self._analyze_btn.configure(state=state)
 
     def _on_single_analysis_complete(
         self, entry: tuple[str, JudgmentResult | None, str | None]
@@ -465,41 +468,6 @@ class AlarmTestGUI:
         self._show_result_detail(name)
         self._status_var.set(f"Done: {name} → {result.status.value if result else 'ERROR'}")
         self._set_buttons_state(tk.NORMAL)
-
-    def _on_analyze_all(self) -> None:
-        if not self._image_list:
-            self._status_var.set("No images loaded")
-            return
-        self._update_api_client()
-        self._status_var.set("Analyzing...")
-        self._set_buttons_state(tk.DISABLED)
-        threading.Thread(target=self._run_analyze_all, daemon=True).start()
-
-    def _run_analyze_all(self) -> None:
-        assert self._api_client is not None
-        results: list[tuple[str, JudgmentResult | None, str | None]] = []
-        for image_path, _ in self._image_list:
-            try:
-                result = self._api_client.analyze_single(image_path)
-                results.append((image_path.name, result, None))
-            except Exception as exc:
-                results.append((image_path.name, None, str(exc)))
-        self.root.after(0, lambda: self._on_analysis_complete(results))
-
-    def _on_analysis_complete(
-        self, results: list[tuple[str, JudgmentResult | None, str | None]]
-    ) -> None:
-        self._results = results
-        for name, result, error in results:
-            self._add_history(name, result, error)
-        self._status_var.set(f"Done - {len(results)} images analyzed")
-        self._set_buttons_state(tk.NORMAL)
-        children = self._image_tree.get_children()
-        if children:
-            first_children = self._image_tree.get_children(children[0])
-            if first_children:
-                self._image_tree.selection_set(first_children[0])
-                self._on_image_select()
 
     # ------------------------------------------------------------------
     # Batch analysis
@@ -527,23 +495,36 @@ class AlarmTestGUI:
 
         total = len(images)
         counts = {"ok": 0, "ng": 0, "unknown": 0, "error": 0}
+        completed = 0
+        lock = threading.Lock()
 
-        for i, img_path in enumerate(images, 1):
-            self.root.after(0, lambda i=i: self._status_var.set(f"Batch: {i} / {total} — {img_path.name}"))
-            try:
-                result = self._api_client.analyze_single(img_path)
-                status_key = result.status.value.lower()
-                if status_key not in ("ok", "ng", "unknown"):
-                    status_key = "unknown"
-                if use_subfolders:
-                    shutil.move(str(img_path), out_dirs[status_key] / img_path.name)
-                counts[status_key] += 1
-                self.root.after(0, lambda n=img_path.name, r=result: self._add_history(n, r, None))
-                logger.info("Batch [%d/%d] %s → %s", i, total, img_path.name, status_key)
-            except Exception as exc:
-                counts["error"] += 1
-                self.root.after(0, lambda n=img_path.name, e=str(exc): self._add_history(n, None, e))
-                logger.error("Batch error for %s: %s", img_path.name, exc)
+        def process(img_path: Path):
+            return img_path, self._api_client.analyze_single(img_path)
+
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            futures = {executor.submit(process, img): img for img in images}
+            for future in as_completed(futures):
+                img_path = futures[future]
+                with lock:
+                    completed += 1
+                    c = completed
+                self.root.after(0, lambda c=c: self._status_var.set(f"Batch: {c} / {total} — processing"))
+                try:
+                    _, result = future.result()
+                    status_key = result.status.value.lower()
+                    if status_key not in ("ok", "ng", "unknown"):
+                        status_key = "unknown"
+                    if use_subfolders:
+                        shutil.move(str(img_path), out_dirs[status_key] / img_path.name)
+                    with lock:
+                        counts[status_key] += 1
+                    self.root.after(0, lambda n=img_path.name, r=result: self._add_history(n, r, None))
+                    logger.info("Batch [%d/%d] %s → %s", c, total, img_path.name, status_key)
+                except Exception as exc:
+                    with lock:
+                        counts["error"] += 1
+                    self.root.after(0, lambda n=img_path.name, e=str(exc): self._add_history(n, None, e))
+                    logger.error("Batch error for %s: %s", img_path.name, exc)
 
         summary = (
             f"Batch complete — {total} images\n"
