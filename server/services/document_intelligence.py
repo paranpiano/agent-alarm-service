@@ -95,9 +95,11 @@ class PanelExtractionResult:
     Attributes:
         equipment_id: Detected equipment label (e.g. 'S520'), or '' if unknown.
         tables: Tables extracted from this panel.
+        wait_counts: S540 station wait count values extracted from paragraphs.
     """
     equipment_id: str = ""
     tables: list[ExtractedTable] = field(default_factory=list)
+    wait_counts: list[int] = field(default_factory=list)
 
     def to_prompt_context(self) -> str:
         """Return a formatted string of mapped table data for LLM injection."""
@@ -194,6 +196,26 @@ def _detect_equipment(paragraphs: list[str]) -> str:
     return ""
 
 
+def extract_s540_wait_counts(paragraphs: list[str]) -> list[int]:
+    """Extract integer wait count values from S540 paragraph text.
+
+    Filters out table data (which contains units like 'pcs', '%', 'S', '+')
+    and known UI noise values (2, 12, 21) from button/ST box elements.
+    Returns plain integers — these are the station wait counts in the 3D layout.
+    """
+    _NOISE = {2, 3, 12, 21}
+    counts = []
+    for p in paragraphs:
+        text = p.strip()
+        if any(c in text for c in ("+", "%", "S", "pcs", ".", ":")):
+            continue
+        if text.isdigit():
+            val = int(text)
+            if val not in _NOISE:
+                counts.append(val)
+    return counts
+
+
 def _crop_panel(image_bytes: bytes, fractions: tuple[float, float, float, float]) -> bytes:
     """Crop image_bytes to the given fractional bounding box, return PNG bytes."""
     from PIL import Image
@@ -216,6 +238,19 @@ def _parse_di_result(result: Any) -> PanelExtractionResult:
     """
     paragraphs = [p.content for p in result.paragraphs] if result.paragraphs else []
     equipment_id = _detect_equipment(paragraphs)
+
+    # Debug: log all paragraphs for S540 to check if station counts are extracted
+    if equipment_id == "S540":
+        logger.info(
+            "S540 DI paragraphs (%d total): %s",
+            len(paragraphs),
+            paragraphs,
+        )
+
+    wait_counts: list[int] = []
+    if equipment_id == "S540":
+        wait_counts = extract_s540_wait_counts(paragraphs)
+        logger.info("S540 wait counts extracted: %s", wait_counts)
 
     table_label_patterns = [
         "Cooling 2 line", "Cooling 1 line",
@@ -270,7 +305,7 @@ def _parse_di_result(result: Any) -> PanelExtractionResult:
                 sub_label=sub_label,
             ))
 
-    return PanelExtractionResult(equipment_id=equipment_id, tables=tables)
+    return PanelExtractionResult(equipment_id=equipment_id, tables=tables, wait_counts=wait_counts)
 
 
 # ── Service ───────────────────────────────────────────────────────────────────

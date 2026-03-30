@@ -106,7 +106,8 @@ class SnsSettings:
 class AlarmSettings:
     """Alarm threshold settings."""
 
-    numeric_ng_threshold: int = 3500  # Set NUMERIC_NG_THRESHOLD in .env to override
+    numeric_ng_threshold: int = 3500   # Set NUMERIC_NG_THRESHOLD in .env to override
+    s540_wait_ng_threshold: int = 1200  # Set S540_WAIT_NG_THRESHOLD in .env to override
 
 
 @dataclass
@@ -215,7 +216,11 @@ def _load_env_vars() -> tuple[str, str, str, str, str]:
 def _load_alarm_settings() -> AlarmSettings:
     """Load alarm threshold settings from environment variables."""
     threshold = int(os.getenv("NUMERIC_NG_THRESHOLD", "3500"))
-    return AlarmSettings(numeric_ng_threshold=threshold)
+    s540_threshold = int(os.getenv("S540_WAIT_NG_THRESHOLD", "1200"))
+    return AlarmSettings(
+        numeric_ng_threshold=threshold,
+        s540_wait_ng_threshold=s540_threshold,
+    )
 
 
 def _load_sns_settings() -> SnsSettings:

@@ -236,6 +236,7 @@ class LLMService:
         self.config: PromptConfig = app_config.prompt
         self.timeout_seconds: int = app_config.server.llm_timeout_seconds
         self.numeric_ng_threshold: int = app_config.alarm.numeric_ng_threshold
+        self.s540_wait_ng_threshold: int = app_config.alarm.s540_wait_ng_threshold
         self.llm: AzureChatOpenAI = get_azure_vision_llm(app_config)
 
         di = app_config.document_intelligence
@@ -481,6 +482,20 @@ class LLMService:
                             item = f"{field_name}: {max_val} (>= {self.numeric_ng_threshold})"
                             ng_items.append(item)
                             logger.warning("Numeric NG [%s] %s", eq_id, item)
+
+            # ── S540 wait count NG from DI paragraphs ────────────────────────
+            if eq_id == "S540" and di_result:
+                for pos, panel in di_result.panels.items():
+                    if panel.equipment_id != eq_id:
+                        continue
+                    if panel.wait_counts:
+                        eq_entry["wait_counts"] = panel.wait_counts
+                        over = [v for v in panel.wait_counts if v >= self.s540_wait_ng_threshold]
+                        if over:
+                            max_val = max(over)
+                            item = f"wait_count: {max_val} (>= {self.s540_wait_ng_threshold})"
+                            ng_items.append(item)
+                            logger.warning("S540 Wait NG %s", item)
 
             # ── Color NG from LLM (all equipment) ────────────────────────────
             color_data = color_by_eq.get(eq_id, {})

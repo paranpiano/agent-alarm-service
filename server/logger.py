@@ -104,10 +104,8 @@ class JudgmentLogger:
         # Append DI extracted values for traceability
         if result.equipment_data:
             for eq_id, eq_data in result.equipment_data.items():
-                if eq_id == "S540":
-                    continue
                 for field_name, vals in eq_data.items():
-                    if isinstance(vals, list) and vals:
+                    if isinstance(vals, list) and vals and field_name not in ("ng_items", "stations"):
                         entry += f"  [{eq_id}.{field_name}] ({len(vals)}개): {vals}\n"
 
         try:
