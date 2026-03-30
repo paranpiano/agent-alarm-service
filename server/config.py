@@ -103,6 +103,13 @@ class SnsSettings:
 
 
 @dataclass
+class AlarmSettings:
+    """Alarm threshold settings."""
+
+    numeric_ng_threshold: int = 3500  # Set NUMERIC_NG_THRESHOLD in .env to override
+
+
+@dataclass
 class AppConfig:
     """Top-level application configuration aggregating all settings."""
 
@@ -110,6 +117,7 @@ class AppConfig:
     server: ServerSettings
     email: EmailSettings
     sns: SnsSettings
+    alarm: AlarmSettings
     storage: StorageSettings
     document_intelligence: DocumentIntelligenceSettings
     azure_endpoint: str
@@ -204,6 +212,12 @@ def _load_env_vars() -> tuple[str, str, str, str, str]:
     return endpoint, api_key, api_version, chat_model, vision_model
 
 
+def _load_alarm_settings() -> AlarmSettings:
+    """Load alarm threshold settings from environment variables."""
+    threshold = int(os.getenv("NUMERIC_NG_THRESHOLD", "3500"))
+    return AlarmSettings(numeric_ng_threshold=threshold)
+
+
 def _load_sns_settings() -> SnsSettings:
     """Load SNS notification settings from environment variables."""
     enabled_str = os.getenv("SNS_ENABLED", "true").lower().strip()
@@ -250,6 +264,7 @@ def load_config(
     server_settings, email_settings, storage_settings = _load_server_config(server_config_path)
     endpoint, api_key, api_version, chat_model, vision_model = _load_env_vars()
     sns_settings = _load_sns_settings()
+    alarm_settings = _load_alarm_settings()
     doc_intelligence_settings = _load_document_intelligence_settings()
 
     return AppConfig(
@@ -257,6 +272,7 @@ def load_config(
         server=server_settings,
         email=email_settings,
         sns=sns_settings,
+        alarm=alarm_settings,
         storage=storage_settings,
         document_intelligence=doc_intelligence_settings,
         azure_endpoint=endpoint,

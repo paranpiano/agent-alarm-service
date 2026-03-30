@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" font-family="'Segoe UI', Arial, sans-serif">
+  <rect width="1000" height="700" fill="#f0f4f8"/>
+
+  <!-- Title -->
+  <rect x="0" y="0" width="1000" height="58" fill="#0c4a6e"/>
+  <text x="500" y="36" text-anchor="middle" fill="white" font-size="21" font-weight="bold">비즈니스 가치 &amp; 도입 효과</text>
+
+  <!-- Before / After -->
+  <rect x="30" y="75" width="440" height="260" rx="12" fill="white" stroke="#dc2626" stroke-width="2"/>
+  <rect x="30" y="75" width="440" height="40" rx="12" fill="#dc2626"/>
+  <rect x="30" y="99" width="440" height="16" fill="#dc2626"/>
+  <text x="250" y="101" text-anchor="middle" fill="white" font-size="15" font-weight="bold">😓 도입 전 (AS-IS)</text>
+
+  <text x="60" y="140" fill="#374151" font-size="12">❌  작업자가 HMI 화면을 직접 육안으로 확인</text>
+  <text x="60" y="165" fill="#374151" font-size="12">❌  4개 장비 × 수십 개 수치를 수동으로 읽음</text>
+  <text x="60" y="190" fill="#374151" font-size="12">❌  이상 감지 지연 → 불량 확대 위험</text>
+  <text x="60" y="215" fill="#374151" font-size="12">❌  야간/주말 모니터링 공백 발생</text>
+  <text x="60" y="240" fill="#374151" font-size="12">❌  이상 발생 시 수동 이메일/전화 연락</text>
+  <text x="60" y="265" fill="#374151" font-size="12">❌  판단 기준이 작업자마다 상이</text>
+  <text x="60" y="295" fill="#dc2626" font-size="11" font-style="italic">→ 인적 오류 · 대응 지연 · 비용 증가</text>
+
+  <rect x="530" y="75" width="440" height="260" rx="12" fill="white" stroke="#16a34a" stroke-width="2"/>
+  <rect x="530" y="75" width="440" height="40" rx="12" fill="#16a34a"/>
+  <rect x="530" y="99" width="440" height="16" fill="#16a34a"/>
+  <text x="750" y="101" text-anchor="middle" fill="white" font-size="15" font-weight="bold">🚀 도입 후 (TO-BE)</text>
+
+  <text x="560" y="140" fill="#374151" font-size="12">✅  AI가 HMI 화면을 자동으로 분석</text>
+  <text x="560" y="165" fill="#374151" font-size="12">✅  4개 장비 × 86개 수치 + 색상 동시 판단</text>
+  <text x="560" y="190" fill="#374151" font-size="12">✅  이상 감지 시간: 약 7~9초 이내</text>
+  <text x="560" y="215" fill="#374151" font-size="12">✅  24시간 / 365일 무중단 모니터링</text>
+  <text x="560" y="240" fill="#374151" font-size="12">✅  UNKNOWN 발생 시 자동 이메일 알림</text>
+  <text x="560" y="265" fill="#374151" font-size="12">✅  일관된 AI 판단 기준 적용</text>
+  <text x="560" y="295" fill="#16a34a" font-size="11" font-style="italic">→ 오류 제거 · 즉각 대응 · 비용 절감</text>
+
+  <!-- Arrow between -->
+  <rect x="455" y="175" width="90" height="60" rx="30" fill="#6366f1"/>
+  <text x="500" y="200" text-anchor="middle" fill="white" font-size="18">→</text>
+  <text x="500" y="222" text-anchor="middle" fill="white" font-size="10">AI 전환</text>
+
+  <!-- KPI Cards -->
+  <text x="500" y="375" text-anchor="middle" fill="#1e293b" font-size="14" font-weight="bold">핵심 성과 지표 (KPI)</text>
+
+  <rect x="30" y="390" width="180" height="110" rx="12" fill="white" stroke="#6366f1" stroke-width="2"/>
+  <text x="120" y="420" text-anchor="middle" fill="#6366f1" font-size="28" font-weight="bold">7~9s</text>
+  <text x="120" y="445" text-anchor="middle" fill="#374151" font-size="11">분석 처리 시간</text>
+  <text x="120" y="463" text-anchor="middle" fill="#6b7280" font-size="10">DI + LLM 병렬 처리</text>
+  <text x="120" y="485" text-anchor="middle" fill="#6b7280" font-size="10">단일 이미지 기준</text>
+
+  <rect x="230" y="390" width="180" height="110" rx="12" fill="white" stroke="#0ea5e9" stroke-width="2"/>
+  <text x="320" y="420" text-anchor="middle" fill="#0ea5e9" font-size="28" font-weight="bold">4개</text>
+  <text x="320" y="445" text-anchor="middle" fill="#374151" font-size="11">동시 모니터링 장비</text>
+  <text x="320" y="463" text-anchor="middle" fill="#6b7280" font-size="10">S520 / S530</text>
+  <text x="320" y="485" text-anchor="middle" fill="#6b7280" font-size="10">S540 / S810</text>
+
+  <rect x="430" y="390" width="180" height="110" rx="12" fill="white" stroke="#22c55e" stroke-width="2"/>
+  <text x="520" y="420" text-anchor="middle" fill="#22c55e" font-size="28" font-weight="bold">86+</text>
+  <text x="520" y="445" text-anchor="middle" fill="#374151" font-size="11">분석 데이터 포인트</text>
+  <text x="520" y="463" text-anchor="middle" fill="#6b7280" font-size="10">수치 86개 + 색상 감지</text>
+  <text x="520" y="485" text-anchor="middle" fill="#6b7280" font-size="10">1회 분석 기준</text>
+
+  <rect x="630" y="390" width="180" height="110" rx="12" fill="white" stroke="#f59e0b" stroke-width="2"/>
+  <text x="720" y="420" text-anchor="middle" fill="#f59e0b" font-size="28" font-weight="bold">24/7</text>
+  <text x="720" y="445" text-anchor="middle" fill="#374151" font-size="11">무중단 모니터링</text>
+  <text x="720" y="463" text-anchor="middle" fill="#6b7280" font-size="10">5초 / 10초 주기</text>
+  <text x="720" y="485" text-anchor="middle" fill="#6b7280" font-size="10">자동 반복 분석</text>
+
+  <rect x="830" y="390" width="140" height="110" rx="12" fill="white" stroke="#ef4444" stroke-width="2"/>
+  <text x="900" y="420" text-anchor="middle" fill="#ef4444" font-size="28" font-weight="bold">즉시</text>
+  <text x="900" y="445" text-anchor="middle" fill="#374151" font-size="11">이상 알림</text>
+  <text x="900" y="463" text-anchor="middle" fill="#6b7280" font-size="10">UNKNOWN 시</text>
+  <text x="900" y="485" text-anchor="middle" fill="#6b7280" font-size="10">자동 이메일 발송</text>
+
+  <!-- Roadmap -->
+  <rect x="30" y="520" width="940" height="160" rx="12" fill="white" stroke="#e5e7eb" stroke-width="1.5"/>
+  <text x="500" y="545" text-anchor="middle" fill="#1e293b" font-size="14" font-weight="bold">향후 확장 로드맵</text>
+
+  <rect x="50" y="558" width="170" height="100" rx="8" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="135" y="580" text-anchor="middle" fill="#5b21b6" font-size="11" font-weight="bold">Phase 1 (현재)</text>
+  <text x="135" y="598" text-anchor="middle" fill="#6d28d9" font-size="10">POC 완료</text>
+  <text x="135" y="614" text-anchor="middle" fill="#374151" font-size="9">HMI 이미지 분석</text>
+  <text x="135" y="630" text-anchor="middle" fill="#374151" font-size="9">4개 장비 모니터링</text>
+  <text x="135" y="646" text-anchor="middle" fill="#374151" font-size="9">이메일 알림</text>
+
+  <text x="245" y="610" text-anchor="middle" fill="#9ca3af" font-size="18">→</text>
+
+  <rect x="260" y="558" width="170" height="100" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="345" y="580" text-anchor="middle" fill="#1e40af" font-size="11" font-weight="bold">Phase 2</text>
+  <text x="345" y="598" text-anchor="middle" fill="#1d4ed8" font-size="10">운영 안정화</text>
+  <text x="345" y="614" text-anchor="middle" fill="#374151" font-size="9">실시간 화면 캡처 연동</text>
+  <text x="345" y="630" text-anchor="middle" fill="#374151" font-size="9">RPA 자동화</text>
+  <text x="345" y="646" text-anchor="middle" fill="#374151" font-size="9">대시보드 웹 UI</text>
+
+  <text x="455" y="610" text-anchor="middle" fill="#9ca3af" font-size="18">→</text>
+
+  <rect x="470" y="558" width="170" height="100" rx="8" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="555" y="580" text-anchor="middle" fill="#14532d" font-size="11" font-weight="bold">Phase 3</text>
+  <text x="555" y="598" text-anchor="middle" fill="#15803d" font-size="10">분석 고도화</text>
+  <text x="555" y="614" text-anchor="middle" fill="#374151" font-size="9">판단 이력 통계/트렌드</text>
+  <text x="555" y="630" text-anchor="middle" fill="#374151" font-size="9">추가 장비 확장</text>
+  <text x="555" y="646" text-anchor="middle" fill="#374151" font-size="9">알림 채널 다양화</text>
+
+  <text x="665" y="610" text-anchor="middle" fill="#9ca3af" font-size="18">→</text>
+
+  <rect x="680" y="558" width="270" height="100" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="815" y="580" text-anchor="middle" fill="#92400e" font-size="11" font-weight="bold">Phase 4</text>
+  <text x="815" y="598" text-anchor="middle" fill="#78350f" font-size="10">스마트 팩토리 통합</text>
+  <text x="815" y="614" text-anchor="middle" fill="#374151" font-size="9">Teams / Slack 알림 연동</text>
+  <text x="815" y="630" text-anchor="middle" fill="#374151" font-size="9">예측 유지보수 AI 연동</text>
+  <text x="815" y="646" text-anchor="middle" fill="#374151" font-size="9">전사 MES 시스템 통합</text>
+</svg>

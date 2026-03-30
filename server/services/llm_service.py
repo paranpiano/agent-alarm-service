@@ -230,6 +230,7 @@ class LLMService:
     def __init__(self, app_config: AppConfig) -> None:
         self.config: PromptConfig = app_config.prompt
         self.timeout_seconds: int = app_config.server.llm_timeout_seconds
+        self.numeric_ng_threshold: int = app_config.alarm.numeric_ng_threshold
         self.llm: AzureChatOpenAI = get_azure_vision_llm(app_config)
 
         di = app_config.document_intelligence
@@ -468,10 +469,10 @@ class LLMService:
                             eq_id, field_name, len(vals), vals,
                         )
 
-                        # Check >= 3000
+                        # Check >= threshold
                         for val in vals:
-                            if val >= 3000:
-                                item = f"{field_name}: {val} (>= 3000)"
+                            if val >= self.numeric_ng_threshold:
+                                item = f"{field_name}: {val} (>= {self.numeric_ng_threshold})"
                                 ng_items.append(item)
                                 logger.warning("Numeric NG [%s] %s", eq_id, item)
 
