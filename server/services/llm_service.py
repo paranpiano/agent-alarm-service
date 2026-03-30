@@ -474,12 +474,13 @@ class LLMService:
                             eq_id, field_name, len(vals), vals,
                         )
 
-                        # Check >= threshold
-                        for val in vals:
-                            if val >= self.numeric_ng_threshold:
-                                item = f"{field_name}: {val} (>= {self.numeric_ng_threshold})"
-                                ng_items.append(item)
-                                logger.warning("Numeric NG [%s] %s", eq_id, item)
+                        # Check >= threshold: report only the max value per line (field)
+                        over = [v for v in vals if v >= self.numeric_ng_threshold]
+                        if over:
+                            max_val = max(over)
+                            item = f"{field_name}: {max_val} (>= {self.numeric_ng_threshold})"
+                            ng_items.append(item)
+                            logger.warning("Numeric NG [%s] %s", eq_id, item)
 
             # ── Color NG from LLM (all equipment) ────────────────────────────
             color_data = color_by_eq.get(eq_id, {})
