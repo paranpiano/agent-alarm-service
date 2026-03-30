@@ -1,30 +1,16 @@
 system_prompt: |
   You are an AI expert analyzing manufacturing equipment HMI panel images.
-  The image contains 4 remote connection panels. Each panel belongs to one of: S520, S530, S540, S810.
+  Your ONLY task is to detect RED background areas indicating alarms.
   Panel positions may vary — always identify each panel by its equipment number shown at the top of the panel.
 
 equipment_definitions:
   S520:
     name: "S520 - Preheating & Curing"
-    description: |
-      Contains TWO tables (Curing Oven, Preheating Oven).
-      Numeric values are provided via OCR — use them AS-IS.
-      Also scan the entire panel image for any RED background areas.
-    extraction_rules:
-      curing_oven: "Use OCR mapped values for keys 1..14"
-      preheating_oven: "Use OCR mapped values for keys 14..27"
     ng_rule: |
       NG if ANY red background area is visible — read the text label in that area and add to ng_items as "RED: <label text>".
 
   S530:
     name: "S530 - Cooling"
-    description: |
-      Contains TWO tables (Cooling 1 Line IN, Cooling 2 Line Out).
-      Numeric values are provided via OCR — use them AS-IS.
-      Also scan the entire panel image for any RED background areas.
-    extraction_rules:
-      cooling_1_line: "Use OCR mapped values for keys 1..14"
-      cooling_2_line: "Use OCR mapped values for keys 1..14"
     ng_rule: |
       NG if ANY red background area is visible — read the text label in that area and add to ng_items as "RED: <label text>".
 
@@ -33,15 +19,10 @@ equipment_definitions:
     description: |
       Contains a 3D layout view showing robot stations.
       Each station label has a background color (green = normal, red or black = alarm).
-      Read colors directly from the image.
-    extraction_rules:
-      stations: "For each station, record: count (numeric value) and color (green/red/black/white)"
     ng_rule: "NG if ANY station label background color is RED or BLACK. Green = OK."
 
   S310:
     name: "S310 - Hairpin Insertion"
-    description: |
-      Scan the entire panel image for any RED background areas indicating alarms.
     ng_rule: |
       NG if ANY red background area is visible — read the text label in that area and add to ng_items as "RED: <label text>".
 
@@ -52,65 +33,46 @@ equipment_definitions:
       Each station number X has TWO sub-stations: X-1 and X-2.
       Total 12 stations: 1-1, 1-2, 2-1, 2-2, 3-1, 3-2, 4-1, 4-2, 5-1, 5-2, 6-1, 6-2.
       Each station label has a background color (green = normal, red or black = alarm).
-      Read count values and colors directly from the image.
-    extraction_rules:
-      stations: "For each of the 12 stations, record: count (numeric value) and color (green/red/black/white)"
     ng_rule: "NG if ANY station label background color is RED or BLACK. Green = OK."
 
   S810:
     name: "S810 - Housing Cooling"
-    description: |
-      Contains TWO tables (Cooling 1 line, Cooling 2 line).
-      Numeric values are provided via OCR — use them AS-IS.
-      Also scan the entire panel image for any RED background areas.
-    extraction_rules:
-      cooling_1_line: "Use OCR mapped values for keys 1..15"
-      cooling_2_line: "Use OCR mapped values for keys 1..15"
     ng_rule: |
       NG if ANY red background area is visible — read the text label in that area and add to ng_items as "RED: <label text>".
 
 judgment_criteria:
   step1_identification: |
-    Locate all 4 panels in the image. Identify each panel by reading the equipment number
-    (S520, S530, S540, S810) from the title bar at the top of each panel.
-    If any of the 4 equipment panels cannot be identified, set status = UNKNOWN.
+    Identify the equipment by reading the equipment number (S520, S530, S540, S510, S310, S810)
+    from the title bar at the top of the panel.
+    If the panel cannot be identified, set status = UNKNOWN.
 
-  step2_data_extraction: |
-    You are analyzing a SINGLE equipment panel image.
-    The equipment type is identified by the title bar (S520, S530, S540, or S810).
+  step2_color_check: |
+    Scan the entire panel image for any RED background areas.
+    If you see a red background anywhere, read the text label inside or near that area.
 
-    For S520, S530, S810 (numeric panels):
-    - Numeric values: copy directly from the OCR data provided — do NOT re-read from image.
-    - Color check: scan the entire panel image for any RED background areas.
-      If you see a red background anywhere, read the text label inside or near that area.
-      Add each red area to ng_items as "RED: <label text>".
-
-    For S540 (robot panel):
-    - Read count and color for all 12 stations (1-1 through 6-2) directly from the image.
-    - Record background color as green, red, or black.
-
-    Only set identified=false if the panel title is completely unreadable.
+    For S540 and S510 (robot panels):
+    - Also check station label background colors (green = normal, red or black = alarm).
 
   step3_ng_check: |
     Apply NG rules STRICTLY:
 
-    For S520, S530, S810:
-    - Add any red background areas found in step2 as "RED: <label>".
+    For S520, S530, S310, S810:
+    - Add any red background areas as "RED: <label>".
 
-    For S540:
+    For S540, S510:
     - If station background color is RED or BLACK: add "STATION <id>: <color>" to ng_items.
     - Green = OK.
 
   step4_final_judgment: |
-    - If ANY equipment has ng_items with at least one entry: status = "NG"
-    - If ALL equipment have empty ng_items AND all data extracted: status = "OK"
-    - If any panel is unidentifiable or completely unreadable: status = "UNKNOWN"
+    - If ANY ng_items found: status = "NG"
+    - If no ng_items: status = "OK"
+    - If panel is unidentifiable: status = "UNKNOWN"
 
 response_format:
   type: "json"
   schema: |
     {
-      "equipment_id": "S520 or S530 or S540 or S810 (read from title bar)",
+      "equipment_id": "S520 or S530 or S540 or S510 or S310 or S810 (read from title bar)",
       "red_areas_found": true or false,
       "red_areas": [
         {
