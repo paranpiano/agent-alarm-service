@@ -14,7 +14,6 @@ equipment_definitions:
       curing_oven: "Use OCR mapped values for keys 1..14"
       preheating_oven: "Use OCR mapped values for keys 14..27"
     ng_rule: |
-      NG if ANY numeric value >= 3500.
       NG if ANY red background area is visible — read the text label in that area and add to ng_items as "RED: <label text>".
 
   S530:
@@ -27,7 +26,6 @@ equipment_definitions:
       cooling_1_line: "Use OCR mapped values for keys 1..14"
       cooling_2_line: "Use OCR mapped values for keys 1..14"
     ng_rule: |
-      NG if ANY numeric value >= 3500.
       NG if ANY red background area is visible — read the text label in that area and add to ng_items as "RED: <label text>".
 
   S540:
@@ -52,7 +50,6 @@ equipment_definitions:
       cooling_1_line: "Use OCR mapped values for keys 1..15"
       cooling_2_line: "Use OCR mapped values for keys 1..15"
     ng_rule: |
-      NG if ANY numeric value >= 3500.
       NG if ANY red background area is visible — read the text label in that area and add to ng_items as "RED: <label text>".
 
 judgment_criteria:
@@ -81,9 +78,7 @@ judgment_criteria:
     Apply NG rules STRICTLY:
 
     For S520, S530, S810:
-    - Check each numeric value as INTEGER against 3500.
-      Only add to ng_items if value >= 3500. (3499 = NOT NG, 3500 = NG)
-    - Also add any red background areas found in step2 as "RED: <label>".
+    - Add any red background areas found in step2 as "RED: <label>".
 
     For S540:
     - If station background color is RED or BLACK: add "STATION <id>: <color>" to ng_items.
