@@ -356,11 +356,14 @@ def main():
         "Machine_Missing": ImageTk.PhotoImage(Image.open(os.path.join(os.getcwd(), "UI_Images", "Machine_Missing.png")))
     }
     while True:
-        
+        print("\n\n")
         now_ts = time.time()
         NG_hwnd = [item for item in NG_hwnd if now_ts - item["timestamp"] < 600]
         UNKNOWN_hwnd = [item for item in UNKNOWN_hwnd if now_ts - item["timestamp"] < 300]
-
+        
+        print(f"NG_hwnd: {NG_hwnd}")
+        print(f"UNKNOWN_hwnd: {UNKNOWN_hwnd}")
+        
         # pause_event.wait()
         windows_images = []
         
@@ -396,6 +399,8 @@ def main():
                         "hwnd": hwnd,
                         "status": status
                     })
+                    
+            print(f"Result: {results}")
             
             NG_list = [r["hwnd"] for r in results if r["status"] == "NG"]
             UNKNOWN_list = [r["hwnd"] for r in results if r["status"] == "UNKNOWN"]
@@ -426,6 +431,6 @@ def test():
         time.sleep(20)
 
 if __name__ == "__main__":
-    # threading.Thread(target=main, daemon=True).start()
-    threading.Thread(target=test, daemon=True).start()
+    threading.Thread(target=main, daemon=True).start()
+    # threading.Thread(target=test, daemon=True).start()
     root.mainloop()
