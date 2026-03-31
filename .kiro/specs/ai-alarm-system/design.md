@@ -44,7 +44,7 @@ DI 추출 후 장비 ID 누락 시 LLM 호출 없이 즉시 UNKNOWN 반환:
 - 값 개수 검증은 OCR 오류 내성을 위해 제거됨 (`_check_di_value_counts` no-op)
 
 ### S540 화면 모드 감지
-S540 패널이 정상 3D 스테이션 레이아웃이 아닌 다른 화면(Setup & Parameters 등)을 표시하면 UNKNOWN 반환.
+S540 패널이 정상 3D 스테이션 레이아웃이 아닌 다른 화면(Setup & Parameters 등)을 표시하면 UNKNOWN 반환. S510은 Operation Mode 화면도 정상으로 허용 (wrong screen 체크 대상 아님).
 
 ## 아키텍처
 
@@ -248,6 +248,21 @@ data/
 ```
 
 > `--dev` 플래그 없이 실행 시 results/unknown_images 파일은 저장되지 않습니다.
+
+## 장비별 NG 판정 기준
+
+| 장비 | 분석 방식 | NG 조건 | UNKNOWN 조건 |
+|------|----------|---------|-------------|
+| S520 (Preheating & Curing) | DI 숫자 추출 + LLM 색상 감지 | 숫자 값 >= 3500 또는 RED 영역 감지 | 장비 ID 미식별 |
+| S530 (Cooling) | DI 숫자 추출 + LLM 색상 감지 | 숫자 값 >= 3500 또는 RED 영역 감지 | 장비 ID 미식별 |
+| S540 (Robot) | LLM 색상 감지 전용 (3D 레이아웃 + wrong screen 체크) | RED/BLACK 스테이션 배경 | 장비 ID 미식별 또는 wrong screen |
+| S510 (Robot 1) | LLM 색상 감지 전용 (RED 영역 감지) | RED 영역 감지 | 장비 ID 미식별 |
+| S310 (Hairpin Insertion) | LLM 색상 감지 전용 (RED 영역 감지) | RED 영역 감지 | 장비 ID 미식별 |
+| S810 (Housing Cooling) | DI 숫자 추출 + LLM 색상 감지 | 숫자 값 >= 3500 또는 RED 영역 감지 | 장비 ID 미식별 |
+
+> 숫자 NG 임계값: 기본 3500 (`NUMERIC_NG_THRESHOLD` 환경변수로 변경 가능)
+> S540 wait count NG 임계값: 기본 1200 (`S540_WAIT_NG_THRESHOLD` 환경변수로 변경 가능)
+> S510/S310은 DI 없이 LLM RED 감지만 사용. wrong screen 체크는 S540 전용.
 
 ## 오류 처리
 
