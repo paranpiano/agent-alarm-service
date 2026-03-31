@@ -126,6 +126,7 @@ class AppConfig:
     api_version: str
     chat_model: str
     vision_model: str
+    log_api_url: str = ""
 
 
 def _load_yaml(filepath: Path, description: str) -> dict[str, Any]:
@@ -285,4 +286,5 @@ def load_config(
         api_version=api_version,
         chat_model=chat_model,
         vision_model=vision_model,
+        log_api_url=os.getenv("LOG_API_URL", ""),
     )

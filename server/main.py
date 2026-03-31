@@ -23,6 +23,7 @@ from flask import Flask
 from server.api.routes import api_bp, init_routes
 from server.config import ConfigError, load_config
 from server.logger import JudgmentLogger, ResultStorage
+from server.services.cloud_logger import CloudLogger
 from server.services.email_notifier import EmailNotifier
 from server.services.llm_service import LLMService
 
@@ -55,7 +56,10 @@ def create_app() -> Flask:
     # Create SNS notifier for UNKNOWN status alerts
     email_notifier = EmailNotifier(config=config.sns)
 
-    init_routes(llm_service, result_storage, judgment_logger, email_notifier)
+    # Create cloud logger if configured
+    cloud_logger = CloudLogger(api_url=config.log_api_url) if config.log_api_url else None
+
+    init_routes(llm_service, result_storage, judgment_logger, email_notifier, cloud_logger)
 
     # Register API blueprint
     app.register_blueprint(api_bp)

@@ -29,6 +29,7 @@ _llm_service: LLMService | None = None
 _result_storage = None  # type: ignore[assignment]
 _judgment_logger = None  # type: ignore[assignment]
 _email_notifier = None  # type: ignore[assignment]
+_cloud_logger = None  # type: ignore[assignment]
 
 
 def init_routes(
@@ -36,20 +37,14 @@ def init_routes(
     result_storage=None,
     judgment_logger=None,
     email_notifier=None,
+    cloud_logger=None,
 ) -> None:
-    """Inject service instances used by route handlers.
-
-    Args:
-        llm_service: Configured LLMService for image analysis.
-        result_storage: Optional ResultStorage for persisting results.
-        judgment_logger: Optional JudgmentLogger for logging judgments.
-        email_notifier: Optional EmailNotifier for UNKNOWN status alerts.
-    """
-    global _llm_service, _result_storage, _judgment_logger, _email_notifier  # noqa: PLW0603
+    global _llm_service, _result_storage, _judgment_logger, _email_notifier, _cloud_logger  # noqa: PLW0603
     _llm_service = llm_service
     _result_storage = result_storage
     _judgment_logger = judgment_logger
     _email_notifier = email_notifier
+    _cloud_logger = cloud_logger
 
 
 def _generate_request_id() -> str:
@@ -210,6 +205,10 @@ def analyze() -> tuple[Response, int]:
             _judgment_logger.log_judgment(result)
         except Exception:
             logger.exception("Failed to log judgment for request_id=%s", request_id)
+
+    # Cloud log upload (always, async fire-and-forget)
+    if _cloud_logger is not None:
+        _cloud_logger.log_async(result)
 
     if debug_mode and _result_storage is not None:
         try:
