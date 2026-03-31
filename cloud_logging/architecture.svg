@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 620" font-family="Segoe UI, Arial, sans-serif">
+  <!-- Background -->
+  <rect width="960" height="620" fill="#f8f9fa" rx="12"/>
+  <text x="480" y="38" text-anchor="middle" font-size="20" font-weight="bold" fill="#1a1a2e">Cloud Logging - System Architecture</text>
+
+  <!-- ── Zone: Internet (Server) ── -->
+  <rect x="30" y="60" width="260" height="200" rx="10" fill="#e8f4fd" stroke="#3498db" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="160" y="82" text-anchor="middle" font-size="12" fill="#3498db" font-weight="bold">Internet Zone</text>
+
+  <!-- Flask Server -->
+  <rect x="55" y="92" width="210" height="60" rx="8" fill="#3498db" />
+  <text x="160" y="118" text-anchor="middle" font-size="13" font-weight="bold" fill="white">Flask Server</text>
+  <text x="160" y="136" text-anchor="middle" font-size="11" fill="#d6eaf8">AI Alarm System</text>
+
+  <!-- CloudLogger -->
+  <rect x="55" y="170" width="210" height="50" rx="8" fill="#5dade2"/>
+  <text x="160" y="192" text-anchor="middle" font-size="12" font-weight="bold" fill="white">CloudLogger</text>
+  <text x="160" y="208" text-anchor="middle" font-size="10" fill="#d6eaf8">async fire-and-forget</text>
+
+  <!-- Arrow: Server → CloudLogger -->
+  <line x1="160" y1="152" x2="160" y2="170" stroke="#2980b9" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── Zone: AWS Cloud ── -->
+  <rect x="330" y="60" width="600" height="200" rx="10" fill="#fef9e7" stroke="#f39c12" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="630" y="82" text-anchor="middle" font-size="12" fill="#f39c12" font-weight="bold">AWS Cloud (eu-central-1)</text>
+
+  <!-- Public API GW -->
+  <rect x="355" y="92" width="160" height="60" rx="8" fill="#f39c12"/>
+  <text x="435" y="116" text-anchor="middle" font-size="12" font-weight="bold" fill="white">API Gateway</text>
+  <text x="435" y="132" text-anchor="middle" font-size="10" fill="#fef9e7">Public EDGE</text>
+  <text x="435" y="146" text-anchor="middle" font-size="9" fill="#fef9e7">04x5u7rq6e</text>
+
+  <!-- Private API GW -->
+  <rect x="355" y="170" width="160" height="60" rx="8" fill="#e67e22"/>
+  <text x="435" y="194" text-anchor="middle" font-size="12" font-weight="bold" fill="white">API Gateway</text>
+  <text x="435" y="210" text-anchor="middle" font-size="10" fill="#fef9e7">Private (VPC)</text>
+  <text x="435" y="224" text-anchor="middle" font-size="9" fill="#fef9e7">j28ud38ww4</text>
+
+  <!-- Lambda -->
+  <rect x="560" y="120" width="140" height="60" rx="8" fill="#e74c3c"/>
+  <text x="630" y="146" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Lambda</text>
+  <text x="630" y="162" text-anchor="middle" font-size="10" fill="#fadbd8">ai-alarm-log-manager</text>
+
+  <!-- DynamoDB -->
+  <rect x="750" y="120" width="150" height="60" rx="8" fill="#8e44ad"/>
+  <text x="825" y="146" text-anchor="middle" font-size="12" font-weight="bold" fill="white">DynamoDB</text>
+  <text x="825" y="162" text-anchor="middle" font-size="10" fill="#e8daef">ai-alarm-logs</text>
+
+  <!-- Arrows AWS -->
+  <line x1="515" y1="122" x2="560" y2="145" stroke="#c0392b" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="515" y1="200" x2="560" y2="165" stroke="#c0392b" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="700" y1="150" x2="750" y2="150" stroke="#7d3c98" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Arrow: CloudLogger → Public API GW -->
+  <line x1="265" y1="190" x2="355" y2="130" stroke="#2980b9" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="305" y="148" text-anchor="middle" font-size="10" fill="#2980b9">POST /logs</text>
+
+  <!-- ── Zone: VPC (현장) ── -->
+  <rect x="30" y="300" width="560" height="200" rx="10" fill="#eafaf1" stroke="#27ae60" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="310" y="322" text-anchor="middle" font-size="12" fill="#27ae60" font-weight="bold">VPC Internal Zone (현장 장비)</text>
+
+  <!-- Log Viewer -->
+  <rect x="55" y="335" width="200" height="60" rx="8" fill="#27ae60"/>
+  <text x="155" y="361" text-anchor="middle" font-size="13" font-weight="bold" fill="white">Log Viewer</text>
+  <text x="155" y="377" text-anchor="middle" font-size="10" fill="#d5f5e3">tkinter GUI (python main.py)</text>
+
+  <!-- VPC Endpoint -->
+  <rect x="300" y="335" width="160" height="60" rx="8" fill="#1e8449"/>
+  <text x="380" y="358" text-anchor="middle" font-size="12" font-weight="bold" fill="white">VPC Endpoint</text>
+  <text x="380" y="374" text-anchor="middle" font-size="9" fill="#d5f5e3">vpce-0ad8bea3eea59f0ed</text>
+
+  <!-- Arrow: Log Viewer → VPC Endpoint -->
+  <line x1="255" y1="365" x2="300" y2="365" stroke="#1a5276" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="278" y="358" text-anchor="middle" font-size="10" fill="#1a5276">GET /logs</text>
+
+  <!-- Arrow: VPC Endpoint → Private API GW -->
+  <path d="M460,365 Q520,365 520,200 Q520,200 515,200" stroke="#1e8449" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+
+  <!-- ── Local Log ── -->
+  <rect x="30" y="530" width="260" height="60" rx="8" fill="#95a5a6"/>
+  <text x="160" y="556" text-anchor="middle" font-size="12" font-weight="bold" fill="white">Local Log File</text>
+  <text x="160" y="572" text-anchor="middle" font-size="10" fill="#ecf0f1">data/logs/YYYY-MM-DD.log</text>
+
+  <!-- Arrow: Server → Local Log -->
+  <line x1="160" y1="260" x2="160" y2="530" stroke="#7f8c8d" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+
+  <!-- Legend -->
+  <rect x="650" y="310" width="280" height="160" rx="8" fill="white" stroke="#bdc3c7" stroke-width="1"/>
+  <text x="790" y="332" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c3e50">Legend</text>
+  <line x1="670" y1="348" x2="710" y2="348" stroke="#2980b9" stroke-width="2"/>
+  <text x="720" y="352" font-size="11" fill="#2c3e50">저장 경로 (POST)</text>
+  <line x1="670" y1="370" x2="710" y2="370" stroke="#1e8449" stroke-width="2" stroke-dasharray="5,3"/>
+  <text x="720" y="374" font-size="11" fill="#2c3e50">조회 경로 (GET)</text>
+  <line x1="670" y1="392" x2="710" y2="392" stroke="#7f8c8d" stroke-width="2" stroke-dasharray="4,3"/>
+  <text x="720" y="396" font-size="11" fill="#2c3e50">로컬 파일 저장</text>
+  <rect x="670" y="408" width="16" height="16" rx="3" fill="#f39c12"/>
+  <text x="695" y="420" font-size="11" fill="#2c3e50">Public API GW (EDGE)</text>
+  <rect x="670" y="430" width="16" height="16" rx="3" fill="#e67e22"/>
+  <text x="695" y="442" font-size="11" fill="#2c3e50">Private API GW (VPC)</text>
+
+  <!-- Arrow marker -->
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#555"/>
+    </marker>
+  </defs>
+</svg>

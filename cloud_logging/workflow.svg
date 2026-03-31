@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 700" font-family="Segoe UI, Arial, sans-serif">
+  <rect width="960" height="700" fill="#f8f9fa" rx="12"/>
+  <text x="480" y="38" text-anchor="middle" font-size="20" font-weight="bold" fill="#1a1a2e">Cloud Logging - Workflow</text>
+
+  <!-- ── Swimlane Headers ── -->
+  <rect x="20" y="55" width="140" height="620" rx="6" fill="#d6eaf8" stroke="#3498db" stroke-width="1"/>
+  <text x="90" y="370" text-anchor="middle" font-size="13" font-weight="bold" fill="#1a5276" transform="rotate(-90,90,370)">Flask Server</text>
+
+  <rect x="170" y="55" width="140" height="620" rx="6" fill="#fef9e7" stroke="#f39c12" stroke-width="1"/>
+  <text x="240" y="370" text-anchor="middle" font-size="13" font-weight="bold" fill="#7d6608" transform="rotate(-90,240,370)">API Gateway</text>
+
+  <rect x="320" y="55" width="140" height="620" rx="6" fill="#fdedec" stroke="#e74c3c" stroke-width="1"/>
+  <text x="390" y="370" text-anchor="middle" font-size="13" font-weight="bold" fill="#922b21" transform="rotate(-90,390,370)">Lambda</text>
+
+  <rect x="470" y="55" width="140" height="620" rx="6" fill="#f5eef8" stroke="#8e44ad" stroke-width="1"/>
+  <text x="540" y="370" text-anchor="middle" font-size="13" font-weight="bold" fill="#6c3483" transform="rotate(-90,540,370)">DynamoDB</text>
+
+  <rect x="620" y="55" width="140" height="620" rx="6" fill="#eafaf1" stroke="#27ae60" stroke-width="1"/>
+  <text x="690" y="370" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e8449" transform="rotate(-90,690,370)">Log Viewer</text>
+
+  <rect x="770" y="55" width="170" height="620" rx="6" fill="#fdfefe" stroke="#95a5a6" stroke-width="1"/>
+  <text x="855" y="370" text-anchor="middle" font-size="13" font-weight="bold" fill="#566573" transform="rotate(-90,855,370)">Local File</text>
+
+  <!-- ══ WRITE FLOW ══ -->
+  <text x="480" y="88" text-anchor="middle" font-size="13" font-weight="bold" fill="#c0392b">▼ 로그 저장 흐름</text>
+
+  <!-- Step 1: analyze() -->
+  <rect x="30" y="100" width="120" height="44" rx="6" fill="#3498db"/>
+  <text x="90" y="118" text-anchor="middle" font-size="11" font-weight="bold" fill="white">1. analyze()</text>
+  <text x="90" y="134" text-anchor="middle" font-size="10" fill="#d6eaf8">LLM 판정 완료</text>
+
+  <!-- Step 2: JudgmentLogger -->
+  <rect x="30" y="165" width="120" height="44" rx="6" fill="#5dade2"/>
+  <text x="90" y="183" text-anchor="middle" font-size="11" font-weight="bold" fill="white">2. JudgmentLogger</text>
+  <text x="90" y="199" text-anchor="middle" font-size="10" fill="#d6eaf8">log_judgment()</text>
+
+  <!-- Step 3: CloudLogger -->
+  <rect x="30" y="230" width="120" height="44" rx="6" fill="#2980b9"/>
+  <text x="90" y="248" text-anchor="middle" font-size="11" font-weight="bold" fill="white">3. CloudLogger</text>
+  <text x="90" y="264" text-anchor="middle" font-size="10" fill="#d6eaf8">log_async() → thread</text>
+
+  <!-- Local file -->
+  <rect x="790" y="165" width="130" height="44" rx="6" fill="#95a5a6"/>
+  <text x="855" y="183" text-anchor="middle" font-size="11" font-weight="bold" fill="white">YYYY-MM-DD.log</text>
+  <text x="855" y="199" text-anchor="middle" font-size="10" fill="#ecf0f1">로컬 파일 저장</text>
+
+  <!-- Step 4: POST Public API GW -->
+  <rect x="180" y="230" width="120" height="44" rx="6" fill="#f39c12"/>
+  <text x="240" y="248" text-anchor="middle" font-size="11" font-weight="bold" fill="white">4. POST /logs</text>
+  <text x="240" y="264" text-anchor="middle" font-size="10" fill="#fef9e7">Public EDGE API</text>
+
+  <!-- Step 5: Lambda handler -->
+  <rect x="330" y="230" width="120" height="44" rx="6" fill="#e74c3c"/>
+  <text x="390" y="248" text-anchor="middle" font-size="11" font-weight="bold" fill="white">5. lambda_handler</text>
+  <text x="390" y="264" text-anchor="middle" font-size="10" fill="#fadbd8">handle_post()</text>
+
+  <!-- Step 6: DynamoDB put_item -->
+  <rect x="480" y="230" width="120" height="44" rx="6" fill="#8e44ad"/>
+  <text x="540" y="248" text-anchor="middle" font-size="11" font-weight="bold" fill="white">6. put_item()</text>
+  <text x="540" y="264" text-anchor="middle" font-size="10" fill="#e8daef">ai-alarm-logs</text>
+
+  <!-- Arrows write flow -->
+  <line x1="90" y1="144" x2="90" y2="165" stroke="#2980b9" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="90" y1="209" x2="90" y2="230" stroke="#2980b9" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="90" y1="187" x2="790" y2="187" stroke="#7f8c8d" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#a)"/>
+  <line x1="150" y1="252" x2="180" y2="252" stroke="#e67e22" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="300" y1="252" x2="330" y2="252" stroke="#c0392b" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="450" y1="252" x2="480" y2="252" stroke="#7d3c98" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <!-- ══ READ FLOW ══ -->
+  <text x="480" y="330" text-anchor="middle" font-size="13" font-weight="bold" fill="#1e8449">▼ 로그 조회 흐름 (30초 자동 갱신)</text>
+
+  <!-- Step A: 자동 갱신 tick -->
+  <rect x="630" y="345" width="120" height="44" rx="6" fill="#27ae60"/>
+  <text x="690" y="363" text-anchor="middle" font-size="11" font-weight="bold" fill="white">A. 자동 갱신 tick</text>
+  <text x="690" y="379" text-anchor="middle" font-size="10" fill="#d5f5e3">30초 카운트다운</text>
+
+  <!-- Step B: GET Private API GW -->
+  <rect x="180" y="345" width="120" height="44" rx="6" fill="#e67e22"/>
+  <text x="240" y="363" text-anchor="middle" font-size="11" font-weight="bold" fill="white">B. GET /logs</text>
+  <text x="240" y="379" text-anchor="middle" font-size="10" fill="#fef9e7">Private API (VPC)</text>
+
+  <!-- Step C: Lambda query -->
+  <rect x="330" y="345" width="120" height="44" rx="6" fill="#e74c3c"/>
+  <text x="390" y="363" text-anchor="middle" font-size="11" font-weight="bold" fill="white">C. lambda_handler</text>
+  <text x="390" y="379" text-anchor="middle" font-size="10" fill="#fadbd8">handle_get()</text>
+
+  <!-- Step D: DynamoDB query -->
+  <rect x="480" y="345" width="120" height="44" rx="6" fill="#8e44ad"/>
+  <text x="540" y="363" text-anchor="middle" font-size="11" font-weight="bold" fill="white">D. query()</text>
+  <text x="540" y="379" text-anchor="middle" font-size="10" fill="#e8daef">log_date 기준</text>
+
+  <!-- Step E: 결과 반환 -->
+  <rect x="630" y="415" width="120" height="44" rx="6" fill="#1e8449"/>
+  <text x="690" y="433" text-anchor="middle" font-size="11" font-weight="bold" fill="white">E. 테이블 갱신</text>
+  <text x="690" y="449" text-anchor="middle" font-size="10" fill="#d5f5e3">logs 렌더링</text>
+
+  <!-- Step F: NG 체크 -->
+  <rect x="630" y="480" width="120" height="44" rx="6" fill="#27ae60"/>
+  <text x="690" y="498" text-anchor="middle" font-size="11" font-weight="bold" fill="white">F. NG 체크</text>
+  <text x="690" y="514" text-anchor="middle" font-size="10" fill="#d5f5e3">최신 로그 status 확인</text>
+
+  <!-- Step G: 알림창 -->
+  <rect x="630" y="545" width="120" height="44" rx="6" fill="#e74c3c"/>
+  <text x="690" y="563" text-anchor="middle" font-size="11" font-weight="bold" fill="white">G. 알림 창</text>
+  <text x="690" y="579" text-anchor="middle" font-size="10" fill="#fadbd8">NG→표시 / OK→닫힘</text>
+
+  <!-- Arrows read flow -->
+  <line x1="630" y1="367" x2="300" y2="367" stroke="#1e8449" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="300" y1="367" x2="330" y2="367" stroke="#c0392b" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="450" y1="367" x2="480" y2="367" stroke="#7d3c98" stroke-width="1.5" marker-end="url(#a)"/>
+  <!-- return path -->
+  <path d="M540,389 Q540,410 630,415" stroke="#1e8449" stroke-width="1.5" fill="none" marker-end="url(#a)"/>
+  <line x1="690" y1="459" x2="690" y2="480" stroke="#27ae60" stroke-width="1.5" marker-end="url(#a)"/>
+  <line x1="690" y1="524" x2="690" y2="545" stroke="#e74c3c" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <!-- Arrow marker -->
+  <defs>
+    <marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#555"/>
+    </marker>
+  </defs>
+</svg>

@@ -2,6 +2,14 @@
 
 서버에서 판정 결과를 AWS에 저장하고, Log Viewer로 조회하는 구조입니다.
 
+## 다이어그램
+
+### System Architecture
+![Architecture](architecture.svg)
+
+### Workflow
+![Workflow](workflow.svg)
+
 ---
 
 ## 폴더 구조
