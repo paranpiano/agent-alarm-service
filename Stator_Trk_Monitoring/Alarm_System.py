@@ -1,7 +1,8 @@
-import win32gui, win32ui, glob, cv2, os, ctypes, time, winsound, threading, datetime, random
+import win32gui, win32ui, glob, cv2, os, ctypes
+import time, winsound, threading, datetime, random
 import numpy as np
 import tkinter as tk
-import requests
+import requests, serial
 import concurrent.futures
 from PIL import Image, ImageTk
 
@@ -12,11 +13,16 @@ global Logging_path, target_path, Trk_ref_image_path
 target_path = r'C:\Users\uiv14247\OneDrive - Vitesco Technologies\Desktop\Stator_Trk_Monitoring'
 # Trk_ref_image_path = r'AAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 
+ser = serial.Serial('COM3', 9600, timeout=1)
+
 user32 = ctypes.windll.user32
 open_windows = {}
 
 playing_sound_threads = {}
 stop_sound_events = {}
+
+led_threads = {}
+stop_led_events = {}
 
 NG_hwnd = []
 UNKNOWN_hwnd = []
@@ -26,6 +32,24 @@ pause_event.set()
 
 root = tk.Tk()
 root.withdraw()
+
+def LED_OK():
+    global ser
+    ser.write(bytes([0, 255, 0]))
+
+def loop_led_NG(flag):
+    global ser, stop_led_events
+
+    if flag not in stop_led_events:
+        stop_led_events[flag] = threading.Event()
+
+    event = stop_led_events[flag]
+
+    while not event.is_set():
+        ser.write(bytes([255, 0, 0]))
+        time.sleep(0.5)
+        ser.write(bytes([0, 0, 0]))
+        time.sleep(0.5)
 
 def loading_ref_images():
     global Trk_ref_image_path
@@ -39,7 +63,6 @@ def loading_target_images():
     target_list = glob.glob(os.path.join(target_path, "*.png"))
     target_img_list = [[cv2.imread(a), os.path.basename(a).replace(".png","")] for a in target_list]
     return target_img_list
-
 
 def loop_sound(flag, sound_path):
     global stop_sound_events
@@ -148,6 +171,8 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
                 pass
         stop_sound_events.clear()
         playing_sound_threads.clear()
+        
+        LED_OK()
 
         for win in list(open_windows.values()):
             try:
@@ -171,6 +196,15 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
         playing_sound_threads[flag] = t
         t.start()
 
+        if flag in stop_led_events:
+            stop_led_events[flag].set()
+        
+        stop_led_events[flag] = threading.Event()
+        
+        t_led = threading.Thread(target=loop_led_NG, args=(flag,), daemon=True)
+        led_threads[flag] = t_led
+        t_led.start()
+        
         if "UNKNOWN" in open_windows:
             try:
                 open_windows["UNKNOWN"].destroy()
@@ -211,6 +245,10 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
         def on_check():
             if flag in stop_sound_events:
                 stop_sound_events[flag].set()
+                
+            if flag in stop_led_events:
+                stop_led_events[flag].set()
+
             
             now_ts = time.time()
             for h in hwnd_list:
