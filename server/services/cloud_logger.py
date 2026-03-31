@@ -21,12 +21,12 @@ class CloudLogger:
 
     def log_async(self, result: JudgmentResult) -> None:
         """Fire-and-forget: upload in background thread."""
-        t = threading.Thread(target=self._send, args=(result,), daemon=True)
+        t = threading.Thread(target=self._send, args=(result,), daemon=False)
         t.start()
 
     def _send(self, result: JudgmentResult) -> None:
         try:
-            resp = requests.post(self._url, json=result.to_dict(), headers=self._headers, timeout=5)
+            resp = requests.post(self._url, json=result.to_dict(), headers=self._headers, timeout=15)
             resp.raise_for_status()
             logger.debug("Cloud log uploaded: %s", result.request_id)
         except Exception as exc:
