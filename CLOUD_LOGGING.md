@@ -52,8 +52,7 @@ Log Viewer (현장 장비, VPC 내부)
 | 환경 | URL |
 |------|-----|
 | 서버 (인터넷) | `https://04x5u7rq6e.execute-api.eu-central-1.amazonaws.com/prod/logs` |
-| Log Viewer dev | `https://04x5u7rq6e.execute-api.eu-central-1.amazonaws.com/prod/logs` |
-| Log Viewer prod (현장) | `https://j28ud38ww4-vpce-0ad8bea3eea59f0ed.execute-api.eu-central-1.amazonaws.com/prod/logs` |
+| Log Viewer (dev/prod 공통) | `https://j28ud38ww4-vpce-0ad8bea3eea59f0ed.execute-api.eu-central-1.amazonaws.com/prod/logs` |
 
 ---
 
@@ -128,13 +127,10 @@ python main.py
 python -m cloud_logging.log_viewer.main
 ```
 
-### dev / prod URL 전환 (`cloud_logging/log_viewer/api_client.py`)
+### dev / prod URL (`cloud_logging/log_viewer/api_client.py`)
 ```python
-# dev 환경 (인터넷 접속 가능) - Public EDGE API
-DEFAULT_API_URL = "https://04x5u7rq6e.execute-api.eu-central-1.amazonaws.com/prod/logs"
-
-# prod 환경 (현장 장비, VPC 내부) - Private API (VPC Endpoint DNS 방식)
-# DEFAULT_API_URL = "https://j28ud38ww4-vpce-0ad8bea3eea59f0ed.execute-api.eu-central-1.amazonaws.com/prod/logs"
+# Private API (VPC Endpoint DNS 방식) - dev/prod 공통
+DEFAULT_API_URL = "https://j28ud38ww4-vpce-0ad8bea3eea59f0ed.execute-api.eu-central-1.amazonaws.com/prod/logs"
 ```
 
 ### 주요 기능

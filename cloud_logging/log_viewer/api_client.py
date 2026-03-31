@@ -7,11 +7,7 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-# Public API (EDGE)
-# dev 환경 (인터넷 접속 가능) - Public EDGE API
-# DEFAULT_API_URL = "https://04x5u7rq6e.execute-api.eu-central-1.amazonaws.com/prod/logs"
-
-# prod 환경 (현장 장비, VPC 내부) - Private API (VPC Endpoint DNS 방식)
+# Private API (VPC Endpoint DNS 방식) - dev/prod 공통
 DEFAULT_API_URL = "https://j28ud38ww4-vpce-0ad8bea3eea59f0ed.execute-api.eu-central-1.amazonaws.com/prod/logs"
 
 
