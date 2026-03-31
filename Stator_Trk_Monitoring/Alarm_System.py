@@ -171,7 +171,10 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
                 pass
         stop_sound_events.clear()
         playing_sound_threads.clear()
-        
+
+        if "NG" in stop_led_events:
+            stop_led_events["NG"].set()
+                
         LED_OK()
 
         for win in list(open_windows.values()):
