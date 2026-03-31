@@ -176,6 +176,7 @@ class CloudLogViewerGUI:
 
         self._client = LogApiClient()
         self._all_logs: list[dict] = []
+        self._last_seen_timestamp: str = ""  # 마지막으로 확인한 최신 timestamp
         self._alert_win: NgAlertWindow | None = None
         self._auto_refresh_job = None
         self._countdown_remaining = 0
@@ -371,9 +372,9 @@ class CloudLogViewerGUI:
 
     def _on_loaded(self, logs: list[dict], auto: bool = False) -> None:
         self._all_logs = sorted(logs, key=lambda l: str(l.get("timestamp", "")), reverse=True)
-        self._render_logs(logs)
-        self._status_var.set(f"총 {len(logs)}건 조회됨")
-        self._check_ng_alert(logs)
+        self._render_logs(self._all_logs)
+        self._status_var.set(f"총 {len(self._all_logs)}건 조회됨")
+        self._check_ng_alert(self._all_logs)
         if auto:
             self._schedule_next_refresh()
 
@@ -391,14 +392,37 @@ class CloudLogViewerGUI:
     def _check_ng_alert(self, logs: list[dict]) -> None:
         if not logs:
             self._close_alert()
+            self._last_seen_timestamp = ""
             return
 
-        latest = logs[0]
-        status = latest.get("status", "")
-        eq_data = latest.get("equipment_data") or {}
+        # 새로 갱신된 항목만 추출 (이전에 본 timestamp 이후)
+        if self._last_seen_timestamp:
+            new_logs = [l for l in logs if str(l.get("timestamp", "")) > self._last_seen_timestamp]
+        else:
+            new_logs = logs  # 최초 로드 시 전체 대상
 
-        if status == "NG" and eq_data:
-            ng_equipments = list(eq_data.keys())
+        # 다음 갱신을 위해 현재 최신 timestamp 저장
+        self._last_seen_timestamp = str(logs[0].get("timestamp", ""))
+
+        # 새 데이터가 없으면 알림 상태 유지
+        if not new_logs:
+            return
+
+        ng_logs = [l for l in new_logs if l.get("status") == "NG"]
+
+        if ng_logs:
+            # 새 데이터 중 NG가 있으면 알림 표시
+            eq_names: list[str] = []
+            for l in ng_logs:
+                eq_data = l.get("equipment_data") or {}
+                if eq_data:
+                    eq_names.extend(eq_data.keys())
+                else:
+                    eq_names.append(l.get("reason", "NG 발생"))
+            # 중복 제거, 순서 유지
+            seen: set[str] = set()
+            ng_equipments = [x for x in eq_names if not (x in seen or seen.add(x))]
+
             position = self._position_var.get()
             try:
                 ratio = float(self._size_ratio_var.get())
@@ -411,6 +435,7 @@ class CloudLogViewerGUI:
             else:
                 self._alert_win.update_message(ng_equipments)
         else:
+            # 새 데이터가 모두 OK면 알림 닫기
             self._close_alert()
 
     def _close_alert(self) -> None:
