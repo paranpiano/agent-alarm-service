@@ -11,7 +11,7 @@ time.sleep(2)
 
 # 타임아웃 설정
 last_signal_time = time.time()
-timeout_seconds = 30
+timeout_seconds = 40
 
 def send_color(r, g, b):
     """Arduino로 RGB 값 전송"""
