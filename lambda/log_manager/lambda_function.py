@@ -26,7 +26,7 @@ def _response(status_code: int, body: dict) -> dict:
     return {
         "statusCode": status_code,
         "headers": {
-            "Content-Type": "application/json",
+            "Content-Type": "application/json; charset=utf-8",
             "Access-Control-Allow-Origin": "*",
         },
         "body": json.dumps(body, ensure_ascii=False, default=_default),
@@ -54,11 +54,21 @@ def handle_post(body: dict) -> dict:
         "reason": body.get("reason", ""),
         "image_name": body.get("image_name", ""),
         "processing_time_ms": body.get("processing_time_ms", 0),
-        "equipment_data": body.get("equipment_data") or {},
+        "equipment_data": json.dumps(body.get("equipment_data") or {}, ensure_ascii=False),
     }
 
     table.put_item(Item=item)
     return _response(200, {"message": "Log saved", "request_id": body["request_id"], "log_date": log_date})
+
+
+def _parse_equipment_data(item: dict) -> dict:
+    """equipment_data JSON 문자열을 dict로 파싱."""
+    if "equipment_data" in item and isinstance(item["equipment_data"], str):
+        try:
+            item["equipment_data"] = json.loads(item["equipment_data"])
+        except Exception:
+            pass
+    return item
 
 
 def handle_get(params: dict) -> dict:
@@ -76,14 +86,14 @@ def handle_get(params: dict) -> dict:
         item = resp.get("Item")
         if not item:
             return _response(404, {"error": "Log not found"})
-        return _response(200, {"logs": [item]})
+        return _response(200, {"logs": [_parse_equipment_data(item)]})
 
     resp = table.query(
         KeyConditionExpression=Key("log_date").eq(log_date),
         Limit=limit,
-        ScanIndexForward=False,  # newest first
+        ScanIndexForward=False,
     )
-    items = resp.get("Items", [])
+    items = [_parse_equipment_data(item) for item in resp.get("Items", [])]
     return _response(200, {"logs": items, "count": len(items), "date": log_date})
 
 
