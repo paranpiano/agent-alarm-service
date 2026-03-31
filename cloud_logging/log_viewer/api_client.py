@@ -33,4 +33,4 @@ class LogApiClient:
                 all_logs.extend(self.get_logs(log_date=d))
             except Exception as exc:
                 logger.warning("날짜 %s 로그 조회 실패: %s", d, exc)
-        return all_logs
+        return sorted(all_logs, key=lambda l: str(l.get("timestamp", "")), reverse=True)

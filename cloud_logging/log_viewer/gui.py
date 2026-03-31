@@ -370,7 +370,7 @@ class CloudLogViewerGUI:
         threading.Thread(target=_fetch, daemon=True).start()
 
     def _on_loaded(self, logs: list[dict], auto: bool = False) -> None:
-        self._all_logs = logs
+        self._all_logs = sorted(logs, key=lambda l: str(l.get("timestamp", "")), reverse=True)
         self._render_logs(logs)
         self._status_var.set(f"총 {len(logs)}건 조회됨")
         self._check_ng_alert(logs)
@@ -423,6 +423,8 @@ class CloudLogViewerGUI:
     # ------------------------------------------------------------------
 
     def _render_logs(self, logs: list[dict]) -> None:
+        # timestamp 역순(최신 먼저) 고정 정렬
+        logs = sorted(logs, key=lambda l: str(l.get("timestamp", "")), reverse=True)
         self._tree.delete(*self._tree.get_children())
         for log in logs:
             status = log.get("status", "")
