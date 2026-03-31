@@ -72,7 +72,7 @@ Your ONLY task is to detect RED background areas in this panel image.
 Instructions:
 1. First, identify the equipment from the title bar (S520, S530, S540, S510, S310, or S810).
 
-2. For S540 and S510 panels ONLY — check the screen mode:
+2. For S540 panels ONLY — check the screen mode:
    - NORMAL mode: shows a 3D layout with station labels (1-1, 1-2, 2-1 ... 6-2) and numeric counts.
    - WRONG mode: shows any other screen such as "Setup & Parameters", "Machine Parameter",
      "BypassMES", "BypassCamera", "BypassScanner", "DripBypass", or any menu/settings page.
@@ -500,8 +500,8 @@ class LLMService:
             # ── Color NG from LLM (all equipment) ────────────────────────────
             color_data = color_by_eq.get(eq_id, {})
             if color_data:
-                # S540/S510 wrong screen → UNKNOWN
-                if eq_id in ("S540", "S510") and color_data.get("wrong_screen"):
+                # S540 wrong screen → UNKNOWN (S510은 Operation Mode 화면도 정상으로 허용)
+                if eq_id == "S540" and color_data.get("wrong_screen"):
                     logger.warning(
                         "%s wrong screen detected: %s",
                         eq_id, color_data.get("overall_reasoning", ""),
@@ -544,8 +544,8 @@ class LLMService:
             single_eq_data = {eq_id: equipment_data.get(eq_id, {})}
             eq_ng = equipment_data.get(eq_id, {}).get("ng_items", [])
 
-            # wrong screen check (for color-only equipment)
-            wrong_screen = any("WRONG_SCREEN" in i for i in eq_ng)
+            # wrong screen check (S540만 해당, S510은 Operation Mode 화면도 정상으로 허용)
+            wrong_screen = eq_id == "S540" and any("WRONG_SCREEN" in i for i in eq_ng)
             if wrong_screen:
                 single_eq_data[eq_id]["ng_items"] = [i for i in eq_ng if "WRONG_SCREEN" not in i]
                 return LLMResponse(
@@ -569,9 +569,9 @@ class LLMService:
 
         missing = [eq for eq in _ALL_EQUIPMENT_IDS if eq not in identified_eqs]
 
-        # Check for wrong screen in any color-only equipment
+        # Check for wrong screen in S540 only (S510은 Operation Mode 화면도 정상으로 허용)
         wrong_screen_eq = next(
-            (eq for eq in _COLOR_ONLY_IDS
+            (eq for eq in ("S540",)
              if any("WRONG_SCREEN" in item for item in equipment_data.get(eq, {}).get("ng_items", []))),
             None,
         )
