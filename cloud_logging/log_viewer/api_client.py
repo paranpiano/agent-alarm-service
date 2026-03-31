@@ -1,0 +1,40 @@
+"""Cloud log API 클라이언트 - API Gateway를 통해 DynamoDB 로그를 조회합니다."""
+
+import logging
+from datetime import date, timedelta
+
+import requests
+
+logger = logging.getLogger(__name__)
+
+# Public API (EDGE)
+# dev 환경 (인터넷 접속 가능) - Public EDGE API
+# DEFAULT_API_URL = "https://04x5u7rq6e.execute-api.eu-central-1.amazonaws.com/prod/logs"
+
+# prod 환경 (현장 장비, VPC 내부) - Private API (VPC Endpoint DNS 방식)
+DEFAULT_API_URL = "https://j28ud38ww4-vpce-0ad8bea3eea59f0ed.execute-api.eu-central-1.amazonaws.com/prod/logs"
+
+
+class LogApiClient:
+    def __init__(self, api_url: str = DEFAULT_API_URL) -> None:
+        self._url = api_url
+
+    def get_logs(self, log_date: str | None = None, limit: int = 200) -> list[dict]:
+        """날짜별 로그 조회. log_date 미입력 시 오늘."""
+        params: dict = {"limit": limit}
+        if log_date:
+            params["date"] = log_date
+        resp = requests.get(self._url, params=params, timeout=10)
+        resp.raise_for_status()
+        return resp.json().get("logs", [])
+
+    def get_logs_range(self, days: int = 3) -> list[dict]:
+        """최근 N일 로그를 합쳐서 반환 (최신순)."""
+        all_logs: list[dict] = []
+        for i in range(days):
+            d = (date.today() - timedelta(days=i)).strftime("%Y-%m-%d")
+            try:
+                all_logs.extend(self.get_logs(log_date=d))
+            except Exception as exc:
+                logger.warning("날짜 %s 로그 조회 실패: %s", d, exc)
+        return all_logs
