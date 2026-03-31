@@ -296,7 +296,7 @@ class AlarmTestGUI:
         item = selection[0]
         item_text = self._image_tree.item(item, "text")
         # folder node: has children and no image extension
-        if self._image_tree.get_children(item) or not any(item_text.endswith(ext) for ext in _IMAGE_EXTENSIONS):
+        if self._image_tree.get_children(item) or Path(item_text).suffix.lower() not in _IMAGE_EXTENSIONS:
             if not self._filter_var.get().strip():
                 return
         for path, _ in self._image_list:
@@ -359,7 +359,7 @@ class AlarmTestGUI:
         # folder node has children — skip unless filter is active (flat list)
         if self._image_tree.get_children(item):
             return None
-        if not any(item_text.endswith(ext) for ext in _IMAGE_EXTENSIONS):
+        if Path(item_text).suffix.lower() not in _IMAGE_EXTENSIONS:
             return None
         for path, folder_name in self._image_list:
             if path.name == item_text:
@@ -379,7 +379,7 @@ class AlarmTestGUI:
         item = selection[0]
         self._update_api_client()
 
-        if not self._image_tree.parent(item):
+        if self._image_tree.get_children(item):
             images = self._get_images_under(item)
             if not images:
                 self._status_var.set("No images in selected folder")
