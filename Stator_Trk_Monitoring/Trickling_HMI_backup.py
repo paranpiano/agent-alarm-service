@@ -4,9 +4,12 @@ import numpy as np
 user32 = ctypes.windll.user32
 
 def main():
+    max_storage_for_logging_in_GB = 20
+    max_images = max_storage_for_logging_in_GB*1024*1024/300
     save_path = r''
     hwnd = find_Trk_windows()
     os.makedirs(save_path, exist_ok=True)
+    idx = 0
     while True:
         try:
             now = datetime.datetime.now()
@@ -14,6 +17,10 @@ def main():
             folder_name = now.strftime("%Y-%m-%d_%H")
             os.makedirs(os.path.join(save_path, folder_name), exist_ok=True)
             cv2.imwrite(os.path.join(save_path, folder_name, timestamp), capturing(hwnd))
+            time.sleep(0.5)
+            idx = idx + 1
+            if idx > max_images:
+                return None
         except Exception as e:
             print(e)
         
@@ -28,6 +35,8 @@ def find_Trk_windows():
                 result = find_matching_windows(capturing(win[0]), ref_img)
                 if result:
                     cv2.imshow("Find matching windows", capturing(win[0]))
+                    cv2.waitKey(1000*5)
+                    cv2.destroyAllWindows()
                     return win[0]
             time.sleep(2)
         except Exception as e:
