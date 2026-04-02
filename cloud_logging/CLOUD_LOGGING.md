@@ -169,3 +169,81 @@ aws lambda update-function-code --region eu-central-1 `
 aws apigateway create-deployment --rest-api-id 04x5u7rq6e --region eu-central-1 --stage-name prod
 aws apigateway create-deployment --rest-api-id j28ud38ww4 --region eu-central-1 --stage-name prod
 ```
+
+---
+
+## Web Dashboard (Amplify)
+
+React + Vite + TailwindCSS 기반의 웹 대시보드입니다.
+
+- URL: https://main.d7rexzac4m6pv.amplifyapp.com
+- App ID: `d7rexzac4m6pv`
+- Region: `eu-central-1`
+- Branch: `main`
+
+### 폴더 구조
+
+```
+cloud_logging/web/
+├── src/
+│   ├── pages/
+│   │   ├── Dashboard.tsx    # 대시보드 메인
+│   │   └── LogViewer.tsx    # 로그 조회
+│   ├── components/
+│   │   ├── EquipmentDetail.tsx
+│   │   └── Shared.tsx
+│   ├── App.tsx
+│   └── main.tsx
+├── index.html
+├── vite.config.ts
+└── package.json
+```
+
+### Web Dashboard 배포 방법 (AWS CLI - Manual Zip Deploy)
+
+Git 연동 없이 빌드 결과물을 직접 Amplify에 업로드하는 방식입니다.
+
+```powershell
+# 1. 빌드
+npm run build --prefix cloud_logging/web
+
+# 2. zip 패키징 (슬래시 경로 필수 - Python 사용)
+python -c "
+import zipfile, os
+dist = 'cloud_logging/web/dist'
+with zipfile.ZipFile('deploy.zip', 'w', zipfile.ZIP_DEFLATED) as zf:
+    for root, dirs, files in os.walk(dist):
+        for file in files:
+            abs_path = os.path.join(root, file)
+            rel_path = os.path.relpath(abs_path, dist).replace(os.sep, '/')
+            zf.write(abs_path, rel_path)
+"
+
+# 3. 배포 job 생성 (업로드 URL 획득)
+aws amplify create-deployment --region eu-central-1 --app-id d7rexzac4m6pv --branch-name main --output json
+# → jobId, zipUploadUrl 확인
+
+# 4. zip 업로드 (presigned URL 사용)
+$url = "<zipUploadUrl>"
+Invoke-RestMethod -Uri $url -Method Put -InFile "deploy.zip" -ContentType "application/zip"
+
+# 5. 배포 시작
+aws amplify start-deployment --region eu-central-1 --app-id d7rexzac4m6pv --branch-name main --job-id <jobId>
+
+# 6. 배포 상태 확인
+aws amplify get-job --region eu-central-1 --app-id d7rexzac4m6pv --branch-name main --job-id <jobId> --query "job.summary.status" --output text
+
+# 7. 임시 파일 삭제
+Remove-Item deploy.zip
+```
+
+> PowerShell의 `Compress-Archive`는 경로 구분자를 백슬래시(`\`)로 저장하여 Amplify가 `/assets/` 경로를 인식하지 못합니다. 반드시 Python으로 zip을 생성하세요.
+
+### Amplify Rewrites and Redirects 설정
+
+Amplify 콘솔 > Rewrites and redirects에 아래 규칙이 설정되어 있어야 합니다.
+
+| Source | Target | Type |
+|--------|--------|------|
+| `/assets/<*>` | `/assets/<*>` | 200 (Rewrite) |
+| `/<*>` | `/index.html` | 200 (Rewrite) |

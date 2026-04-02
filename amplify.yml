@@ -1,0 +1,16 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - cd cloud_logging/web && npm ci
+    build:
+      commands:
+        - cd cloud_logging/web && npm run build
+  artifacts:
+    baseDirectory: cloud_logging/web/dist
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - cloud_logging/web/node_modules/**/*

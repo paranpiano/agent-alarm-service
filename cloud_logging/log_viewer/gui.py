@@ -356,12 +356,15 @@ class CloudLogViewerGUI:
         except ValueError:
             days = 1
 
+        # 자동 갱신 시에는 항상 현재 날짜 기준으로 조회
+        query_date = date.today().strftime("%Y-%m-%d") if auto else self._date_var.get().strip()
+
         self._status_var.set("조회 중...")
 
         def _fetch() -> None:
             try:
                 if days == 1:
-                    logs = self._client.get_logs(log_date=self._date_var.get().strip())
+                    logs = self._client.get_logs(log_date=query_date)
                 else:
                     logs = self._client.get_logs_range(days=days)
                 self.root.after(0, lambda: self._on_loaded(logs, auto=auto))
