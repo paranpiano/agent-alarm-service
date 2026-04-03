@@ -351,14 +351,16 @@ class ServiceManagerApp(tk.Tk):
                     creationflags=subprocess.CREATE_NEW_CONSOLE,
                 )
             else:
-                # 백그라운드 실행 - 로그 파일로 출력
-                out_file = open(Path(project) / f"manual_{key}_stdout.log", "w", encoding="utf-8")
+                # 백그라운드 실행 - 부모 종료 후에도 유지되도록 완전 분리
+                out_path = str(Path(project) / f"manual_{key}_stdout.log")
+                # DETACHED_PROCESS: 부모와 완전히 분리, CREATE_NEW_PROCESS_GROUP: 독립 프로세스 그룹
                 proc = subprocess.Popen(
                     [python, script],
                     cwd=project,
-                    stdout=out_file,
-                    stderr=out_file,
-                    creationflags=subprocess.CREATE_NO_WINDOW,
+                    stdout=open(out_path, "w", encoding="utf-8"),
+                    stderr=subprocess.STDOUT,
+                    creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP,
+                    close_fds=True,
                 )
             self._manual_procs[key] = proc
             self.svc_vars[key]["status"].set(f"상태: 수동 실행 중 (PID {proc.pid})")
