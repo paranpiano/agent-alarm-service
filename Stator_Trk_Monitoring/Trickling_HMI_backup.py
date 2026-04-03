@@ -4,9 +4,9 @@ import numpy as np
 user32 = ctypes.windll.user32
 
 def main():
-    max_storage_for_logging_in_GB = 20
+    max_storage_for_logging_in_GB = 100
     max_images = max_storage_for_logging_in_GB*1024*1024/300
-    save_path = r''
+    save_path = r'C:\Users\uiv14138\Desktop\Trk_backup'
     hwnd = find_Trk_windows()
     os.makedirs(save_path, exist_ok=True)
     idx = 0
@@ -17,7 +17,7 @@ def main():
             folder_name = now.strftime("%Y-%m-%d_%H")
             os.makedirs(os.path.join(save_path, folder_name), exist_ok=True)
             cv2.imwrite(os.path.join(save_path, folder_name, timestamp), capturing(hwnd))
-            time.sleep(0.5)
+            time.sleep(1.3)
             idx = idx + 1
             if idx > max_images:
                 return None
@@ -26,7 +26,7 @@ def main():
         
 
 def find_Trk_windows():
-    ref_img = cv2.imread(r"C:\Users\uiv14247\OneDrive - Vitesco Technologies\Desktop\agent-alarm-service\Stator_Trk_Monitoring\Trk_ref_images\Trickling_ref.png")
+    ref_img = cv2.imread(r"C:\Users\uiv14138\agent-alarm-service\Stator_Trk_Monitoring\Trk_ref_images\Trickling_ref.png")
     while True:
         try:
             windows = enum_windows()
