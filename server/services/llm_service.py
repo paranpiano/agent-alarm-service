@@ -44,7 +44,6 @@ import base64
 import json
 import logging
 import time
-from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from typing import Any
 
 import yaml
@@ -264,47 +263,44 @@ class LLMService:
         self, image_bytes: bytes, start_time: float
     ) -> tuple[LLMResponse, int]:
         """
-        1. Use image as-is (single panel)
-        2. DI  : extract numeric data for S520/S530/S810
-        3. LLM : detect red areas
-        4. Merge numeric NG + color NG → final judgment
+        1. LLM color detection 먼저 실행하여 장비 ID 확인
+        2. DI가 필요한 장비(S520/S530/S810/S540)인 경우에만 DI 호출
+           - S510/S310은 DI 스킵 (color-only, DI 결과 미사용)
+        3. Merge numeric NG + color NG → final judgment
         """
         panel_crops: dict[str, bytes] = {"top_left": image_bytes}
-        expected_eqs: tuple[str, ...] = ()  # DI identifies whatever is in the image
 
-        # Step 2 & 3: run DI and LLM concurrently
-        # DI uses 4 workers for its panels; LLM uses 4 workers for color detection
-        # Both run in the same executor pool simultaneously
-        di_future: Future | None = None
-        color_futures: dict[Future, str] = {}
+        # Step 1: LLM color detection 먼저 실행
+        color_results: dict[str, dict] = {}
+        color_result = self._detect_color("top_left", image_bytes)
+        color_results["top_left"] = color_result
 
-        with ThreadPoolExecutor(max_workers=9) as executor:
-            # Submit DI job
-            di_future = executor.submit(
-                self.doc_intelligence.extract, image_bytes, "image/png"
-            )
+        # 장비 ID 확인
+        raw_eq = color_result.get("equipment_id", "")
+        detected_eq = raw_eq
+        for cid in _ALL_EQUIPMENT_IDS:
+            if cid in raw_eq:
+                detected_eq = cid
+                break
 
-            # Submit LLM color detection for each panel
-            for pos, panel_bytes in panel_crops.items():
-                f = executor.submit(self._detect_color, pos, panel_bytes)
-                color_futures[f] = pos
+        # Step 2: S510/S310은 DI 스킵
+        di_skip_ids = ("S510", "S310")
+        di_result = None
 
-            # Collect DI result
-            di_result = None
+        if detected_eq in di_skip_ids:
+            logger.info("DI skipped for %s (color-only equipment)", detected_eq)
+        else:
             try:
-                di_result = di_future.result()
-                logger.info("DI extraction complete")
+                di_result = self.doc_intelligence.extract(image_bytes, "image/png")
+                logger.info("DI extraction complete for %s", detected_eq)
             except Exception as exc:
                 logger.warning("DI failed: %s", exc)
 
-            # Validate DI result before proceeding
+            # Validate DI result (only for DI-required equipment)
+            expected_eqs: tuple[str, ...] = ()
             is_valid, invalid_reason = _validate_di_result(di_result, expected_eqs)
             if not is_valid:
                 logger.warning("DI validation failed: %s", invalid_reason)
-                # Cancel pending LLM futures (best effort)
-                for f in color_futures:
-                    f.cancel()
-                # Build partial equipment_data from whatever DI did extract
                 partial_data = _build_partial_equipment_data(di_result)
                 logger.warning(
                     "Partial DI extraction data: %s",
@@ -318,27 +314,14 @@ class LLMService:
                     equipment_data=partial_data,
                 ), elapsed_ms
 
-            # Check value counts — analysis continues but status becomes UNKNOWN if mismatch
-            di_count_mismatches = _check_di_value_counts(di_result)
-
-            # Collect LLM color results
-            color_results: dict[str, dict] = {}
-            for future in as_completed(color_futures):
-                pos = color_futures[future]
-                try:
-                    color_results[pos] = future.result()
-                except Exception as exc:
-                    logger.error("Color detection failed for %s: %s", pos, exc)
-                    color_results[pos] = {}
+        # Check value counts
+        di_count_mismatches = _check_di_value_counts(di_result)
 
         elapsed_ms = int((time.monotonic() - start_time) * 1000)
 
-        # Step 4: merge
-        response = self._merge_results(
-            di_result, color_results, panel_crops
-        )
+        # Step 3: merge
+        response = self._merge_results(di_result, color_results, panel_crops)
 
-        # Override status to UNKNOWN if DI value counts were mismatched
         if di_count_mismatches:
             mismatch_reason = "DI 추출 값 개수 불일치: " + "; ".join(di_count_mismatches)
             logger.warning("Overriding status to UNKNOWN due to DI count mismatch: %s", mismatch_reason)
