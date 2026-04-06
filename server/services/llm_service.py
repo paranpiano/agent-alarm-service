@@ -56,8 +56,6 @@ from server.models import JudgmentStatus, LLMResponse
 from server.services.document_intelligence import (
     DocumentIntelligenceService,
     PanelExtractionResult,
-    _crop_panel,
-    _PANEL_CROPS,
 )
 
 logger = logging.getLogger(__name__)
@@ -252,38 +250,27 @@ class LLMService:
 
     # ── Public API ────────────────────────────────────────────────────────────
 
-    def analyze_image(self, image_bytes: bytes, image_format: str, single_panel: bool = False) -> tuple[LLMResponse, int]:
+    def analyze_image(self, image_bytes: bytes, image_format: str) -> tuple[LLMResponse, int]:
         start_time = time.monotonic()
 
         if self.doc_intelligence and self.doc_intelligence.available:
-            return self._analyze_di_plus_llm(image_bytes, start_time, single_panel=single_panel)
+            return self._analyze_di_plus_llm(image_bytes, start_time)
         else:
             return self._analyze_vision_only(image_bytes, image_format, start_time)
 
     # ── DI + LLM parallel pipeline ────────────────────────────────────────────
 
     def _analyze_di_plus_llm(
-        self, image_bytes: bytes, start_time: float, single_panel: bool = False
+        self, image_bytes: bytes, start_time: float
     ) -> tuple[LLMResponse, int]:
         """
-        1. Crop 4 panels (once) — or use image as-is if single_panel=True
-        2. DI  : extract numeric data for S520/S530/S810 (parallel)
-        3. LLM : detect red areas in all panels (parallel)
+        1. Use image as-is (single panel)
+        2. DI  : extract numeric data for S520/S530/S810
+        3. LLM : detect red areas
         4. Merge numeric NG + color NG → final judgment
         """
-        if single_panel:
-            # Image is already a single panel — use as-is, position = "top_left"
-            panel_crops: dict[str, bytes] = {"top_left": image_bytes}
-            expected_eqs: tuple[str, ...] = ()  # DI identifies whatever is in the image
-        else:
-            # Step 1: crop panels once, shared by DI and LLM
-            panel_crops = {}
-            for pos, fractions in _PANEL_CROPS.items():
-                try:
-                    panel_crops[pos] = _crop_panel(image_bytes, fractions)
-                except Exception as exc:
-                    logger.error("Crop failed for %s: %s", pos, exc)
-            expected_eqs = ("S520", "S530", "S810")
+        panel_crops: dict[str, bytes] = {"top_left": image_bytes}
+        expected_eqs: tuple[str, ...] = ()  # DI identifies whatever is in the image
 
         # Step 2 & 3: run DI and LLM concurrently
         # DI uses 4 workers for its panels; LLM uses 4 workers for color detection
@@ -292,9 +279,9 @@ class LLMService:
         color_futures: dict[Future, str] = {}
 
         with ThreadPoolExecutor(max_workers=9) as executor:
-            # Submit DI job (internally parallel across 4 panels)
+            # Submit DI job
             di_future = executor.submit(
-                self.doc_intelligence.extract, image_bytes, "image/png", single_panel
+                self.doc_intelligence.extract, image_bytes, "image/png"
             )
 
             # Submit LLM color detection for each panel
@@ -348,7 +335,7 @@ class LLMService:
 
         # Step 4: merge
         response = self._merge_results(
-            di_result, color_results, panel_crops, single_panel=single_panel
+            di_result, color_results, panel_crops
         )
 
         # Override status to UNKNOWN if DI value counts were mismatched
@@ -397,7 +384,6 @@ class LLMService:
         di_result: Any | None,
         color_results: dict[str, dict],
         panel_crops: dict[str, bytes],
-        single_panel: bool = False,
     ) -> LLMResponse:
         """Merge DI numeric results and LLM color results into one LLMResponse.
 
@@ -531,73 +517,40 @@ class LLMService:
         # Check if any equipment was not identified
         identified_eqs = set(pos_to_eq.values())
 
-        # Single panel mode: only the identified equipment matters
-        if single_panel:
-            if not identified_eqs:
-                return LLMResponse(
-                    status=JudgmentStatus.UNKNOWN,
-                    reason="단일 패널에서 장비를 식별할 수 없습니다.",
-                    equipment_data=equipment_data,
-                )
-            # Return only the identified equipment's data
-            eq_id = next(iter(identified_eqs))
-            single_eq_data = {eq_id: equipment_data.get(eq_id, {})}
-            eq_ng = equipment_data.get(eq_id, {}).get("ng_items", [])
-
-            # wrong screen check (S540만 해당, S510은 Operation Mode 화면도 정상으로 허용)
-            wrong_screen = eq_id == "S540" and any("WRONG_SCREEN" in i for i in eq_ng)
-            if wrong_screen:
-                single_eq_data[eq_id]["ng_items"] = [i for i in eq_ng if "WRONG_SCREEN" not in i]
-                return LLMResponse(
-                    status=JudgmentStatus.UNKNOWN,
-                    reason=f"[{eq_id}] 패널이 정상 화면을 표시하지 않습니다.",
-                    equipment_data=single_eq_data,
-                )
-
-            if eq_ng:
-                status = JudgmentStatus.NG
-                reason = f"[{eq_id}] NG 항목 발견: " + "; ".join(eq_ng)
-            else:
-                status = JudgmentStatus.OK
-                reason = f"[{eq_id}] 단일 패널 분석 완료 — 이상 없음"
-
+        if not identified_eqs:
             return LLMResponse(
-                status=status,
-                reason=reason,
-                equipment_data=single_eq_data,
+                status=JudgmentStatus.UNKNOWN,
+                reason="패널에서 장비를 식별할 수 없습니다.",
+                equipment_data=equipment_data,
             )
 
-        missing = [eq for eq in _ALL_EQUIPMENT_IDS if eq not in identified_eqs]
+        # Return only the identified equipment's data
+        eq_id = next(iter(identified_eqs))
+        single_eq_data = {eq_id: equipment_data.get(eq_id, {})}
+        eq_ng = equipment_data.get(eq_id, {}).get("ng_items", [])
 
-        # Check for wrong screen in S540 only (S510은 Operation Mode 화면도 정상으로 허용)
         wrong_screen_eq = next(
             (eq for eq in ("S540",)
              if any("WRONG_SCREEN" in item for item in equipment_data.get(eq, {}).get("ng_items", []))),
             None,
         )
 
-        if missing:
-            logger.warning("Unidentified panels: %s", missing)
+        if wrong_screen_eq:
             status = JudgmentStatus.UNKNOWN
-            reason = f"패널 식별 불가: {', '.join(missing)}"
-        elif wrong_screen_eq:
-            status = JudgmentStatus.UNKNOWN
-            reason = f"{wrong_screen_eq} 패널이 정상 화면(3D 스테이션 레이아웃)을 표시하지 않습니다. 화면이 다른 메뉴로 전환되어 있습니다."
-            eq_data = equipment_data.get(wrong_screen_eq, {})
-            eq_data["ng_items"] = [
-                i for i in eq_data.get("ng_items", []) if "WRONG_SCREEN" not in i
-            ]
-        elif all_ng_items:
+            reason = f"{wrong_screen_eq} 패널이 정상 화면(3D 스테이션 레이아웃)을 표시하지 않습니다."
+            eq_data = single_eq_data.get(wrong_screen_eq, {})
+            eq_data["ng_items"] = [i for i in eq_data.get("ng_items", []) if "WRONG_SCREEN" not in i]
+        elif eq_ng:
             status = JudgmentStatus.NG
-            reason = "NG 항목 발견: " + "; ".join(all_ng_items)
+            reason = f"[{eq_id}] NG 항목 발견: " + "; ".join(eq_ng)
         else:
             status = JudgmentStatus.OK
-            reason = "모든 장비 정상입니다."
+            reason = f"[{eq_id}] 분석 완료 — 이상 없음"
 
         return LLMResponse(
             status=status,
             reason=reason,
-            equipment_data=equipment_data,
+            equipment_data=single_eq_data,
         )
 
     # ── Vision-only fallback ──────────────────────────────────────────────────

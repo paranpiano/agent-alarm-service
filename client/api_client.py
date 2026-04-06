@@ -41,10 +41,7 @@ class AlarmApiClient:
         self.request_timeout = request_timeout
 
     def analyze_single(self, image_path: Path) -> JudgmentResult:
-        """Send a single image for analysis with up to 3 retries.
-
-        The server automatically detects whether the image is a single panel
-        or a full 4-panel composite based on aspect ratio.
+        """Send a single panel image for analysis with up to 3 retries.
 
         Args:
             image_path: Path to the image file (PNG or JPEG).
