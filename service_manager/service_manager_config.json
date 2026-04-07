@@ -1,8 +1,8 @@
 {
-  "python_path": "C:\\Users\\uidg3913\\AppData\\Local\\Programs\\Python\\Python312\\pythonw.exe",
-  "project_dir": "C:\\00.DX\\17. Stator-AlarmAgent\\Code",
+  "python_path": "C:\\Users\\uiv14138\\AppData\\Local\\Programs\\Python\\Python312\\pythonw.exe",
+  "project_dir": "C:/Users/uiv14138/agent-alarm-service",
   "scripts": {
-    "server": "C:\\00.DX\\17. Stator-AlarmAgent\\Code\\server\\main.py",
-    "alarm": "C:\\00.DX\\17. Stator-AlarmAgent\\Code\\Stator_Trk_Monitoring\\Alarm_System.py"
+    "server": "C:\\Users\\uiv14138\\agent-alarm-service\\server\\main.py",
+    "alarm": "C:\\Users\\uiv14138\\agent-alarm-service\\Stator_Trk_Monitoring\\Alarm_System.py"
   }
 }
