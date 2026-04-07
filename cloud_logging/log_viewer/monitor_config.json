@@ -3,5 +3,11 @@
   "interval_sec": 30,
   "alert_position": "우측",
   "alert_size_ratio": 0.25,
-  "days": 1
+  "days": 1,
+  "no_update_alert_minutes": 60,
+  "no_update_alert_enabled": true,
+  "sns_enabled": true,
+  "sns_api_url": "https://075qa06cSNS_API_URL",
+  "sns_topic_arn": "arn:aws:sns:eSNS_TOPIC_ARN",
+  "sns_protocol": "email"
 }
