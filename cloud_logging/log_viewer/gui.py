@@ -357,7 +357,15 @@ class CloudLogViewerGUI:
             days = 1
 
         # 자동 갱신 시에는 항상 현재 날짜 기준으로 조회
-        query_date = date.today().strftime("%Y-%m-%d") if auto else self._date_var.get().strip()
+        today = date.today().strftime("%Y-%m-%d")
+        if auto:
+            # 날짜가 바뀌었으면 UI 필드도 갱신하고 last_seen_timestamp 초기화
+            if self._date_var.get().strip() != today:
+                self._date_var.set(today)
+                self._last_seen_timestamp = ""
+            query_date = today
+        else:
+            query_date = self._date_var.get().strip()
 
         self._status_var.set("조회 중...")
 

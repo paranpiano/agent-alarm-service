@@ -1,15 +1,9 @@
 """Azure Document Intelligence service for extracting text and tables from images.
 
 역할:
-  전체 HMI 이미지를 4개 패널(2x2 그리드)로 크롭한 후, 각 패널을 병렬로 DI에 전송하여
-  테이블 숫자 데이터를 추출합니다. S520/S530/S810의 WHITE row 값을 헤더 키 기반으로
-  정확히 매핑하여 반환합니다. S540은 숫자 테이블이 없으므로 DI 추출 대상에서 제외됩니다.
-
-패널 크롭 위치:
-  top_left     → S520 (Preheating & Curing)
-  top_right    → S530 (Cooling)
-  bottom_left  → S540 (Robot)
-  bottom_right → S810 (Housing Cooling)
+  단일 패널 이미지를 DI에 전송하여 테이블 숫자 데이터를 추출합니다.
+  S520/S530/S810의 WHITE row 값을 헤더 키 기반으로 정확히 매핑하여 반환합니다.
+  S540은 숫자 테이블이 없으므로 DI 추출 대상에서 제외됩니다.
 
 필드 추론 방식 (infer_field_name):
   헤더 키 범위와 첫 번째 헤더 키를 기반으로 필드명을 결정합니다.
@@ -19,22 +13,12 @@
   - S810: sub_label에 '1' 포함 → cooling_1_line, '2' 포함 → cooling_2_line
 """
 
-import io
 import json
 import logging
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from typing import Any
 
 logger = logging.getLogger(__name__)
-
-# 2x2 grid positions → (left, upper, right, lower) as fractions of (width, height)
-_PANEL_CROPS = {
-    "top_left":     (0.0, 0.0, 0.5, 0.5),
-    "top_right":    (0.5, 0.0, 1.0, 0.5),
-    "bottom_left":  (0.0, 0.5, 0.5, 1.0),
-    "bottom_right": (0.5, 0.5, 1.0, 1.0),
-}
 
 _EQUIPMENT_IDS = ["S520", "S530", "S540", "S810"]
 
@@ -216,19 +200,6 @@ def extract_s540_wait_counts(paragraphs: list[str]) -> list[int]:
     return counts
 
 
-def _crop_panel(image_bytes: bytes, fractions: tuple[float, float, float, float]) -> bytes:
-    """Crop image_bytes to the given fractional bounding box, return PNG bytes."""
-    from PIL import Image
-    img = Image.open(io.BytesIO(image_bytes))
-    w, h = img.size
-    lf, uf, rf, bf = fractions
-    box = (int(w * lf), int(h * uf), int(w * rf), int(h * bf))
-    cropped = img.crop(box)
-    buf = io.BytesIO()
-    cropped.save(buf, format="PNG")
-    return buf.getvalue()
-
-
 def _parse_di_result(result: Any) -> PanelExtractionResult:
     """Parse a DI AnalyzeResult into a PanelExtractionResult.
 
@@ -353,13 +324,12 @@ class DocumentIntelligenceService:
             logger.error("DI extraction failed for panel %s: %s", position, exc)
             return position, PanelExtractionResult()
 
-    def extract(self, image_bytes: bytes, content_type: str = "image/png", single_panel: bool = False) -> DocumentExtractionResult:
-        """Extract tables from image.
+    def extract(self, image_bytes: bytes, content_type: str = "image/png") -> DocumentExtractionResult:
+        """Extract tables from a single panel image.
 
         Args:
-            image_bytes: HMI screenshot bytes (PNG or JPEG).
+            image_bytes: Single panel HMI screenshot bytes (PNG or JPEG).
             content_type: Unused — kept for API compatibility.
-            single_panel: If True, send image as-is (no 4-way crop).
 
         Returns:
             DocumentExtractionResult with per-panel OCR data.
@@ -367,33 +337,5 @@ class DocumentIntelligenceService:
         if not self._available:
             return DocumentExtractionResult()
 
-        if single_panel:
-            # Send image as-is — it's already a single panel
-            _, panel_result = self._extract_panel(image_bytes, "top_left")
-            return DocumentExtractionResult(panels={"top_left": panel_result})
-
-        # Crop 4 panels
-        panel_bytes: dict[str, bytes] = {}
-        for pos, fractions in _PANEL_CROPS.items():
-            try:
-                panel_bytes[pos] = _crop_panel(image_bytes, fractions)
-            except Exception as exc:
-                logger.error("Failed to crop panel %s: %s", pos, exc)
-
-        # Run DI in parallel
-        panels: dict[str, PanelExtractionResult] = {}
-        with ThreadPoolExecutor(max_workers=4) as executor:
-            futures = {
-                executor.submit(self._extract_panel, pb, pos): pos
-                for pos, pb in panel_bytes.items()
-            }
-            for future in as_completed(futures):
-                pos, panel_result = future.result()
-                panels[pos] = panel_result
-
-        total_tables = sum(len(p.tables) for p in panels.values())
-        logger.info(
-            "DI extraction complete: %d panels, %d total tables",
-            len(panels), total_tables,
-        )
-        return DocumentExtractionResult(panels=panels)
+        _, panel_result = self._extract_panel(image_bytes, "top_left")
+        return DocumentExtractionResult(panels={"top_left": panel_result})

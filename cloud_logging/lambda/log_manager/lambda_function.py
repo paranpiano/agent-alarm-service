@@ -79,7 +79,7 @@ def handle_get(params: dict) -> dict:
         log_date = datetime.utcnow().strftime("%Y-%m-%d")
 
     request_id = params.get("request_id")
-    limit = int(params.get("limit", 100))
+    exclusive_start_key = params.get("last_key")
 
     if request_id:
         resp = table.get_item(Key={"log_date": log_date, "request_id": request_id})
@@ -88,13 +88,24 @@ def handle_get(params: dict) -> dict:
             return _response(404, {"error": "Log not found"})
         return _response(200, {"logs": [_parse_equipment_data(item)]})
 
-    resp = table.query(
-        KeyConditionExpression=Key("log_date").eq(log_date),
-        Limit=limit,
-        ScanIndexForward=False,
-    )
+    query_kwargs = {
+        "KeyConditionExpression": Key("log_date").eq(log_date),
+        "ScanIndexForward": True,
+    }
+    if exclusive_start_key:
+        try:
+            query_kwargs["ExclusiveStartKey"] = json.loads(exclusive_start_key)
+        except Exception:
+            pass
+
+    resp = table.query(**query_kwargs)
     items = [_parse_equipment_data(item) for item in resp.get("Items", [])]
-    return _response(200, {"logs": items, "count": len(items), "date": log_date})
+    last_key = resp.get("LastEvaluatedKey")
+
+    result = {"logs": items, "count": len(items), "date": log_date}
+    if last_key:
+        result["last_key"] = json.dumps(last_key, default=_default)
+    return _response(200, result)
 
 
 def lambda_handler(event, context):
