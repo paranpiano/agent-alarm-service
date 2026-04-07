@@ -15,3 +15,4 @@ __pycache__/
 /Stator_Trk_Monitoring/Target_images/
 lambda/log_manager/function.zip
 response.json
+service_manager/service_manager.log
