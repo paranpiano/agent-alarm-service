@@ -13,7 +13,7 @@ global Logging_path, target_path, Trk_ref_image_path
 target_path = r'C:\Users\uiv14247\OneDrive - Vitesco Technologies\Desktop\Stator_Trk_Monitoring'
 # Trk_ref_image_path = r'AAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
 
-ser = serial.Serial('COM3', 9600, timeout=1)
+# ser = serial.Serial('COM3', 9600, timeout=1)
 
 user32 = ctypes.windll.user32
 open_windows = {}
@@ -35,7 +35,7 @@ root.withdraw()
 
 def LED_OK():
     global ser
-    ser.write(bytes([0, 255, 0]))
+    # ser.write(bytes([0, 255, 0]))
 
 def loop_led_NG(flag):
     global ser, stop_led_events
@@ -46,9 +46,9 @@ def loop_led_NG(flag):
     event = stop_led_events[flag]
 
     while not event.is_set():
-        ser.write(bytes([255, 0, 0]))
+        # ser.write(bytes([255, 0, 0]))
         time.sleep(0.5)
-        ser.write(bytes([0, 0, 0]))
+        # ser.write(bytes([0, 0, 0]))
         time.sleep(0.5)
 
 def loading_ref_images():
