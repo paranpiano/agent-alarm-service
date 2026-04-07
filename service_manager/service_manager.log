@@ -1,0 +1,422 @@
+2026-04-03 16:04:57,978 [INFO] service_manager.py 시작
+2026-04-03 16:04:57,978 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-03 16:04:57,978 [INFO] 작업 디렉토리: C:\00.DX\17. Stator-AlarmAgent\Code
+2026-04-03 16:04:57,978 [INFO] 관리자 권한 확인: False
+2026-04-03 16:04:59,722 [INFO] 관리자 권한으로 재실행 시도
+2026-04-03 16:05:39,203 [INFO] service_manager.py 시작
+2026-04-03 16:05:39,203 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-03 16:05:39,213 [INFO] 작업 디렉토리: C:\00.DX\17. Stator-AlarmAgent\Code
+2026-04-03 16:05:39,213 [INFO] 관리자 권한 확인: False
+2026-04-03 16:05:40,836 [INFO] 관리자 권한으로 재실행 시도
+2026-04-03 16:05:40,836 [INFO] 재실행: python=C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\python.exe, script=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager.py, cwd=C:\00.DX\17. Stator-AlarmAgent\Code
+2026-04-03 16:05:50,042 [INFO] service_manager.py 시작
+2026-04-03 16:05:50,042 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-03 16:05:50,043 [INFO] 작업 디렉토리: C:\Users\uidg3913\AppData\Local\Programs\Python\Python312
+2026-04-03 16:05:50,043 [INFO] 관리자 권한 확인: True
+2026-04-03 16:05:50,043 [INFO] 메인 앱 시작
+2026-04-03 16:05:50,043 [INFO] ServiceManagerApp 초기화 시작
+2026-04-03 16:05:50,344 [INFO] UI 빌드 완료
+2026-04-03 16:05:50,344 [DEBUG] NSSM 탐색 시작
+2026-04-03 16:05:50,347 [DEBUG] NSSM 'nssm' 탐색 실패: [WinError 2] The system cannot find the file specified
+2026-04-03 16:05:50,349 [DEBUG] NSSM 'nssm.exe' 탐색 실패: [WinError 2] The system cannot find the file specified
+2026-04-03 16:05:50,350 [WARNING] NSSM을 찾을 수 없음
+2026-04-03 16:05:50,366 [INFO] 자동 탐지 완료
+2026-04-03 16:05:50,413 [INFO] ServiceManagerApp 초기화 완료
+2026-04-03 16:07:56,123 [INFO] 앱 정상 종료
+2026-04-03 16:09:18,432 [INFO] service_manager.py 시작
+2026-04-03 16:09:18,433 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-03 16:09:18,433 [INFO] 작업 디렉토리: C:\00.DX\17. Stator-AlarmAgent\Code
+2026-04-03 16:09:18,433 [INFO] 관리자 권한 확인: False
+2026-04-03 16:09:20,970 [INFO] 관리자 권한으로 재실행 시도
+2026-04-03 16:09:20,971 [INFO] 재실행: python=C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\python.exe, script=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager.py, cwd=C:\00.DX\17. Stator-AlarmAgent\Code
+2026-04-03 16:09:30,576 [INFO] service_manager.py 시작
+2026-04-03 16:09:30,576 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-03 16:09:30,576 [INFO] 작업 디렉토리: C:\Users\uidg3913\AppData\Local\Programs\Python\Python312
+2026-04-03 16:09:30,577 [INFO] 관리자 권한 확인: True
+2026-04-03 16:09:30,577 [INFO] 메인 앱 시작
+2026-04-03 16:09:30,577 [INFO] ServiceManagerApp 초기화 시작
+2026-04-03 16:09:30,742 [INFO] UI 빌드 완료
+2026-04-03 16:09:30,742 [DEBUG] NSSM 탐색 시작
+2026-04-03 16:09:30,744 [DEBUG] NSSM 'nssm' 탐색 실패: [WinError 2] The system cannot find the file specified
+2026-04-03 16:09:30,746 [DEBUG] NSSM 'nssm.exe' 탐색 실패: [WinError 2] The system cannot find the file specified
+2026-04-03 16:09:30,746 [WARNING] NSSM을 찾을 수 없음
+2026-04-03 16:09:30,752 [INFO] 자동 탐지 완료
+2026-04-03 16:09:30,782 [INFO] ServiceManagerApp 초기화 완료
+2026-04-03 16:09:35,483 [INFO] 수동 실행: C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\python.exe C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py (new_window=True)
+2026-04-03 16:09:35,498 [INFO] 수동 실행 성공 PID=19268
+2026-04-03 16:09:42,032 [INFO] 수동 실행: C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\python.exe C:\00.DX\17. Stator-AlarmAgent\Code\Stator_Trk_Monitoring\Alarm_System.py (new_window=True)
+2026-04-03 16:09:42,040 [INFO] 수동 실행 성공 PID=21232
+2026-04-03 16:13:35,806 [INFO] 앱 정상 종료
+2026-04-03 16:13:36,061 [CRITICAL] Unhandled exception:
+Traceback (most recent call last):
+  File "C:\00.DX\17. Stator-AlarmAgent\Code\service_manager.py", line 468, in <module>
+    run_cmd([str(exe_path), "stop"], self.log)
+        ^^^^^^^^^^^^^^
+  File "C:\00.DX\17. Stator-AlarmAgent\Code\service_manager.py", line 79, in run_as_admin
+    ctypes.windll.shell32.ShellExecuteW(
+KeyboardInterrupt
+
+2026-04-03 16:13:43,052 [INFO] service_manager.py 시작
+2026-04-03 16:13:43,052 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-03 16:13:43,052 [INFO] 작업 디렉토리: C:\00.DX\17. Stator-AlarmAgent\Code
+2026-04-03 16:13:43,052 [INFO] 관리자 권한 확인: False
+2026-04-03 16:13:45,360 [INFO] 관리자 권한으로 재실행 시도
+2026-04-03 16:13:45,361 [INFO] 재실행: python=C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\python.exe, script=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager.py, cwd=C:\00.DX\17. Stator-AlarmAgent\Code
+2026-04-03 16:13:56,664 [INFO] service_manager.py 시작
+2026-04-03 16:13:56,664 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-03 16:13:56,664 [INFO] 작업 디렉토리: C:\Users\uidg3913\AppData\Local\Programs\Python\Python312
+2026-04-03 16:13:56,664 [INFO] 관리자 권한 확인: True
+2026-04-03 16:13:56,664 [INFO] 메인 앱 시작
+2026-04-03 16:13:56,664 [INFO] ServiceManagerApp 초기화 시작
+2026-04-03 16:13:56,795 [INFO] UI 빌드 완료
+2026-04-03 16:13:56,796 [DEBUG] WinSW 탐색 시작
+2026-04-03 16:13:56,800 [WARNING] WinSW를 찾을 수 없음
+2026-04-03 16:13:56,804 [INFO] 자동 탐지 완료
+2026-04-03 16:13:56,839 [INFO] ServiceManagerApp 초기화 완료
+2026-04-03 16:15:01,868 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\AIAlarmServer.exe', 'install']
+2026-04-03 16:15:02,985 [DEBUG] 명령 결과 (rc=0): 2026-04-03 16:15:02,914 INFO  - Installing service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-03 16:15:02,966 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' was installed successfully.
+2026-04-03 16:15:10,021 [INFO] 앱 정상 종료
+2026-04-07 09:05:32,555 [INFO] service_manager.py 시작
+2026-04-07 09:05:32,556 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:05:32,556 [INFO] 작업 디렉토리: C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:05:32,556 [INFO] 관리자 권한 확인: False
+2026-04-07 09:05:38,095 [INFO] 관리자 권한으로 재실행 시도
+2026-04-07 09:05:38,095 [INFO] 재실행: python=C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\python.exe, script=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\main.py, cwd=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:05:54,593 [INFO] service_manager.py 시작
+2026-04-07 09:05:54,593 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:05:54,593 [INFO] 작업 디렉토리: C:\Users\uidg3913\AppData\Local\Programs\Python\Python312
+2026-04-07 09:05:54,593 [INFO] 관리자 권한 확인: True
+2026-04-07 09:05:54,593 [INFO] 메인 앱 시작
+2026-04-07 09:05:54,593 [INFO] ServiceManagerApp 초기화 시작
+2026-04-07 09:05:54,895 [INFO] UI 빌드 완료
+2026-04-07 09:05:54,895 [DEBUG] WinSW 탐색 시작
+2026-04-07 09:05:54,898 [INFO] WinSW 발견 (로컬): C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\WinSW-x64.exe
+2026-04-07 09:05:54,903 [INFO] 자동 탐지 완료
+2026-04-07 09:05:54,942 [INFO] ServiceManagerApp 초기화 완료
+2026-04-07 09:06:42,200 [INFO] 수동 실행: C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\python.exe C:/00.DX/17. Stator-AlarmAgent/Code/server/main.py (new_window=True)
+2026-04-07 09:06:42,211 [INFO] 수동 실행 성공 PID=17944
+2026-04-07 09:07:23,305 [INFO] 수동 실행: C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\python.exe C:/00.DX/17. Stator-AlarmAgent/Code/client/main.py (new_window=True)
+2026-04-07 09:07:23,314 [INFO] 수동 실행 성공 PID=28676
+2026-04-07 09:10:15,491 [INFO] 앱 정상 종료
+2026-04-07 09:10:17,807 [INFO] service_manager.py 시작
+2026-04-07 09:10:17,807 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:10:17,807 [INFO] 작업 디렉토리: C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:10:17,807 [INFO] 관리자 권한 확인: False
+2026-04-07 09:10:20,704 [INFO] 관리자 권한으로 재실행 시도
+2026-04-07 09:10:20,704 [INFO] 재실행: python=C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\python.exe, script=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\main.py, cwd=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:10:35,210 [INFO] service_manager.py 시작
+2026-04-07 09:10:35,210 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:10:35,210 [INFO] 작업 디렉토리: C:\Users\uidg3913\AppData\Local\Programs\Python\Python312
+2026-04-07 09:10:35,210 [INFO] 관리자 권한 확인: True
+2026-04-07 09:10:35,210 [INFO] 메인 앱 시작
+2026-04-07 09:10:35,210 [INFO] ServiceManagerApp 초기화 시작
+2026-04-07 09:10:35,540 [INFO] UI 빌드 완료
+2026-04-07 09:10:35,541 [DEBUG] WinSW 탐색 시작
+2026-04-07 09:10:35,544 [INFO] WinSW 발견 (로컬): C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\WinSW-x64.exe
+2026-04-07 09:10:35,548 [INFO] 자동 탐지 완료
+2026-04-07 09:10:35,570 [INFO] ServiceManagerApp 초기화 완료
+2026-04-07 09:11:06,871 [INFO] 수동 실행: C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\python.exe C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py (new_window=True)
+2026-04-07 09:11:06,876 [INFO] 수동 실행 성공 PID=27972
+2026-04-07 09:13:55,799 [INFO] 앱 정상 종료
+2026-04-07 09:13:55,999 [CRITICAL] Unhandled exception:
+Traceback (most recent call last):
+  File "C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\main.py", line 508, in <module>
+    )
+      
+  File "C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\main.py", line 79, in run_as_admin
+    working_dir = str(Path(__file__).parent.resolve())
+KeyboardInterrupt
+
+2026-04-07 09:14:24,079 [INFO] service_manager.py 시작
+2026-04-07 09:14:24,079 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:14:24,079 [INFO] 작업 디렉토리: C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:14:24,079 [INFO] 관리자 권한 확인: False
+2026-04-07 09:14:26,112 [INFO] 관리자 권한으로 재실행 시도
+2026-04-07 09:14:26,113 [INFO] 재실행: python=C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\python.exe, script=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\main.py, cwd=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:14:35,741 [INFO] service_manager.py 시작
+2026-04-07 09:14:35,742 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:14:35,742 [INFO] 작업 디렉토리: C:\Users\uidg3913\AppData\Local\Programs\Python\Python312
+2026-04-07 09:14:35,742 [INFO] 관리자 권한 확인: True
+2026-04-07 09:14:35,742 [INFO] 메인 앱 시작
+2026-04-07 09:14:35,742 [INFO] ServiceManagerApp 초기화 시작
+2026-04-07 09:14:35,825 [INFO] UI 빌드 완료
+2026-04-07 09:14:35,825 [DEBUG] WinSW 탐색 시작
+2026-04-07 09:14:35,828 [INFO] WinSW 발견 (로컬): C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\WinSW-x64.exe
+2026-04-07 09:14:35,831 [INFO] 자동 탐지 완료
+2026-04-07 09:14:35,852 [INFO] ServiceManagerApp 초기화 완료
+2026-04-07 09:14:42,815 [INFO] 수동 실행: ['C:\\Users\\uidg3913\\AppData\\Local\\Programs\\Python\\Python312\\python.exe', '-m', 'server.main'] (new_window=True)
+2026-04-07 09:14:42,821 [INFO] 수동 실행 성공 PID=28544
+2026-04-07 09:15:16,335 [INFO] 수동 중지 PID=28544
+2026-04-07 09:15:18,430 [INFO] 수동 실행: ['C:\\Users\\uidg3913\\AppData\\Local\\Programs\\Python\\Python312\\python.exe', '-m', 'server.main'] (new_window=False)
+2026-04-07 09:15:18,434 [INFO] 수동 실행 성공 PID=28320
+2026-04-07 09:15:58,993 [INFO] 수동 실행: ['C:\\Users\\uidg3913\\AppData\\Local\\Programs\\Python\\Python312\\python.exe', 'C:\\00.DX\\17. Stator-AlarmAgent\\Code\\Stator_Trk_Monitoring\\Alarm_System.py'] (new_window=True)
+2026-04-07 09:15:58,999 [INFO] 수동 실행 성공 PID=13412
+2026-04-07 09:16:49,234 [INFO] service_manager.py 시작
+2026-04-07 09:16:49,234 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:16:49,234 [INFO] 작업 디렉토리: C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:16:49,234 [INFO] 관리자 권한 확인: False
+2026-04-07 09:16:51,941 [INFO] 관리자 권한으로 재실행 시도
+2026-04-07 09:16:51,943 [INFO] 재실행: python=C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\python.exe, script=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\main.py, cwd=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:17:01,571 [INFO] service_manager.py 시작
+2026-04-07 09:17:01,571 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:17:01,571 [INFO] 작업 디렉토리: C:\Users\uidg3913\AppData\Local\Programs\Python\Python312
+2026-04-07 09:17:01,571 [INFO] 관리자 권한 확인: True
+2026-04-07 09:17:01,571 [INFO] 메인 앱 시작
+2026-04-07 09:17:01,571 [INFO] ServiceManagerApp 초기화 시작
+2026-04-07 09:17:01,676 [INFO] UI 빌드 완료
+2026-04-07 09:17:01,676 [DEBUG] WinSW 탐색 시작
+2026-04-07 09:17:01,679 [INFO] WinSW 발견 (로컬): C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\WinSW-x64.exe
+2026-04-07 09:17:01,685 [INFO] 자동 탐지 완료
+2026-04-07 09:17:01,709 [INFO] ServiceManagerApp 초기화 완료
+2026-04-07 09:18:21,340 [INFO] service_manager.py 시작
+2026-04-07 09:18:22,662 [INFO] service_manager.py 시작
+2026-04-07 09:18:22,663 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:18:22,663 [INFO] 작업 디렉토리: C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:18:22,663 [INFO] 관리자 권한 확인: False
+2026-04-07 09:18:50,649 [INFO] service_manager.py 시작
+2026-04-07 09:18:50,715 [INFO] service_manager.py 시작
+2026-04-07 09:18:50,716 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:18:50,716 [INFO] 작업 디렉토리: C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:18:50,716 [INFO] 관리자 권한 확인: False
+2026-04-07 09:18:53,076 [INFO] 관리자 권한으로 재실행 시도
+2026-04-07 09:18:53,076 [INFO] 재실행: python=C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe, script=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\main.py, cwd=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:19:03,066 [INFO] service_manager.py 시작
+2026-04-07 09:19:03,066 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:19:03,067 [INFO] 작업 디렉토리: C:\Users\uidg3913\AppData\Local\Programs\Python\Python312
+2026-04-07 09:19:03,067 [INFO] 관리자 권한 확인: True
+2026-04-07 09:19:03,067 [INFO] 메인 앱 시작
+2026-04-07 09:19:03,067 [INFO] ServiceManagerApp 초기화 시작
+2026-04-07 09:19:03,153 [INFO] UI 빌드 완료
+2026-04-07 09:19:03,153 [DEBUG] WinSW 탐색 시작
+2026-04-07 09:19:03,156 [INFO] WinSW 발견 (로컬): C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\WinSW-x64.exe
+2026-04-07 09:19:03,158 [INFO] 자동 탐지 완료
+2026-04-07 09:19:03,473 [INFO] ServiceManagerApp 초기화 완료
+2026-04-07 09:19:24,241 [INFO] 수동 실행: ['C:\\Users\\uidg3913\\AppData\\Local\\Programs\\Python\\Python312\\pythonw.exe', 'C:\\00.DX\\17. Stator-AlarmAgent\\Code\\Stator_Trk_Monitoring\\Alarm_System.py'] (new_window=True)
+2026-04-07 09:19:24,250 [INFO] 수동 실행 성공 PID=7388
+2026-04-07 09:20:24,655 [INFO] 수동 실행: ['C:\\Users\\uidg3913\\AppData\\Local\\Programs\\Python\\Python312\\pythonw.exe', '-m', 'server.main'] (new_window=True)
+2026-04-07 09:20:24,661 [INFO] 수동 실행 성공 PID=6408
+2026-04-07 09:21:06,180 [INFO] 수동 중지 PID=6408
+2026-04-07 09:21:25,483 [INFO] 앱 정상 종료
+2026-04-07 09:21:30,032 [INFO] service_manager.py 시작
+2026-04-07 09:21:30,101 [INFO] service_manager.py 시작
+2026-04-07 09:21:30,101 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:21:30,101 [INFO] 작업 디렉토리: C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:21:30,102 [INFO] 관리자 권한 확인: False
+2026-04-07 09:21:31,712 [INFO] 관리자 권한으로 재실행 시도
+2026-04-07 09:21:31,712 [INFO] 재실행: python=C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe, script=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\main.py, cwd=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:21:43,215 [INFO] service_manager.py 시작
+2026-04-07 09:21:43,215 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:21:43,215 [INFO] 작업 디렉토리: C:\Users\uidg3913\AppData\Local\Programs\Python\Python312
+2026-04-07 09:21:43,215 [INFO] 관리자 권한 확인: True
+2026-04-07 09:21:43,215 [INFO] 메인 앱 시작
+2026-04-07 09:21:43,215 [INFO] ServiceManagerApp 초기화 시작
+2026-04-07 09:21:43,306 [INFO] UI 빌드 완료
+2026-04-07 09:21:43,306 [DEBUG] WinSW 탐색 시작
+2026-04-07 09:21:43,309 [INFO] WinSW 발견 (로컬): C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\WinSW-x64.exe
+2026-04-07 09:21:43,313 [INFO] 자동 탐지 완료
+2026-04-07 09:21:43,609 [INFO] ServiceManagerApp 초기화 완료
+2026-04-07 09:22:28,889 [INFO] 수동 실행: ['C:\\Users\\uidg3913\\AppData\\Local\\Programs\\Python\\Python312\\python.exe', '-m', 'server.main'] (new_window=True)
+2026-04-07 09:22:28,895 [INFO] 수동 실행 성공 PID=28952
+2026-04-07 09:22:34,568 [INFO] 수동 실행: ['C:\\Users\\uidg3913\\AppData\\Local\\Programs\\Python\\Python312\\python.exe', 'C:\\00.DX\\17. Stator-AlarmAgent\\Code\\Stator_Trk_Monitoring\\Alarm_System.py'] (new_window=True)
+2026-04-07 09:22:34,576 [INFO] 수동 실행 성공 PID=28612
+2026-04-07 09:23:03,425 [INFO] 수동 중지 PID=28952
+2026-04-07 09:23:07,023 [INFO] 수동 실행: ['C:\\Users\\uidg3913\\AppData\\Local\\Programs\\Python\\Python312\\pythonw.exe', '-m', 'server.main'] (new_window=False)
+2026-04-07 09:23:07,031 [INFO] 수동 실행 성공 PID=9064
+2026-04-07 09:23:32,282 [INFO] 수동 실행: ['C:\\Users\\uidg3913\\AppData\\Local\\Programs\\Python\\Python312\\python.exe', 'C:\\00.DX\\17. Stator-AlarmAgent\\Code\\Stator_Trk_Monitoring\\Alarm_System.py'] (new_window=True)
+2026-04-07 09:23:32,286 [INFO] 수동 실행 성공 PID=27892
+2026-04-07 09:25:46,792 [INFO] 수동 중지 PID=9064
+2026-04-07 09:25:55,512 [INFO] 앱 정상 종료
+2026-04-07 09:26:23,067 [INFO] service_manager.py 시작
+2026-04-07 09:26:23,137 [INFO] service_manager.py 시작
+2026-04-07 09:26:23,137 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:26:23,137 [INFO] 작업 디렉토리: C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:26:23,138 [INFO] 관리자 권한 확인: False
+2026-04-07 09:26:25,149 [INFO] 관리자 권한으로 재실행 시도
+2026-04-07 09:26:25,150 [INFO] 재실행: python=C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe, script=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\main.py, cwd=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:26:43,413 [INFO] service_manager.py 시작
+2026-04-07 09:26:43,414 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:26:43,414 [INFO] 작업 디렉토리: C:\Users\uidg3913\AppData\Local\Programs\Python\Python312
+2026-04-07 09:26:43,414 [INFO] 관리자 권한 확인: True
+2026-04-07 09:26:43,414 [INFO] 메인 앱 시작
+2026-04-07 09:26:43,414 [INFO] ServiceManagerApp 초기화 시작
+2026-04-07 09:26:43,503 [INFO] UI 빌드 완료
+2026-04-07 09:26:43,504 [DEBUG] WinSW 탐색 시작
+2026-04-07 09:26:43,506 [INFO] WinSW 발견 (로컬): C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\WinSW-x64.exe
+2026-04-07 09:26:43,510 [INFO] 경로 설정 완료
+2026-04-07 09:26:43,820 [INFO] ServiceManagerApp 초기화 완료
+2026-04-07 09:27:10,106 [INFO] 수동 실행: ['C:\\Users\\uidg3913\\AppData\\Local\\Programs\\Python\\Python312\\python.exe', 'C:\\00.DX\\17. Stator-AlarmAgent\\Code\\Stator_Trk_Monitoring\\Alarm_System.py'] (new_window=True)
+2026-04-07 09:27:10,112 [INFO] 수동 실행 성공 PID=13724
+2026-04-07 09:27:12,171 [WARNING] [AIAlarmSystem] 프로세스가 즉시 종료됐습니다 (exit code: 1).
+스크립트 오류일 수 있습니다.
+2026-04-07 09:27:18,101 [INFO] 수동 실행: ['C:\\Users\\uidg3913\\AppData\\Local\\Programs\\Python\\Python312\\pythonw.exe', 'C:\\00.DX\\17. Stator-AlarmAgent\\Code\\Stator_Trk_Monitoring\\Alarm_System.py'] (new_window=False)
+2026-04-07 09:27:18,109 [INFO] 수동 실행 성공 PID=11576
+2026-04-07 09:27:20,118 [WARNING] [AIAlarmSystem] 프로세스가 즉시 종료됐습니다 (exit code: 1).
+스크립트 오류일 수 있습니다.
+2026-04-07 09:27:24,837 [INFO] 수동 실행: ['C:\\Users\\uidg3913\\AppData\\Local\\Programs\\Python\\Python312\\pythonw.exe', '-m', 'server.main'] (new_window=False)
+2026-04-07 09:27:24,847 [INFO] 수동 실행 성공 PID=10392
+2026-04-07 09:29:35,399 [INFO] 앱 정상 종료
+2026-04-07 09:30:00,748 [INFO] service_manager.py 시작
+2026-04-07 09:30:00,829 [INFO] service_manager.py 시작
+2026-04-07 09:30:00,829 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:30:00,829 [INFO] 작업 디렉토리: C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:30:00,829 [INFO] 관리자 권한 확인: False
+2026-04-07 09:30:02,405 [INFO] 관리자 권한으로 재실행 시도
+2026-04-07 09:30:02,406 [INFO] 재실행: python=C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe, script=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\main.py, cwd=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:30:12,158 [INFO] service_manager.py 시작
+2026-04-07 09:30:12,158 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:30:12,158 [INFO] 작업 디렉토리: C:\Users\uidg3913\AppData\Local\Programs\Python\Python312
+2026-04-07 09:30:12,159 [INFO] 관리자 권한 확인: True
+2026-04-07 09:30:12,159 [INFO] 메인 앱 시작
+2026-04-07 09:30:12,159 [INFO] ServiceManagerApp 초기화 시작
+2026-04-07 09:30:12,285 [INFO] UI 빌드 완료
+2026-04-07 09:30:12,294 [INFO] 설정 로드 완료: C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\service_manager_config.json
+2026-04-07 09:30:12,294 [INFO] 경로 설정 완료
+2026-04-07 09:30:12,608 [INFO] ServiceManagerApp 초기화 완료
+2026-04-07 09:30:57,656 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\AIAlarmServer.exe', 'install']
+2026-04-07 09:30:58,562 [DEBUG] 명령 결과 (rc=1073): 2026-04-07 09:30:58,541 INFO  - Installing service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:30:58,545 ERROR - A service with ID 'AIAlarmServer' already exists.
+2026-04-07 09:30:58,546 FATAL - Failed to install the service. The specified service already exists.
+2026-04-07 09:31:23,814 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\AIAlarmServer.exe', 'stop']
+2026-04-07 09:31:24,356 [DEBUG] 명령 결과 (rc=0): 2026-04-07 09:31:24,331 INFO  - Stopping service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:31:24,339 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' has already stopped.
+2026-04-07 09:31:24,359 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\AIAlarmServer.exe', 'uninstall']
+2026-04-07 09:31:24,894 [DEBUG] 명령 결과 (rc=0): 2026-04-07 09:31:24,874 INFO  - Uninstalling service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:31:24,879 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' was uninstalled successfully.
+2026-04-07 09:31:31,550 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\AIAlarmServer.exe', 'install']
+2026-04-07 09:31:32,393 [DEBUG] 명령 결과 (rc=0): 2026-04-07 09:31:32,356 INFO  - Installing service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:31:32,378 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' was installed successfully.
+2026-04-07 09:31:35,925 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\AIAlarmServer.exe', 'start']
+2026-04-07 09:31:36,779 [DEBUG] 명령 결과 (rc=0): 2026-04-07 09:31:36,415 INFO  - Starting service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:31:36,762 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' started successfully.
+2026-04-07 09:32:24,000 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\AIAlarmServer.exe', 'stop']
+2026-04-07 09:32:24,521 [DEBUG] 명령 결과 (rc=0): 2026-04-07 09:32:24,497 INFO  - Stopping service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:32:24,505 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' has already stopped.
+2026-04-07 09:33:04,660 [INFO] 앱 정상 종료
+2026-04-07 09:33:53,197 [INFO] service_manager.py 시작
+2026-04-07 09:33:53,276 [INFO] service_manager.py 시작
+2026-04-07 09:33:53,276 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:33:53,276 [INFO] 작업 디렉토리: C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:33:53,277 [INFO] 관리자 권한 확인: False
+2026-04-07 09:33:54,679 [INFO] 관리자 권한으로 재실행 시도
+2026-04-07 09:33:54,680 [INFO] 재실행: python=C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe, script=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\main.py, cwd=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:34:05,426 [INFO] service_manager.py 시작
+2026-04-07 09:34:05,426 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:34:05,426 [INFO] 작업 디렉토리: C:\Users\uidg3913\AppData\Local\Programs\Python\Python312
+2026-04-07 09:34:05,426 [INFO] 관리자 권한 확인: True
+2026-04-07 09:34:05,426 [INFO] 메인 앱 시작
+2026-04-07 09:34:05,426 [INFO] ServiceManagerApp 초기화 시작
+2026-04-07 09:34:05,536 [INFO] UI 빌드 완료
+2026-04-07 09:34:05,536 [INFO] 설정 로드 완료: C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\service_manager_config.json
+2026-04-07 09:34:05,536 [INFO] 경로 설정 완료
+2026-04-07 09:34:05,864 [INFO] ServiceManagerApp 초기화 완료
+2026-04-07 09:34:18,800 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\AIAlarmServer.exe', 'start']
+2026-04-07 09:34:19,682 [DEBUG] 명령 결과 (rc=0): 2026-04-07 09:34:19,287 INFO  - Starting service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:34:19,665 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' started successfully.
+2026-04-07 09:36:02,392 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\AIAlarmServer.exe', 'stop']
+2026-04-07 09:36:02,954 [DEBUG] 명령 결과 (rc=0): 2026-04-07 09:36:02,929 INFO  - Stopping service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:36:02,937 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' has already stopped.
+2026-04-07 09:37:04,097 [INFO] 앱 정상 종료
+2026-04-07 09:38:39,552 [INFO] service_manager.py 시작
+2026-04-07 09:38:39,869 [INFO] service_manager.py 시작
+2026-04-07 09:38:39,869 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:38:39,869 [INFO] 작업 디렉토리: C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:38:39,869 [INFO] 관리자 권한 확인: False
+2026-04-07 09:39:13,042 [INFO] service_manager.py 시작
+2026-04-07 09:39:13,121 [INFO] service_manager.py 시작
+2026-04-07 09:39:13,121 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:39:13,121 [INFO] 작업 디렉토리: C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:39:13,121 [INFO] 관리자 권한 확인: False
+2026-04-07 09:39:14,749 [INFO] 관리자 권한으로 재실행 시도
+2026-04-07 09:39:14,749 [INFO] 재실행: python=C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe, script=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\main.py, cwd=C:\00.DX\17. Stator-AlarmAgent\Code\service_manager
+2026-04-07 09:39:40,358 [INFO] service_manager.py 시작
+2026-04-07 09:39:40,358 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:39:40,358 [INFO] 작업 디렉토리: C:\Users\uidg3913\AppData\Local\Programs\Python\Python312
+2026-04-07 09:39:40,358 [INFO] 관리자 권한 확인: True
+2026-04-07 09:39:40,358 [INFO] 메인 앱 시작
+2026-04-07 09:39:40,358 [INFO] ServiceManagerApp 초기화 시작
+2026-04-07 09:39:40,593 [INFO] UI 빌드 완료
+2026-04-07 09:39:40,624 [INFO] 설정 로드 완료: C:\00.DX\17. Stator-AlarmAgent\Code\service_manager\service_manager_config.json
+2026-04-07 09:39:40,624 [INFO] 경로 설정 완료
+2026-04-07 09:39:40,918 [INFO] ServiceManagerApp 초기화 완료
+2026-04-07 09:40:05,147 [INFO] 수동 실행: ['C:\\Users\\uidg3913\\AppData\\Local\\Programs\\Python\\Python312\\python.exe', '-m', 'server.main'] (new_window=True)
+2026-04-07 09:40:05,152 [INFO] 수동 실행 성공 PID=25100
+2026-04-07 09:40:28,713 [INFO] 수동 중지 PID=25100
+2026-04-07 09:40:30,551 [INFO] 수동 실행: ['C:\\Users\\uidg3913\\AppData\\Local\\Programs\\Python\\Python312\\pythonw.exe', '-m', 'server.main'] (new_window=False)
+2026-04-07 09:40:30,559 [INFO] 수동 실행 성공 PID=2916
+2026-04-07 09:41:57,643 [INFO] 수동 중지 PID=2916
+2026-04-07 09:42:03,560 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\service_manager\\AIAlarmServer.exe', 'start']
+2026-04-07 09:42:03,561 [ERROR] 명령 실행 오류: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\service_manager\\AIAlarmServer.exe', 'start'] / [WinError 2] The system cannot find the file specified
+2026-04-07 09:42:33,079 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\service_manager\\AIAlarmServer.exe', 'stop']
+2026-04-07 09:42:33,080 [ERROR] 명령 실행 오류: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\service_manager\\AIAlarmServer.exe', 'stop'] / [WinError 2] The system cannot find the file specified
+2026-04-07 09:42:36,434 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\service_manager\\AIAlarmServer.exe', 'stop']
+2026-04-07 09:42:36,436 [ERROR] 명령 실행 오류: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\service_manager\\AIAlarmServer.exe', 'stop'] / [WinError 2] The system cannot find the file specified
+2026-04-07 09:42:36,436 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\service_manager\\AIAlarmServer.exe', 'uninstall']
+2026-04-07 09:42:36,438 [ERROR] 명령 실행 오류: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\service_manager\\AIAlarmServer.exe', 'uninstall'] / [WinError 2] The system cannot find the file specified
+2026-04-07 09:43:14,974 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\service_manager\\AIAlarmServer.exe', 'stop']
+2026-04-07 09:43:15,751 [DEBUG] 명령 결과 (rc=0): 2026-04-07 09:43:15,728 INFO  - Stopping service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:43:15,736 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' has already stopped.
+2026-04-07 09:43:15,751 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\service_manager\\AIAlarmServer.exe', 'uninstall']
+2026-04-07 09:43:16,257 [DEBUG] 명령 결과 (rc=0): 2026-04-07 09:43:16,239 INFO  - Uninstalling service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:43:16,244 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' was uninstalled successfully.
+2026-04-07 09:43:20,337 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\service_manager\\AIAlarmServer.exe', 'start']
+2026-04-07 09:43:20,865 [DEBUG] 명령 결과 (rc=1060): 2026-04-07 09:43:20,849 FATAL - The specified service does not exist as an installed service.
+2026-04-07 09:43:27,821 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\service_manager\\AIAlarmServer.exe', 'install']
+2026-04-07 09:43:28,679 [DEBUG] 명령 결과 (rc=0): 2026-04-07 09:43:28,644 INFO  - Installing service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:43:28,666 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' was installed successfully.
+2026-04-07 09:43:31,740 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\service_manager\\AIAlarmServer.exe', 'start']
+2026-04-07 09:43:32,619 [DEBUG] 명령 결과 (rc=0): 2026-04-07 09:43:32,233 INFO  - Starting service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:43:32,592 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' started successfully.
+2026-04-07 09:44:33,561 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\service_manager\\AIAlarmServer.exe', 'stop']
+2026-04-07 09:44:34,096 [DEBUG] 명령 결과 (rc=0): 2026-04-07 09:44:34,081 INFO  - Stopping service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:44:34,087 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' stopped successfully.
+2026-04-07 09:44:39,794 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\service_manager\\AIAlarmServer.exe', 'start']
+2026-04-07 09:44:40,648 [DEBUG] 명령 결과 (rc=0): 2026-04-07 09:44:40,284 INFO  - Starting service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:44:40,636 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' started successfully.
+2026-04-07 09:46:08,487 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\service_manager\\AIAlarmServer.exe', 'stop']
+2026-04-07 09:46:09,047 [DEBUG] 명령 결과 (rc=0): 2026-04-07 09:46:09,026 INFO  - Stopping service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:46:09,032 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' stopped successfully.
+2026-04-07 09:46:09,047 [DEBUG] 명령 실행: ['C:\\00.DX\\17. Stator-AlarmAgent\\Code\\service_manager\\AIAlarmServer.exe', 'uninstall']
+2026-04-07 09:46:09,565 [DEBUG] 명령 결과 (rc=0): 2026-04-07 09:46:09,550 INFO  - Uninstalling service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:46:09,554 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' was uninstalled successfully.
+2026-04-07 09:46:19,796 [INFO] 수동 실행: ['C:\\Users\\uidg3913\\AppData\\Local\\Programs\\Python\\Python312\\python.exe', '-m', 'server.main'] (new_window=True)
+2026-04-07 09:46:19,801 [INFO] 수동 실행 성공 PID=2940
+2026-04-07 09:47:28,926 [INFO] 앱 정상 종료
+2026-04-07 09:51:46,320 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:54:28,052 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 09:54:28,897 [INFO] 설정을 불러왔습니다.
+2026-04-07 09:54:49,040 [INFO] [AI 분석 서버] 시작 중...
+2026-04-07 09:54:49,045 [INFO] [AI 분석 서버] 실행됨 (PID 31244)
+2026-04-07 09:55:04,357 [INFO] [AI 분석 서버] 중지 중...
+2026-04-07 09:55:04,364 [INFO] [AI 분석 서버] 중지 완료
+2026-04-07 09:55:06,159 [INFO] [알람 모니터링] 시작 중...
+2026-04-07 09:55:06,166 [INFO] [알람 모니터링] 실행됨 (PID 14184)
+2026-04-07 09:55:21,263 [INFO] [알람 모니터링] 실행 중인 프로그램 없음
+2026-04-07 10:02:33,033 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 10:02:34,015 [INFO] 설정을 불러왔습니다.
+2026-04-07 10:02:38,238 [INFO] [AI 분석 서버] 시작 중...
+2026-04-07 10:02:38,246 [INFO] [AI 분석 서버] 실행됨 (PID 29364)
+2026-04-07 10:02:49,712 [INFO] [AI 분석 서버] 실행 중인 프로그램 없음
+2026-04-07 10:02:50,257 [INFO] [AI 분석 서버] ⚠ 프로그램이 예기치 않게 종료됐습니다 (코드 3221225786)
+2026-04-07 10:02:53,910 [INFO] [AI 분석 서버] 시작 중...
+2026-04-07 10:02:53,918 [INFO] [AI 분석 서버] 실행됨 (PID 25768)
+2026-04-07 10:03:02,206 [INFO] [알람 모니터링] 시작 중...
+2026-04-07 10:03:02,211 [INFO] [알람 모니터링] 실행됨 (PID 28784)
+2026-04-07 10:03:04,214 [INFO] [알람 모니터링] ⚠ 프로그램이 예기치 않게 종료됐습니다 (코드 1)
+2026-04-07 10:03:09,037 [INFO] [알람 모니터링] 시작 중...
+2026-04-07 10:03:09,042 [INFO] [알람 모니터링] 실행됨 (PID 27708)
+2026-04-07 10:03:11,042 [INFO] [알람 모니터링] ⚠ 프로그램이 예기치 않게 종료됐습니다 (코드 1)
+2026-04-07 10:03:55,826 [INFO] 앱 정상 종료
+2026-04-07 10:03:57,826 [INFO] Python 3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)] / 플랫폼: win32
+2026-04-07 10:03:58,731 [INFO] 설정을 불러왔습니다.
+2026-04-07 10:04:03,348 [INFO] [AI 분석 서버] 🧹 잔여 프로세스 1개 종료: PID [25768]
+2026-04-07 10:04:06,837 [INFO] [알람 모니터링] 🧹 정리할 잔여 프로세스 없음
+2026-04-07 10:04:48,759 [INFO] [AI 분석 서버] 시작 중...
+2026-04-07 10:04:48,764 [INFO] [AI 분석 서버] 실행됨 (PID 9892)
+2026-04-07 10:05:00,791 [INFO] [AI 분석 서버] ⚠ 프로그램이 예기치 않게 종료됐습니다 (코드 3221225786)
+2026-04-07 10:05:03,276 [INFO] [AI 분석 서버] 시작 중...
+2026-04-07 10:05:03,282 [INFO] [AI 분석 서버] 실행됨 (PID 14752)
+2026-04-07 10:05:13,588 [INFO] [AI 분석 서버] 중지 중...
+2026-04-07 10:05:13,599 [INFO] [AI 분석 서버] 중지 완료
+2026-04-07 10:05:15,292 [INFO] [AI 분석 서버] ⚠ 프로그램이 예기치 않게 종료됐습니다 (코드 1)
+2026-04-07 10:10:23,325 [INFO] 앱 정상 종료

@@ -1,0 +1,171 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 1080" width="760" height="1080"
+     font-family="'Malgun Gothic','Apple SD Gothic Neo',sans-serif">
+
+  <rect width="760" height="1080" fill="#F8FAFC"/>
+
+  <!-- Header -->
+  <rect width="760" height="72" fill="#2563EB"/>
+  <text x="30" y="32" font-size="20" font-weight="bold" fill="white">AI 알람 시스템 관리자 — 사용 설명서</text>
+  <text x="30" y="56" font-size="12" fill="#BFDBFE">프로그램을 시작하고 중지하는 방법을 안내합니다.</text>
+
+  <!-- ── 화면 구성 ── -->
+  <text x="30" y="102" font-size="14" font-weight="bold" fill="#1E293B">화면 구성</text>
+
+  <!-- GUI mockup -->
+  <rect x="30" y="112" width="340" height="330" rx="8" fill="white" stroke="#CBD5E1" stroke-width="1.5"/>
+  <rect x="30" y="112" width="340" height="44" rx="8" fill="#2563EB"/>
+  <rect x="30" y="136" width="340" height="20" fill="#2563EB"/>
+  <text x="200" y="130" font-size="11" font-weight="bold" fill="white" text-anchor="middle">AI 알람 시스템 관리자</text>
+  <text x="200" y="148" font-size="9" fill="#BFDBFE" text-anchor="middle">프로그램을 시작하거나 중지할 수 있습니다.</text>
+
+  <!-- Card 1 -->
+  <rect x="44" y="164" width="148" height="148" rx="6" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+  <circle cx="58" cy="180" r="5" fill="#DC2626"/>
+  <text x="68" y="184" font-size="10" font-weight="bold" fill="#1E293B">AI 분석 서버</text>
+  <text x="50" y="198" font-size="8" fill="#64748B">이미지를 분석하고</text>
+  <text x="50" y="210" font-size="8" fill="#64748B">알람을 판단합니다.</text>
+  <text x="50" y="224" font-size="8" fill="#DC2626">● 중지됨</text>
+  <rect x="50" y="232" width="56" height="15" rx="3" fill="#2563EB"/>
+  <text x="78" y="243" font-size="7" fill="white" text-anchor="middle">▶ 창 표시</text>
+  <rect x="110" y="232" width="66" height="15" rx="3" fill="#3B82F6"/>
+  <text x="143" y="243" font-size="7" fill="white" text-anchor="middle">▶ 백그라운드</text>
+  <rect x="50" y="251" width="56" height="15" rx="3" fill="#F1F5F9" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="78" y="262" font-size="7" fill="#1E293B" text-anchor="middle">⬛ 중지</text>
+  <rect x="110" y="251" width="56" height="15" rx="3" fill="#FEF2F2" stroke="#FECACA" stroke-width="1"/>
+  <text x="138" y="262" font-size="7" fill="#DC2626" text-anchor="middle">🧹 정리</text>
+
+  <!-- Card 2 -->
+  <rect x="206" y="164" width="148" height="148" rx="6" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
+  <circle cx="220" cy="180" r="5" fill="#16A34A"/>
+  <text x="230" y="184" font-size="10" font-weight="bold" fill="#1E293B">알람 모니터링</text>
+  <text x="212" y="198" font-size="8" fill="#64748B">설비 상태를 모니터링</text>
+  <text x="212" y="210" font-size="8" fill="#64748B">하고 알람을 표시합니다.</text>
+  <text x="212" y="224" font-size="8" fill="#16A34A">● 실행 중 (PID 5820)</text>
+  <rect x="212" y="232" width="56" height="15" rx="3" fill="#2563EB"/>
+  <text x="240" y="243" font-size="7" fill="white" text-anchor="middle">▶ 창 표시</text>
+  <rect x="272" y="232" width="66" height="15" rx="3" fill="#3B82F6"/>
+  <text x="305" y="243" font-size="7" fill="white" text-anchor="middle">▶ 백그라운드</text>
+  <rect x="212" y="251" width="56" height="15" rx="3" fill="#F1F5F9" stroke="#E2E8F0" stroke-width="1"/>
+  <text x="240" y="262" font-size="7" fill="#1E293B" text-anchor="middle">⬛ 중지</text>
+  <rect x="272" y="251" width="56" height="15" rx="3" fill="#FEF2F2" stroke="#FECACA" stroke-width="1"/>
+  <text x="300" y="262" font-size="7" fill="#DC2626" text-anchor="middle">🧹 정리</text>
+
+  <text x="44" y="328" font-size="9" fill="#64748B">⚙ 고급 설정 ▾</text>
+  <rect x="44" y="336" width="310" height="52" rx="4" fill="#1E293B"/>
+  <text x="54" y="352" font-size="8" fill="#4ADE80" font-family="Consolas,monospace">[AI 분석 서버] 실행됨 (PID 5820)</text>
+  <text x="54" y="366" font-size="8" fill="#F87171" font-family="Consolas,monospace">[알람 모니터링] ⚠ 예기치 않게 종료됨 (코드 1)</text>
+  <text x="54" y="380" font-size="8" fill="#94A3B8" font-family="Consolas,monospace">[AI 분석 서버] 🧹 잔여 프로세스 1개 종료: [4421]</text>
+  <text x="200" y="420" font-size="9" fill="#94A3B8" text-anchor="middle">기록 지우기</text>
+
+  <!-- Callouts -->
+  <line x1="380" y1="180" x2="408" y2="180" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <polygon points="406,176 414,180 406,184" fill="#F59E0B"/>
+  <rect x="414" y="162" width="316" height="44" rx="6" fill="#FFFBEB" stroke="#FCD34D" stroke-width="1"/>
+  <text x="428" y="180" font-size="11" font-weight="bold" fill="#92400E">① 상태 표시등</text>
+  <text x="428" y="196" font-size="10" fill="#78350F">🔴 빨간색 = 중지됨   🟢 초록색 = 실행 중   🟡 노란색 = 시작 중</text>
+
+  <line x1="380" y1="238" x2="408" y2="238" stroke="#2563EB" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <polygon points="406,234 414,238 406,242" fill="#2563EB"/>
+  <rect x="414" y="218" width="316" height="52" rx="6" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1"/>
+  <text x="428" y="236" font-size="11" font-weight="bold" fill="#1E40AF">② 시작 버튼 (2가지)</text>
+  <text x="428" y="252" font-size="10" fill="#1D4ED8">▶ 창 표시 — 콘솔 창을 보면서 실행</text>
+  <text x="428" y="266" font-size="10" fill="#1D4ED8">▶ 백그라운드 — 창 없이 조용히 실행</text>
+
+  <line x1="380" y1="290" x2="408" y2="290" stroke="#DC2626" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <polygon points="406,286 414,290 406,294" fill="#DC2626"/>
+  <rect x="414" y="274" width="316" height="30" rx="6" fill="#FEF2F2" stroke="#FECACA" stroke-width="1"/>
+  <text x="428" y="290" font-size="11" font-weight="bold" fill="#991B1B">③ 중지 버튼</text>
+  <text x="428" y="302" font-size="10" fill="#B91C1C">실행 중인 프로그램을 안전하게 종료합니다.</text>
+
+  <line x1="380" y1="320" x2="408" y2="320" stroke="#DC2626" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <polygon points="406,316 414,320 406,324" fill="#DC2626"/>
+  <rect x="414" y="308" width="316" height="44" rx="6" fill="#FEF2F2" stroke="#FECACA" stroke-width="1"/>
+  <text x="428" y="324" font-size="11" font-weight="bold" fill="#991B1B">④ 🧹 정리 버튼</text>
+  <text x="428" y="338" font-size="10" fill="#B91C1C">관리자 밖에서 실행 중인 잔여 프로세스를 강제 종료.</text>
+  <text x="428" y="350" font-size="10" fill="#B91C1C">프로그램이 꼬였을 때 사용하세요.</text>
+
+  <line x1="380" y1="362" x2="408" y2="362" stroke="#7C3AED" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <polygon points="406,358 414,362 406,366" fill="#7C3AED"/>
+  <rect x="414" y="350" width="316" height="30" rx="6" fill="#F5F3FF" stroke="#DDD6FE" stroke-width="1"/>
+  <text x="428" y="366" font-size="11" font-weight="bold" fill="#5B21B6">⑤ 실행 기록</text>
+  <text x="428" y="378" font-size="10" fill="#6D28D9">시작·중지·오류·정리 내역이 실시간으로 기록됩니다.</text>
+
+  <!-- ── 사용 순서 ── -->
+  <text x="30" y="462" font-size="14" font-weight="bold" fill="#1E293B">사용 순서</text>
+
+  <rect x="30" y="474" width="218" height="96" rx="8" fill="white" stroke="#E2E8F0" stroke-width="1"/>
+  <rect x="30" y="474" width="218" height="32" rx="8" fill="#EFF6FF"/>
+  <rect x="30" y="490" width="218" height="16" fill="#EFF6FF"/>
+  <circle cx="52" cy="490" r="10" fill="#2563EB"/>
+  <text x="52" y="494" font-size="10" font-weight="bold" fill="white" text-anchor="middle">1</text>
+  <text x="68" y="494" font-size="11" font-weight="bold" fill="#1E40AF">프로그램 실행</text>
+  <text x="44" y="520" font-size="11" fill="#475569">main.py 파일을 더블클릭하거나</text>
+  <text x="44" y="536" font-size="11" fill="#475569">바탕화면 바로가기를 실행합니다.</text>
+  <text x="44" y="558" font-size="10" fill="#94A3B8">※ 관리자 권한 불필요</text>
+
+  <text x="258" y="524" font-size="22" fill="#CBD5E1" text-anchor="middle">→</text>
+
+  <rect x="274" y="474" width="218" height="96" rx="8" fill="white" stroke="#E2E8F0" stroke-width="1"/>
+  <rect x="274" y="474" width="218" height="32" rx="8" fill="#F0FDF4"/>
+  <rect x="274" y="490" width="218" height="16" fill="#F0FDF4"/>
+  <circle cx="296" cy="490" r="10" fill="#16A34A"/>
+  <text x="296" y="494" font-size="10" font-weight="bold" fill="white" text-anchor="middle">2</text>
+  <text x="312" y="494" font-size="11" font-weight="bold" fill="#15803D">AI 분석 서버 시작</text>
+  <text x="288" y="520" font-size="11" fill="#475569">'AI 분석 서버' 카드에서</text>
+  <text x="288" y="536" font-size="11" fill="#475569">▶ 백그라운드 버튼을 클릭합니다.</text>
+  <text x="288" y="558" font-size="10" fill="#94A3B8">※ 상태등이 🟢 초록으로 바뀝니다.</text>
+
+  <text x="502" y="524" font-size="22" fill="#CBD5E1" text-anchor="middle">→</text>
+
+  <rect x="518" y="474" width="218" height="96" rx="8" fill="white" stroke="#E2E8F0" stroke-width="1"/>
+  <rect x="518" y="474" width="218" height="32" rx="8" fill="#FFF7ED"/>
+  <rect x="518" y="490" width="218" height="16" fill="#FFF7ED"/>
+  <circle cx="540" cy="490" r="10" fill="#D97706"/>
+  <text x="540" y="494" font-size="10" font-weight="bold" fill="white" text-anchor="middle">3</text>
+  <text x="556" y="494" font-size="11" font-weight="bold" fill="#92400E">알람 모니터링 시작</text>
+  <text x="532" y="520" font-size="11" fill="#475569">'알람 모니터링' 카드에서</text>
+  <text x="532" y="536" font-size="11" fill="#475569">▶ 창 표시 버튼을 클릭합니다.</text>
+  <text x="532" y="558" font-size="10" fill="#94A3B8">※ 모니터링 창이 화면에 나타납니다.</text>
+
+  <!-- ── 🧹 정리 버튼 안내 ── -->
+  <text x="30" y="600" font-size="14" font-weight="bold" fill="#1E293B">🧹 정리 버튼 — 언제 사용하나요?</text>
+  <rect x="30" y="612" width="700" height="68" rx="8" fill="#FEF2F2" stroke="#FECACA" stroke-width="1"/>
+  <text x="50" y="634" font-size="12" font-weight="bold" fill="#991B1B">프로그램이 비정상 종료된 후 다시 시작이 안 될 때 사용합니다.</text>
+  <text x="50" y="654" font-size="11" fill="#7F1D1D">• 중지 버튼을 눌렀는데도 프로그램이 계속 실행 중일 때</text>
+  <text x="50" y="670" font-size="11" fill="#7F1D1D">• PC를 재시작하지 않고 완전히 초기화하고 싶을 때  →  🧹 정리 후 ▶ 시작</text>
+
+  <!-- ── 오류 자동 감지 ── -->
+  <text x="30" y="710" font-size="14" font-weight="bold" fill="#1E293B">오류 자동 감지</text>
+  <rect x="30" y="722" width="700" height="60" rx="8" fill="#FEF2F2" stroke="#FECACA" stroke-width="1"/>
+  <text x="50" y="744" font-size="12" font-weight="bold" fill="#991B1B">⚠  프로그램이 예기치 않게 종료되면 자동으로 알림 팝업이 표시됩니다.</text>
+  <text x="50" y="762" font-size="11" fill="#7F1D1D">• 시작 직후 종료 — 2초 후 감지하여 즉시 알림</text>
+  <text x="50" y="778" font-size="11" fill="#7F1D1D">• 실행 중 종료 — 10초 간격으로 상태를 확인하여 알림 (상태등이 🔴 빨간색으로 변경)</text>
+
+  <!-- ── 종료 방법 ── -->
+  <rect x="30" y="802" width="700" height="44" rx="8" fill="white" stroke="#E2E8F0" stroke-width="1"/>
+  <rect x="30" y="802" width="5" height="44" rx="3" fill="#DC2626"/>
+  <text x="48" y="820" font-size="13" font-weight="bold" fill="#1E293B">종료 방법</text>
+  <text x="48" y="838" font-size="11" fill="#475569">각 카드의 ⬛ 중지 버튼을 클릭하세요. 관리자 창을 그냥 닫으면 백그라운드 프로그램은 계속 실행됩니다.</text>
+
+  <!-- ── 문제 해결 ── -->
+  <text x="30" y="876" font-size="14" font-weight="bold" fill="#1E293B">문제 해결</text>
+
+  <rect x="30" y="888" width="340" height="96" rx="8" fill="#FFFBEB" stroke="#FCD34D" stroke-width="1"/>
+  <text x="48" y="910" font-size="12" font-weight="bold" fill="#92400E">🟡 시작해도 바로 빨간색으로 바뀜</text>
+  <text x="48" y="928" font-size="11" fill="#78350F">→ 🧹 정리 버튼을 누른 후 다시 시작하세요.</text>
+  <text x="48" y="944" font-size="11" fill="#78350F">→ 고급 설정에서 파일 경로를 확인하세요.</text>
+  <text x="48" y="960" font-size="11" fill="#78350F">→ 장치(COM 포트 등) 연결 상태를 확인하세요.</text>
+  <text x="48" y="976" font-size="11" fill="#78350F">→ 실행 기록을 담당자에게 전달하세요.</text>
+
+  <rect x="390" y="888" width="340" height="96" rx="8" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1"/>
+  <text x="408" y="910" font-size="12" font-weight="bold" fill="#15803D">🟢 정상 운영 상태</text>
+  <text x="408" y="928" font-size="11" fill="#166534">→ 두 프로그램 모두 초록색 상태등 확인</text>
+  <text x="408" y="944" font-size="11" fill="#166534">→ 관리자 창은 최소화해도 됩니다.</text>
+  <text x="408" y="960" font-size="11" fill="#166534">→ 오류 발생 시 팝업으로 자동 알림됩니다.</text>
+  <text x="408" y="976" font-size="11" fill="#166534">→ 문제 시 🧹 정리 후 재시작하세요.</text>
+
+  <!-- Footer -->
+  <rect x="0" y="1058" width="760" height="22" fill="#F1F5F9"/>
+  <text x="380" y="1073" font-size="10" fill="#94A3B8" text-anchor="middle">AI 알람 시스템 관리자 — 문의: 담당 개발자에게 연락하세요</text>
+
+</svg>

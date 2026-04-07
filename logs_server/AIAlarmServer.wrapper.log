@@ -1,0 +1,137 @@
+2026-04-07 09:30:58,471 DEBUG - Starting WinSW in console mode
+2026-04-07 09:30:58,541 INFO  - Installing service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:30:58,545 ERROR - A service with ID 'AIAlarmServer' already exists.
+2026-04-07 09:30:58,546 FATAL - Failed to install the service. The specified service already exists.
+2026-04-07 09:31:24,306 DEBUG - Starting WinSW in console mode
+2026-04-07 09:31:24,331 INFO  - Stopping service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:31:24,339 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' has already stopped.
+2026-04-07 09:31:24,852 DEBUG - Starting WinSW in console mode
+2026-04-07 09:31:24,874 INFO  - Uninstalling service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:31:24,879 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' was uninstalled successfully.
+2026-04-07 09:31:32,335 DEBUG - Starting WinSW in console mode
+2026-04-07 09:31:32,356 INFO  - Installing service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:31:32,378 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' was installed successfully.
+2026-04-07 09:31:36,390 DEBUG - Starting WinSW in console mode
+2026-04-07 09:31:36,415 INFO  - Starting service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:31:36,741 DEBUG - Starting WinSW in service mode
+2026-04-07 09:31:36,762 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' started successfully.
+2026-04-07 09:31:36,851 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:31:36,878 INFO  - Started process 26832
+2026-04-07 09:31:36,889 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:31:42,402 DEBUG - Starting WinSW in service mode
+2026-04-07 09:31:42,504 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:31:42,529 INFO  - Started process 14416
+2026-04-07 09:31:42,539 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:31:53,027 DEBUG - Starting WinSW in service mode
+2026-04-07 09:31:53,128 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:31:53,156 INFO  - Started process 21720
+2026-04-07 09:31:53,167 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:32:13,678 DEBUG - Starting WinSW in service mode
+2026-04-07 09:32:13,781 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:32:13,806 INFO  - Started process 12384
+2026-04-07 09:32:13,816 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:32:24,472 DEBUG - Starting WinSW in console mode
+2026-04-07 09:32:24,497 INFO  - Stopping service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:32:24,505 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' has already stopped.
+2026-04-07 09:32:34,304 DEBUG - Starting WinSW in service mode
+2026-04-07 09:32:34,402 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:32:34,425 INFO  - Started process 31316
+2026-04-07 09:32:34,435 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:32:54,933 DEBUG - Starting WinSW in service mode
+2026-04-07 09:32:55,031 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:32:55,057 INFO  - Started process 30148
+2026-04-07 09:32:55,066 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:33:15,555 DEBUG - Starting WinSW in service mode
+2026-04-07 09:33:15,654 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:33:15,676 INFO  - Started process 25952
+2026-04-07 09:33:15,686 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:33:36,177 DEBUG - Starting WinSW in service mode
+2026-04-07 09:33:36,278 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:33:36,300 INFO  - Started process 28288
+2026-04-07 09:33:36,311 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:33:56,822 DEBUG - Starting WinSW in service mode
+2026-04-07 09:33:56,927 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:33:56,954 INFO  - Started process 23948
+2026-04-07 09:33:56,966 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:34:17,488 DEBUG - Starting WinSW in service mode
+2026-04-07 09:34:17,586 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:34:17,610 INFO  - Started process 17552
+2026-04-07 09:34:17,620 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:34:19,260 DEBUG - Starting WinSW in console mode
+2026-04-07 09:34:19,287 INFO  - Starting service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:34:19,622 DEBUG - Starting WinSW in service mode
+2026-04-07 09:34:19,665 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' started successfully.
+2026-04-07 09:34:19,753 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:34:19,776 INFO  - Started process 26728
+2026-04-07 09:34:19,786 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:34:38,104 DEBUG - Starting WinSW in service mode
+2026-04-07 09:34:38,207 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:34:38,231 INFO  - Started process 12828
+2026-04-07 09:34:38,241 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:34:40,270 DEBUG - Starting WinSW in service mode
+2026-04-07 09:34:40,369 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:34:40,396 INFO  - Started process 30860
+2026-04-07 09:34:40,407 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:34:58,760 DEBUG - Starting WinSW in service mode
+2026-04-07 09:34:58,861 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:34:58,894 INFO  - Started process 30832
+2026-04-07 09:34:58,907 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:35:00,901 DEBUG - Starting WinSW in service mode
+2026-04-07 09:35:01,000 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:35:01,023 INFO  - Started process 31068
+2026-04-07 09:35:01,033 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:35:19,502 DEBUG - Starting WinSW in service mode
+2026-04-07 09:35:19,619 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:35:19,646 INFO  - Started process 21412
+2026-04-07 09:35:19,658 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:35:21,593 DEBUG - Starting WinSW in service mode
+2026-04-07 09:35:21,704 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:35:21,729 INFO  - Started process 30428
+2026-04-07 09:35:21,740 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:35:40,190 DEBUG - Starting WinSW in service mode
+2026-04-07 09:35:40,289 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:35:40,315 INFO  - Started process 30832
+2026-04-07 09:35:40,325 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:35:42,246 DEBUG - Starting WinSW in service mode
+2026-04-07 09:35:42,351 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:35:42,379 INFO  - Started process 8720
+2026-04-07 09:35:42,391 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:36:00,833 DEBUG - Starting WinSW in service mode
+2026-04-07 09:36:00,932 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:36:00,956 INFO  - Started process 29980
+2026-04-07 09:36:00,966 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:36:02,904 DEBUG - Starting WinSW in console mode
+2026-04-07 09:36:02,929 INFO  - Stopping service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:36:02,937 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' has already stopped.
+2026-04-07 09:36:02,924 DEBUG - Starting WinSW in service mode
+2026-04-07 09:36:03,034 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:36:03,061 INFO  - Started process 28912
+2026-04-07 09:36:03,073 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:36:21,525 DEBUG - Starting WinSW in service mode
+2026-04-07 09:36:21,663 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:36:21,687 INFO  - Started process 20904
+2026-04-07 09:36:21,697 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:36:48,518 DEBUG - Starting WinSW in service mode
+2026-04-07 09:36:48,648 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:36:48,675 INFO  - Started process 31152
+2026-04-07 09:36:48,685 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:37:09,172 DEBUG - Starting WinSW in service mode
+2026-04-07 09:37:09,272 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:37:09,294 INFO  - Started process 3416
+2026-04-07 09:37:09,304 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:37:29,795 DEBUG - Starting WinSW in service mode
+2026-04-07 09:37:29,902 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:37:29,928 INFO  - Started process 29228
+2026-04-07 09:37:29,940 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:37:50,491 DEBUG - Starting WinSW in service mode
+2026-04-07 09:37:50,594 INFO  - Starting C:\Users\uidg3913\AppData\Local\Programs\Python\Python312\pythonw.exe "C:\00.DX\17. Stator-AlarmAgent\Code\server\main.py"
+2026-04-07 09:37:50,620 INFO  - Started process 29988
+2026-04-07 09:37:50,631 DEBUG - Forwarding logs of the process System.Diagnostics.Process (pythonw) to WinSW.SizeBasedRollingLogAppender
+2026-04-07 09:43:15,704 DEBUG - Starting WinSW in console mode
+2026-04-07 09:43:15,728 INFO  - Stopping service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:43:15,736 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' has already stopped.
+2026-04-07 09:43:16,218 DEBUG - Starting WinSW in console mode
+2026-04-07 09:43:16,239 INFO  - Uninstalling service 'AI Alarm Server (server/main.py) (AIAlarmServer)'...
+2026-04-07 09:43:16,244 INFO  - Service 'AI Alarm Server (server/main.py) (AIAlarmServer)' was uninstalled successfully.
+2026-04-07 09:43:20,821 DEBUG - Starting WinSW in console mode
+2026-04-07 09:43:20,849 FATAL - The specified service does not exist as an installed service.
