@@ -8,16 +8,15 @@ def main():
     interval_sec = 5
     save_path = r''
     os.makedirs(save_path, exist_ok=True)
-    
-    windows = enum_windows()
-    windows = [a for a in windows if "hmi_panel" in a[1]]
         
     for _ in range(int(logging_time_in_minute*60/interval_sec)):
+        windows = enum_windows()
+        windows = [a for a in windows if "hmi_panel" in a[1]]
         now = datetime.datetime.now()
         timestamp = now.strftime("%Y%m%d_%H%M%S")
         for idx, win in enumerate(windows):
             try:
-                cv2.imwrite(os.path.join(save_path, timestamp+f"_{idx:3d}.png"), capturing(win[0]))
+                cv2.imwrite(os.path.join(save_path, timestamp+f"_{idx:03d}.png"), capturing(win[0]))
             except Exception as e:
                 print(e)
         time.sleep(interval_sec)
@@ -60,7 +59,7 @@ def enum_windows():
         if win32gui.IsWindowVisible(hwnd):
             title = win32gui.GetWindowText(hwnd)
             if title.strip():
-                win_list.append([hwnd, title, win32gui.GetWindowRect(hwnd)])
+                win_list.append([hwnd, title])
     win32gui.EnumWindows(callback, None)
     return win_list
 

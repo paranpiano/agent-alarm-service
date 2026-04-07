@@ -7,13 +7,11 @@ import concurrent.futures
 from PIL import Image, ImageTk
 
 global open_windows, pause_event
-global Logging_path, target_path, Trk_ref_image_path
-
-# Logging_path = r'AAAAAAAAAAAAAAAAAAA'
-target_path = r'C:\Users\uiv14247\OneDrive - Vitesco Technologies\Desktop\Stator_Trk_Monitoring'
-# Trk_ref_image_path = r'AAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+global Logging_path
 
 # ser = serial.Serial('COM3', 9600, timeout=1)
+
+Logging_path = r''
 
 user32 = ctypes.windll.user32
 open_windows = {}
@@ -33,6 +31,14 @@ pause_event.set()
 root = tk.Tk()
 root.withdraw()
 
+def logging(text):
+    global Logging_path
+    os.makedirs(os.path.join(Logging_path, "Error Log"), exist_ok=True)
+    now_str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    with open(os.path.join(Logging_path, "Error Log", f"{now_str}.txt"), 'a', encoding='utf-8') as F:
+        F.write(text)
+        F.write('\n')
+
 def LED_OK():
     global ser
     # ser.write(bytes([0, 255, 0]))
@@ -51,33 +57,19 @@ def loop_led_NG(flag):
         # ser.write(bytes([0, 0, 0]))
         time.sleep(0.5)
 
-def loading_ref_images():
-    global Trk_ref_image_path
-    ref_images = {
-        "Trk": cv2.imread(Trk_ref_image_path)
-    }
-    return ref_images
-
-def loading_target_images():
-    global target_path
-    target_list = glob.glob(os.path.join(target_path, "*.png"))
-    target_img_list = [[cv2.imread(a), os.path.basename(a).replace(".png","")] for a in target_list]
-    return target_img_list
-
 def loop_sound(flag, sound_path):
     global stop_sound_events
 
-    # 이벤트가 없으면 생성
     if flag not in stop_sound_events:
         stop_sound_events[flag] = threading.Event()
 
     event = stop_sound_events[flag]
 
-    # 반복
     while not event.is_set():
         try:
             play_sound(sound_path)
-        except:
+        except Exception as e:
+            logging(e)
             pass
         time.sleep(7)
 
@@ -125,11 +117,11 @@ def capturing(hwnd):
 
     except Exception as e:
         print(f"{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}: Capture error:", e)
+        logging(e)
         return None
 
 def send_http(img):
     url = "http://127.0.0.1:8000/api/v1/analyze"
-    results = []
     now_str = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
     name = f"hmi_{random.randint(1, 10000)}_{now_str}.png"
 
@@ -150,7 +142,8 @@ def send_http(img):
         response.raise_for_status()
         js = response.json()
         return js.get("status", "UNKNOWN")
-    except:
+    except Exception as e:
+        logging(e)
         return "UNKNOWN"
 
 def pause_timer():
@@ -167,7 +160,8 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
         for f, event in stop_sound_events.items():
             try:
                 event.set()
-            except:
+            except Exception as e:
+                logging(e)
                 pass
         stop_sound_events.clear()
         playing_sound_threads.clear()
@@ -181,6 +175,7 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
             try:
                 win.destroy()
             except Exception as e:
+                logging(e)
                 print(f"{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}: {e}")
         open_windows.clear()
         
@@ -211,14 +206,16 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
         if "UNKNOWN" in open_windows:
             try:
                 open_windows["UNKNOWN"].destroy()
-            except:
+            except Exception as e:
+                logging(e)
                 pass
             del open_windows["UNKNOWN"]
             
         if "Machine_Missing" in open_windows:
             try:
                 open_windows["Machine_Missing"].destroy()
-            except:
+            except Exception as e:
+                logging(e)
                 pass
             del open_windows["Machine_Missing"]
 
@@ -288,7 +285,8 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
         if "Machine_Missing" in open_windows:
             try:
                 open_windows["Machine_Missing"].destroy()
-            except:
+            except Exception as e:
+                logging(e)
                 pass
             del open_windows["Machine_Missing"]
 
@@ -351,7 +349,8 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
         if "UNKNOWN" in open_windows:
             try:
                 open_windows["UNKNOWN"].destroy()
-            except:
+            except Exception as e:
+                logging(e)
                 pass
             del open_windows["UNKNOWN"]
 
@@ -414,9 +413,9 @@ def main():
         windows = [a for a in windows if "hmi_panel" in a[1]]
         filtered_windows = [w for w in windows if w[0] not in ignore_hwnds]
 
-        if len(windows) < 4:
+        if len(windows) < 6:
             alarm_pop_up("Machine_Missing", UI_Images)
-        elif len(windows) >= 4:
+        elif len(windows) >= 6:
             filtered_windows.sort()
             for w in filtered_windows:
                 # windows_images.append(capturing(w[0]))
@@ -433,7 +432,8 @@ def main():
                     hwnd = future_to_hwnd[future]
                     try:
                         status = future.result()
-                    except:
+                    except Exception as e:
+                        logging(e)
                         status = "UNKNOWN"
                 
                     results.append({
@@ -455,23 +455,6 @@ def main():
             
         time.sleep(30)
 
-def test():
-    # windows = enum_windows()
-    print("test thread start")
-    flag = ["OK", "NG", "UNKNOWN", "Machine_Missing"]
-    UI_Images = {
-        "NG": ImageTk.PhotoImage(Image.open(os.path.join(os.getcwd(), "UI_Images", "Circulation_Error.png"))),
-        "UNKNOWN": ImageTk.PhotoImage(Image.open(os.path.join(os.getcwd(), "UI_Images", "Check_Remote_viewer_and_Scroll.png"))),
-        "Machine_Missing": ImageTk.PhotoImage(Image.open(os.path.join(os.getcwd(), "UI_Images", "Machine_Missing.png")))
-    }
-    while True:
-        pause_event.wait()
-        alarm_pop_up(flag[random.randint(1, 3)], UI_Images)
-        time.sleep(20)
-        alarm_pop_up("OK", UI_Images)
-        time.sleep(20)
-
 if __name__ == "__main__":
     threading.Thread(target=main, daemon=True).start()
-    # threading.Thread(target=test, daemon=True).start()
     root.mainloop()
