@@ -18,7 +18,9 @@ import os
 import sys
 import threading
 import tkinter as tk
-from datetime import date
+from datetime import date, datetime, timezone
+
+import requests
 
 # log_viewer 폴더 안에서 직접 실행 시 경로 보정
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -39,6 +41,12 @@ def load_config() -> dict:
         "alert_position": "우측",
         "alert_size_ratio": 0.25,
         "days": 1,
+        "no_update_alert_minutes": 60,
+        "no_update_alert_enabled": True,
+        "sns_enabled": True,
+        "sns_api_url": "",
+        "sns_topic_arn": "",
+        "sns_protocol": "email",
     }
     if not os.path.exists(_CONFIG_PATH):
         logger.warning("config 파일 없음, 기본값 사용: %s", _CONFIG_PATH)
@@ -60,6 +68,8 @@ class BackgroundMonitor:
         self._root = root
         self._alert_win: NgAlertWindow | None = None
         self._last_seen_timestamp: str = ""
+        self._last_update_time: datetime | None = None   # 마지막으로 새 데이터가 온 시각
+        self._no_update_alert_sent: bool = False          # 무업데이트 알림 중복 방지
         self._poll_job = None
 
         # 최초 폴링 시작
@@ -92,6 +102,7 @@ class BackgroundMonitor:
     def _on_loaded(self, logs: list[dict], cfg: dict) -> None:
         logs = sorted(logs, key=lambda l: str(l.get("timestamp", "")), reverse=True)
         self._check_ng_alert(logs, cfg)
+        self._check_no_update_alert(logs, cfg)
         self._schedule_next(cfg)
 
     def _schedule_next(self, cfg: dict) -> None:
@@ -118,6 +129,10 @@ class BackgroundMonitor:
 
         if not new_logs:
             return
+
+        # 새 데이터가 있으면 마지막 업데이트 시각 갱신 + 무업데이트 알림 플래그 초기화
+        self._last_update_time = datetime.now(timezone.utc)
+        self._no_update_alert_sent = False
 
         ng_logs = [l for l in new_logs if l.get("status") == "NG"]
 
@@ -152,6 +167,92 @@ class BackgroundMonitor:
         if self._alert_win is not None:
             self._alert_win.close()
             self._alert_win = None
+
+    # ------------------------------------------------------------------
+    # 무업데이트 감지 및 SNS 알림
+    # ------------------------------------------------------------------
+
+    def _check_no_update_alert(self, logs: list[dict], cfg: dict) -> None:
+        """마지막 데이터 수신 후 설정 시간(기본 60분) 이상 업데이트 없으면 SNS 알림 발송."""
+        if not cfg.get("no_update_alert_enabled", True):
+            return
+
+        threshold_minutes = int(cfg.get("no_update_alert_minutes", 60))
+
+        # 아직 한 번도 데이터를 받지 못한 경우 (최초 기동 직후) 는 스킵
+        if self._last_update_time is None:
+            # 로그가 있으면 지금을 기준으로 초기화
+            if logs:
+                self._last_update_time = datetime.now(timezone.utc)
+            return
+
+        elapsed_minutes = (datetime.now(timezone.utc) - self._last_update_time).total_seconds() / 60
+
+        if elapsed_minutes >= threshold_minutes and not self._no_update_alert_sent:
+            logger.warning("%.1f분 동안 새 데이터 없음 - SNS 알림 발송 시도", elapsed_minutes)
+            sent = self._send_no_update_sns(cfg, elapsed_minutes)
+            if sent:
+                self._no_update_alert_sent = True
+
+    def _send_no_update_sns(self, cfg: dict, elapsed_minutes: float) -> bool:
+        """SNS API Gateway를 통해 무업데이트 알림 이메일 발송."""
+        sns_enabled = cfg.get("sns_enabled", True)
+        api_url = cfg.get("sns_api_url", "")
+        topic_arn = cfg.get("sns_topic_arn", "")
+        protocol = cfg.get("sns_protocol", "email")
+
+        if not sns_enabled:
+            logger.info("SNS 비활성화 상태 - 무업데이트 알림 스킵")
+            return False
+
+        if not api_url or not topic_arn:
+            logger.warning("SNS 설정 누락 (sns_api_url / sns_topic_arn) - 알림 스킵")
+            return False
+
+        now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+        last_str = (
+            self._last_update_time.strftime("%Y-%m-%d %H:%M:%S UTC")
+            if self._last_update_time
+            else "N/A"
+        )
+
+        subject = f"[AI Alarm Service Off] No Data Update for {int(elapsed_minutes)} Minutes"
+        message = (
+            f"AI Alarm Service has not received any new data for over {int(elapsed_minutes)} minutes.\n"
+            f"\n"
+            f"Last Update   : {last_str}\n"
+            f"Detected At   : {now_str}\n"
+            f"Elapsed Time  : {int(elapsed_minutes)} minutes\n"
+            f"\n"
+            f"Please check the AI Alarm Server and ensure it is running properly.\n"
+            f"If the server has stopped, restart it immediately to resume monitoring.\n"
+        )
+
+        payload = {
+            "topicArn": topic_arn,
+            "subject": subject,
+            "message": message,
+            "protocol": protocol,
+        }
+        url = f"{api_url.rstrip('/')}?action=publishMessage"
+
+        _MAX_RETRIES = 3
+        for attempt in range(1, _MAX_RETRIES + 1):
+            try:
+                resp = requests.post(url, json=payload, timeout=10)
+                resp.raise_for_status()
+                data = resp.json()
+                logger.info(
+                    "무업데이트 SNS 알림 발송 성공 (attempt %d, messageId=%s)",
+                    attempt,
+                    data.get("messageId", "unknown"),
+                )
+                return True
+            except requests.RequestException as exc:
+                logger.warning("SNS 알림 발송 실패 (attempt %d/%d): %s", attempt, _MAX_RETRIES, exc)
+
+        logger.error("SNS 알림 발송 %d회 모두 실패", _MAX_RETRIES)
+        return False
 
 
 def main() -> None:
