@@ -1,0 +1,7 @@
+{
+  "api_url": "https://j28ud38ww4-vpce-0ad8bea3eea59f0ed.execute-api.eu-central-1.amazonaws.com/prod/logs",
+  "interval_sec": 30,
+  "alert_position": "우측",
+  "alert_size_ratio": 0.25,
+  "days": 1
+}
