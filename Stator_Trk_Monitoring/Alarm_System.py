@@ -398,8 +398,8 @@ def main():
     while True:
         print("\n\n")
         now_ts = time.time()
-        NG_hwnd = [item for item in NG_hwnd if now_ts - item["timestamp"] < 600]
-        UNKNOWN_hwnd = [item for item in UNKNOWN_hwnd if now_ts - item["timestamp"] < 300]
+        NG_hwnd = [item for item in NG_hwnd if now_ts - item["timestamp"] < 1800]
+        UNKNOWN_hwnd = [item for item in UNKNOWN_hwnd if now_ts - item["timestamp"] < 1800]
         
         print(f"NG_hwnd: {NG_hwnd}")
         print(f"UNKNOWN_hwnd: {UNKNOWN_hwnd}")
