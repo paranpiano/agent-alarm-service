@@ -1,4 +1,4 @@
-"""Cloud log API 클라이언트 - API Gateway를 통해 DynamoDB 로그를 조회합니다."""
+"""Cloud log API client - queries DynamoDB logs via API Gateway."""
 
 import logging
 from datetime import date, timedelta

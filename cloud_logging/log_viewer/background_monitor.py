@@ -1,15 +1,15 @@
-"""백그라운드 NG 모니터 - GUI 없이 실행, NG 발생 시 경고창만 표시.
+"""Background NG Monitor - runs without a GUI; shows an alert window only when NG occurs.
 
-실행:
-    python background_monitor.py                  (log_viewer 폴더 안에서)
-    python -m log_viewer.background_monitor       (프로젝트 루트에서)
+Usage:
+    python background_monitor.py                  (inside the log_viewer folder)
+    python -m log_viewer.background_monitor       (from the project root)
 
-config 파일: monitor_config.json
+config file: monitor_config.json
     - api_url        : API Gateway URL
-    - interval_sec   : 폴링 주기 (기본 30초)
-    - alert_position : 경고창 위치 (우측/좌측/상단/하단)
-    - alert_size_ratio: 경고창 크기 비율 (0.1 ~ 0.9)
-    - days           : 조회 일수 (기본 1)
+    - interval_sec   : polling interval in seconds (default 30)
+    - alert_position : alert window position (right/left/top/bottom)
+    - alert_size_ratio: alert window size ratio (0.1 ~ 0.9)
+    - days           : number of days to query (default 1)
 """
 
 import json
@@ -22,7 +22,7 @@ from datetime import date, datetime, timezone
 
 import requests
 
-# log_viewer 폴더 안에서 직접 실행 시 경로 보정
+# Path correction when running directly inside the log_viewer folder
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from api_client import LogApiClient, DEFAULT_API_URL
@@ -34,22 +34,23 @@ _CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "monitor
 
 
 def load_config() -> dict:
-    """monitor_config.json 로드. 파일 없으면 기본값 반환."""
+    """Load monitor_config.json. Returns defaults if the file is missing."""
     defaults = {
         "api_url": DEFAULT_API_URL,
         "interval_sec": 30,
-        "alert_position": "우측",
+        "alert_position": "right",
         "alert_size_ratio": 0.25,
         "days": 1,
         "no_update_alert_minutes": 60,
         "no_update_alert_enabled": True,
-        "sns_enabled": True,
         "sns_api_url": "",
-        "sns_topic_arn": "",
-        "sns_protocol": "email",
+        "email_alert_enabled": True,
+        "email_topic_arn": "",
+        "sms_alert_enabled": False,
+        "sms_topic_arn": "",
     }
     if not os.path.exists(_CONFIG_PATH):
-        logger.warning("config 파일 없음, 기본값 사용: %s", _CONFIG_PATH)
+        logger.warning("config file not found, using defaults: %s", _CONFIG_PATH)
         return defaults
     try:
         with open(_CONFIG_PATH, encoding="utf-8") as f:
@@ -57,30 +58,31 @@ def load_config() -> dict:
         defaults.update(data)
         return defaults
     except Exception as exc:
-        logger.warning("config 로드 실패 (%s), 기본값 사용", exc)
+        logger.warning("config load failed (%s), using defaults", exc)
         return defaults
 
 
 class BackgroundMonitor:
-    """백그라운드 폴링 + NG 경고창 관리."""
+    """Background polling and NG alert window management."""
 
     def __init__(self, root: tk.Tk) -> None:
         self._root = root
         self._alert_win: NgAlertWindow | None = None
         self._last_seen_timestamp: str = ""
-        self._last_update_time: datetime | None = None   # 마지막으로 새 데이터가 온 시각
-        self._no_update_alert_sent: bool = False          # 무업데이트 알림 중복 방지
+        self._active_ng_equipments: set[str] = set()     # equipment names currently in NG state
+        self._last_update_time: datetime | None = None   # timestamp of the last received data
+        self._no_update_alert_sent: bool = False          # deduplicates the no-update alert
         self._poll_job = None
 
-        # 최초 폴링 시작
+        # Start the first poll
         self._root.after(500, self._poll)
 
     # ------------------------------------------------------------------
-    # 폴링
+    # Polling
     # ------------------------------------------------------------------
 
     def _poll(self) -> None:
-        """config를 매번 다시 읽어 설정 변경을 즉시 반영."""
+        """Reload config on every cycle so config changes take effect immediately."""
         cfg = load_config()
         client = LogApiClient(api_url=cfg["api_url"])
         days = max(1, int(cfg.get("days", 1)))
@@ -94,7 +96,7 @@ class BackgroundMonitor:
                     logs = client.get_logs_range(days=days)
                 self._root.after(0, lambda: self._on_loaded(logs, cfg))
             except Exception as exc:
-                logger.error("로그 조회 실패: %s", exc)
+                logger.error("Failed to fetch logs: %s", exc)
                 self._root.after(0, lambda: self._schedule_next(cfg))
 
         threading.Thread(target=_fetch, daemon=True).start()
@@ -106,56 +108,59 @@ class BackgroundMonitor:
         self._schedule_next(cfg)
 
     def _schedule_next(self, cfg: dict) -> None:
-        interval = max(5, int(cfg.get("interval_sec", 30))) * 1000  # ms
+        interval = max(5, int(cfg.get("interval_sec", 30))) * 1000  # milliseconds
         self._poll_job = self._root.after(interval, self._poll)
 
     # ------------------------------------------------------------------
-    # NG 알림 창
+    # NG alert window
     # ------------------------------------------------------------------
 
     def _check_ng_alert(self, logs: list[dict], cfg: dict) -> None:
         if not logs:
             self._close_alert()
             self._last_seen_timestamp = ""
+            self._active_ng_equipments.clear()
             return
 
-        # 새로 갱신된 항목만 추출
+        # Extract only newly added entries
         if self._last_seen_timestamp:
             new_logs = [l for l in logs if str(l.get("timestamp", "")) > self._last_seen_timestamp]
         else:
-            new_logs = logs  # 최초 로드 시 전체 대상
+            new_logs = logs  # first load: treat all entries as new
 
         self._last_seen_timestamp = str(logs[0].get("timestamp", ""))
 
         if not new_logs:
             return
 
-        # 새 데이터가 있으면 마지막 업데이트 시각 갱신 + 무업데이트 알림 플래그 초기화
+        # New data arrived: update last-seen time and reset the no-update flag
         self._last_update_time = datetime.now(timezone.utc)
         self._no_update_alert_sent = False
 
-        ng_logs = [l for l in new_logs if l.get("status") == "NG"]
+        # Process oldest-first so the latest status per equipment wins
+        for log in reversed(new_logs):
+            status = log.get("status", "")
+            eq_data = log.get("equipment_data") or {}
+            eq_names = (
+                list(eq_data.keys()) if eq_data
+                else [log.get("image_name") or log.get("reason", "Unknown")]
+            )
+            if status == "NG":
+                self._active_ng_equipments.update(eq_names)
+            else:
+                # OK / UNKNOWN / TIMEOUT: clear NG state for this equipment
+                for name in eq_names:
+                    self._active_ng_equipments.discard(name)
 
-        if ng_logs:
-            eq_names: list[str] = []
-            for l in ng_logs:
-                eq_data = l.get("equipment_data") or {}
-                if eq_data:
-                    eq_names.extend(eq_data.keys())
-                else:
-                    eq_names.append(l.get("reason", "NG 발생"))
-
-            # 중복 제거, 순서 유지
-            seen: set[str] = set()
-            ng_equipments = [x for x in eq_names if not (x in seen or seen.add(x))]
-
-            position = cfg.get("alert_position", "우측")
+        if self._active_ng_equipments:
+            position = cfg.get("alert_position", "right")
             try:
                 ratio = float(cfg.get("alert_size_ratio", 0.25))
                 ratio = max(0.1, min(0.9, ratio))
             except (ValueError, TypeError):
                 ratio = 0.25
 
+            ng_equipments = sorted(self._active_ng_equipments)
             if self._alert_win is None or self._alert_win._closed:
                 self._alert_win = NgAlertWindow(self._root, ng_equipments, position, ratio)
             else:
@@ -169,19 +174,19 @@ class BackgroundMonitor:
             self._alert_win = None
 
     # ------------------------------------------------------------------
-    # 무업데이트 감지 및 SNS 알림
+    # No-update detection and SNS notification
     # ------------------------------------------------------------------
 
     def _check_no_update_alert(self, logs: list[dict], cfg: dict) -> None:
-        """마지막 데이터 수신 후 설정 시간(기본 60분) 이상 업데이트 없으면 SNS 알림 발송."""
+        """Send an SNS alert when no new data has arrived for the configured threshold (default 60 min)."""
         if not cfg.get("no_update_alert_enabled", True):
             return
 
         threshold_minutes = int(cfg.get("no_update_alert_minutes", 60))
 
-        # 아직 한 번도 데이터를 받지 못한 경우 (최초 기동 직후) 는 스킵
+        # Skip if no data has been received yet (right after startup)
         if self._last_update_time is None:
-            # 로그가 있으면 지금을 기준으로 초기화
+            # Initialise the baseline if logs are already available
             if logs:
                 self._last_update_time = datetime.now(timezone.utc)
             return
@@ -189,53 +194,83 @@ class BackgroundMonitor:
         elapsed_minutes = (datetime.now(timezone.utc) - self._last_update_time).total_seconds() / 60
 
         if elapsed_minutes >= threshold_minutes and not self._no_update_alert_sent:
-            logger.warning("%.1f분 동안 새 데이터 없음 - SNS 알림 발송 시도", elapsed_minutes)
+            logger.warning("No new data for %.1f minutes - attempting SNS alert", elapsed_minutes)
             sent = self._send_no_update_sns(cfg, elapsed_minutes)
             if sent:
                 self._no_update_alert_sent = True
 
     def _send_no_update_sns(self, cfg: dict, elapsed_minutes: float) -> bool:
-        """SNS API Gateway를 통해 무업데이트 알림 이메일 발송."""
-        sns_enabled = cfg.get("sns_enabled", True)
+        """Send a no-update alert via SNS API Gateway (email and SMS handled independently)."""
         api_url = cfg.get("sns_api_url", "")
-        topic_arn = cfg.get("sns_topic_arn", "")
-        protocol = cfg.get("sns_protocol", "email")
-
-        if not sns_enabled:
-            logger.info("SNS 비활성화 상태 - 무업데이트 알림 스킵")
+        if not api_url:
+            logger.warning("sns_api_url not configured - skipping alert")
             return False
 
-        if not api_url or not topic_arn:
-            logger.warning("SNS 설정 누락 (sns_api_url / sns_topic_arn) - 알림 스킵")
+        email_enabled = cfg.get("email_alert_enabled", True)
+        sms_enabled   = cfg.get("sms_alert_enabled", False)
+
+        if not email_enabled and not sms_enabled:
+            logger.info("both email and SMS alerts disabled - skipping")
             return False
 
         now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
         last_str = (
             self._last_update_time.strftime("%Y-%m-%d %H:%M:%S UTC")
-            if self._last_update_time
-            else "N/A"
+            if self._last_update_time else "N/A"
         )
+        elapsed_int = int(elapsed_minutes)
 
-        subject = f"[AI Alarm Service Off] No Data Update for {int(elapsed_minutes)} Minutes"
+        subject = f"[AI Alarm Service Off] No Data Update for {elapsed_int} Minutes"
         message = (
-            f"AI Alarm Service has not received any new data for over {int(elapsed_minutes)} minutes.\n"
+            f"AI Alarm Service has not received any new data for over {elapsed_int} minutes.\n"
             f"\n"
             f"Last Update   : {last_str}\n"
             f"Detected At   : {now_str}\n"
-            f"Elapsed Time  : {int(elapsed_minutes)} minutes\n"
+            f"Elapsed Time  : {elapsed_int} minutes\n"
             f"\n"
             f"Please check the AI Alarm Server and ensure it is running properly.\n"
             f"If the server has stopped, restart it immediately to resume monitoring.\n"
         )
 
-        payload = {
-            "topicArn": topic_arn,
-            "subject": subject,
-            "message": message,
-            "protocol": protocol,
-        }
         url = f"{api_url.rstrip('/')}?action=publishMessage"
+        any_success = False
 
+        # ── Email ──────────────────────────────────────────────
+        if email_enabled:
+            email_arn = cfg.get("email_topic_arn", "")
+            if not email_arn:
+                logger.warning("email_topic_arn not configured - skipping email alert")
+            else:
+                payload = {
+                    "topicArn": email_arn,
+                    "subject": subject,
+                    "message": message,
+                    "protocol": "email",
+                }
+                any_success = self._post_sns(url, payload, "email") or any_success
+
+        # ── SMS ────────────────────────────────────────────────
+        if sms_enabled:
+            sms_arn = cfg.get("sms_topic_arn", "")
+            if not sms_arn:
+                logger.warning("sms_topic_arn not configured - skipping SMS alert")
+            else:
+                # SMS carries only the message body (no subject)
+                sms_message = (
+                    f"[AI Alarm Off] No data for {elapsed_int}min. "
+                    f"Last: {last_str}. Check server immediately."
+                )
+                payload = {
+                    "topicArn": sms_arn,
+                    "message": sms_message,
+                    "protocol": "sms",
+                }
+                any_success = self._post_sns(url, payload, "sms") or any_success
+
+        return any_success
+
+    def _post_sns(self, url: str, payload: dict, label: str) -> bool:
+        """POST to the SNS API. Retries up to 3 times."""
         _MAX_RETRIES = 3
         for attempt in range(1, _MAX_RETRIES + 1):
             try:
@@ -243,15 +278,13 @@ class BackgroundMonitor:
                 resp.raise_for_status()
                 data = resp.json()
                 logger.info(
-                    "무업데이트 SNS 알림 발송 성공 (attempt %d, messageId=%s)",
-                    attempt,
-                    data.get("messageId", "unknown"),
+                    "[%s] SNS alert sent (attempt %d, messageId=%s)",
+                    label, attempt, data.get("messageId", "unknown"),
                 )
                 return True
             except requests.RequestException as exc:
-                logger.warning("SNS 알림 발송 실패 (attempt %d/%d): %s", attempt, _MAX_RETRIES, exc)
-
-        logger.error("SNS 알림 발송 %d회 모두 실패", _MAX_RETRIES)
+                logger.warning("[%s] SNS alert failed (attempt %d/%d): %s", label, attempt, _MAX_RETRIES, exc)
+        logger.error("[%s] All %d SNS alert attempts failed", label, _MAX_RETRIES)
         return False
 
 
@@ -262,9 +295,9 @@ def main() -> None:
     )
 
     cfg = load_config()
-    logger.info("백그라운드 모니터 시작 (주기: %s초)", cfg["interval_sec"])
+    logger.info("Background monitor started (interval: %s sec)", cfg["interval_sec"])
 
-    # 메인 윈도우는 숨김 - 경고창(Toplevel)만 표시됨
+    # Hide the main window - only the alert Toplevel is shown
     root = tk.Tk()
     root.withdraw()
 

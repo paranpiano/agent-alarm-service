@@ -1,13 +1,14 @@
 {
   "api_url": "https://j28ud38ww4-vpce-0ad8bea3eea59f0ed.execute-api.eu-central-1.amazonaws.com/prod/logs",
-  "interval_sec": 30,
-  "alert_position": "우측",
+  "interval_sec": 10,
+  "alert_position": "right",
   "alert_size_ratio": 0.25,
   "days": 1,
   "no_update_alert_minutes": 60,
   "no_update_alert_enabled": true,
-  "sns_enabled": true,
-  "sns_api_url": "https://075qa06cSNS_API_URL",
-  "sns_topic_arn": "arn:aws:sns:eSNS_TOPIC_ARN",
-  "sns_protocol": "email"
+  "sns_api_url": "https://j5x48styik-vpce-0ad8bea3eea59f0ed.execute-api.eu-central-1.amazonaws.com/prod",
+  "email_alert_enabled": true,
+  "email_topic_arn": "arn:aws:sns:eu-central-1:819319020856:ICH-ALARM-AGENT",
+  "sms_alert_enabled": true,
+  "sms_topic_arn": "arn:aws:sns:eu-central-1:819319020856:ICH-ALARM-AGENT-SMS"
 }
