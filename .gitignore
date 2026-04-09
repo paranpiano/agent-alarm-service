@@ -19,4 +19,4 @@ response.json
 service_manager/service_manager.log
 service_manager/service_manager_config.json
 Stator_Trk_Monitoring/vision_detection.py
-Stator_Trk_Monitoring/Error Log/20260407_162924.txt
+Stator_Trk_Monitoring/Same_img_elimination.py
