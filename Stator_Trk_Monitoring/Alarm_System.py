@@ -69,7 +69,7 @@ def loop_sound(flag, sound_path):
         try:
             play_sound(sound_path)
         except Exception as e:
-            logging(e)
+            logging(str(e))
             pass
         time.sleep(7)
 
@@ -117,7 +117,7 @@ def capturing(hwnd):
 
     except Exception as e:
         print(f"{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}: Capture error:", e)
-        logging(e)
+        logging(str(e))
         return None
 
 def send_http(img):
@@ -143,7 +143,7 @@ def send_http(img):
         js = response.json()
         return js.get("status", "UNKNOWN")
     except Exception as e:
-        logging(e)
+        logging(str(e))
         return "UNKNOWN"
 
 def pause_timer():
@@ -161,7 +161,7 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
             try:
                 event.set()
             except Exception as e:
-                logging(e)
+                logging(str(e))
                 pass
         stop_sound_events.clear()
         playing_sound_threads.clear()
@@ -175,7 +175,7 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
             try:
                 win.destroy()
             except Exception as e:
-                logging(e)
+                logging(str(e))
                 print(f"{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}: {e}")
         open_windows.clear()
         
@@ -207,7 +207,7 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
             try:
                 open_windows["UNKNOWN"].destroy()
             except Exception as e:
-                logging(e)
+                logging(str(e))
                 pass
             del open_windows["UNKNOWN"]
             
@@ -215,7 +215,7 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
             try:
                 open_windows["Machine_Missing"].destroy()
             except Exception as e:
-                logging(e)
+                logging(str(e))
                 pass
             del open_windows["Machine_Missing"]
 
@@ -286,7 +286,7 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
             try:
                 open_windows["Machine_Missing"].destroy()
             except Exception as e:
-                logging(e)
+                logging(str(e))
                 pass
             del open_windows["Machine_Missing"]
 
@@ -350,7 +350,7 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
             try:
                 open_windows["UNKNOWN"].destroy()
             except Exception as e:
-                logging(e)
+                logging(str(e))
                 pass
             del open_windows["UNKNOWN"]
 
@@ -433,7 +433,7 @@ def main():
                     try:
                         status = future.result()
                     except Exception as e:
-                        logging(e)
+                        logging(str(e))
                         status = "UNKNOWN"
                 
                     results.append({
