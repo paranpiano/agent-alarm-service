@@ -4,15 +4,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from multiprocessing import Pool, cpu_count
 
-def main():
-    path = r'C:\Users\uiv14247\Downloads\sample_img_backup'
+def main(path):
     save_path = r'C:\Users\uiv14247\Downloads\img_diff_test'
-    thr = 0.6
+    thr = 0.5
     backup_folder = r'C:\Users\uiv14247\Downloads\Stator Monitoring System duplicated drop'
     # remove_duplicate_images(path)
     # analyze_folder_image_differences(path, sample_size=3000, bin_width=0.05, xlim=(0,10), use_log_scale=False)
     # visualize_threshold_matches(path, save_path, threshold=thr, sample_size=2500)
-    for _ in range(1000000):
+    for _ in range(5):
         remove_near_duplicate_images_mp(path, backup_folder, threshold=thr)
 
 def remove_near_duplicate_images_mp(folder, backup_folder, threshold=0.1, workers=None):
@@ -36,35 +35,38 @@ def remove_near_duplicate_images_mp(folder, backup_folder, threshold=0.1, worker
         ))
 
 def process_pair(args):
-    img_a, img_b, threshold, backup_folder = args
-
-    if not os.path.exists(img_b):
-        return
-
-    img1 = cv2.imread(img_a)
-    img2 = cv2.imread(img_b)
-
-    if img1 is None or img2 is None:
-        return
-
-    if img1.shape != img2.shape:
-        return
-
-    diff = cv2.absdiff(img1, img2)
-    diff_val = diff.max(axis=2)
-
-    nonzero = diff_val > 0
-    if not np.any(nonzero):
-        score = 0.0
-    else:
-        mean_nonzero = diff_val[nonzero].mean()
-        ratio = np.count_nonzero(nonzero) / diff_val.size
-        score = mean_nonzero * ratio
-
-    if score <= threshold:
-        dst = os.path.join(backup_folder, os.path.basename(img_b))
-        if os.path.exists(img_b):
-            shutil.move(img_b, dst)
+    try:
+        img_a, img_b, threshold, backup_folder = args
+        
+        if not os.path.exists(img_b):
+            return
+        
+        img1 = cv2.imread(img_a)
+        img2 = cv2.imread(img_b)
+        
+        if img1 is None or img2 is None:
+            return
+        
+        if img1.shape != img2.shape:
+            return
+        
+        diff = cv2.absdiff(img1, img2)
+        diff_val = diff.max(axis=2)
+        
+        nonzero = diff_val > 0
+        if not np.any(nonzero):
+            score = 0.0
+        else:
+            mean_nonzero = diff_val[nonzero].mean()
+            ratio = np.count_nonzero(nonzero) / diff_val.size
+            score = mean_nonzero * ratio
+        
+        if score <= threshold:
+            dst = os.path.join(backup_folder, os.path.basename(img_b))
+            if os.path.exists(img_b):
+                shutil.move(img_b, dst)
+    except Exception as e:
+        pass
 
 
 def remove_near_duplicate_images(folder, backup_folder, threshold=0.1):
@@ -271,4 +273,7 @@ def analyze_folder_image_differences(folder, sample_size=2000, bin_width=1, xlim
 
 
 if __name__ == "__main__":
-    main()
+    path = r'C:\Users\uiv14247\Downloads\sample_img_backup'
+    for _ in range(10):
+        for folder in glob.glob(os.path.join(r'C:\Users\uiv14247\Downloads\HMI_Backup0', '*/')):
+            main(folder)
