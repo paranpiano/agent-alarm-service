@@ -83,7 +83,7 @@ class NgAlertWindow:
         win_h = self._win.winfo_height() or 400
 
         # 4 title rows + N equipment rows = (4 + N) total rows dividing the screen
-        title_lines = ["⚠", "Circ.", "Error", "Alert"]
+        title_lines = ["⚠", "순환", "에러"]
         eq_count = max(len(ng_equipments), 1)
         total_rows = len(title_lines) + eq_count
         row_h = max(30, win_h // total_rows)
