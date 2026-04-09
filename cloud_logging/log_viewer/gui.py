@@ -1,6 +1,6 @@
-"""Cloud Log Viewer GUI - 독립 실행형 tkinter 앱.
+"""Cloud Log Viewer GUI - standalone tkinter app.
 
-실행:
+Usage:
     python -m log_viewer.main
     python log_viewer/main.py
 """
@@ -22,108 +22,108 @@ logger = logging.getLogger(__name__)
 _TAG_MAP = {"OK": "ok", "NG": "ng", "UNKNOWN": "unknown", "TIMEOUT": "timeout"}
 _COLS = ("timestamp", "image_name", "status", "reason", "processing_time_ms")
 _COL_CFG = [
-    ("timestamp",          "시간",        160, tk.W),
-    ("image_name",         "이미지",       180, tk.W),
-    ("status",             "상태",          70, tk.CENTER),
-    ("reason",             "판정 이유",     420, tk.W),
-    ("processing_time_ms", "처리(ms)",       80, tk.E),
+    ("timestamp",          "Time",           160, tk.W),
+    ("image_name",         "Image",           180, tk.W),
+    ("status",             "Status",           70, tk.CENTER),
+    ("reason",             "Judgment Reason", 420, tk.W),
+    ("processing_time_ms", "Time(ms)",         80, tk.E),
 ]
 
-_POSITIONS = ["우측", "좌측", "상단", "하단"]
+_POSITIONS = ["right", "left", "top", "bottom"]
 _DEFAULT_INTERVAL_SEC = 30
 
 
 class NgAlertWindow:
-    """NG 발생 시 표시되는 알림 창."""
+    """Alert window displayed when an NG event occurs."""
 
     def __init__(self, parent: tk.Tk, ng_equipments: list[str],
                  position: str, size_ratio: float) -> None:
         self._win = tk.Toplevel(parent)
-        self._win.title("⚠ 순환 에러 알림")
+        self._win.title("⚠ Circulation Error Alert")
         self._win.attributes("-topmost", True)
         self._win.resizable(True, True)
         self._win.protocol("WM_DELETE_WINDOW", self._on_close)
         self._closed = False
         self._win.configure(bg="#FFD700")
-        self._resize_job = None  # debounce용
+        self._resize_job = None  # debounce handle
 
         sw = parent.winfo_screenwidth()
         sh = parent.winfo_screenheight()
 
-        if position in ("우측", "좌측"):
+        if position in ("right", "left"):
             win_w = int(sw * size_ratio)
             win_h = sh
         else:
             win_w = sw
             win_h = int(sh * size_ratio)
 
-        # 제목 프레임 - 창 크기에 맞게 동적 폰트
+        # Title frame - dynamic font size fitted to window dimensions
         self._title_frame = tk.Frame(self._win, bg="#FFD700")
         self._title_frame.pack(fill=tk.X, pady=(10, 4))
 
-        # 장비 이름 영역
+        # Equipment name area
         self._eq_frame = tk.Frame(self._win, bg="#FFD700")
         self._eq_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
         self._ng_equipments: list[str] = []
 
-        # 크기 확정 후 렌더링
+        # Render after geometry is finalised
         self._win.geometry(f"{win_w}x{win_h}")
         self._win.update_idletasks()
         self._place(parent, position, win_w, win_h)
         self._render_all(ng_equipments)
 
-        # resize debounce (무한루프 방지)
+        # Bind resize with debounce to prevent infinite loops
         self._win.bind("<Configure>", self._on_resize_debounce)
 
     def _render_all(self, ng_equipments: list[str]) -> None:
-        """제목 + 장비 이름 전체를 창 크기에 맞게 렌더링."""
+        """Re-render title and equipment names scaled to the current window size."""
         self._ng_equipments = ng_equipments
         win_w = self._win.winfo_width() or 400
         win_h = self._win.winfo_height() or 400
 
-        # 제목 4줄 + 장비 N줄 = 총 (4 + N) 행으로 화면 분할
-        title_lines = ["⚠", "순환", "에러", "발생"]
+        # 4 title rows + N equipment rows = (4 + N) total rows dividing the screen
+        title_lines = ["⚠", "Circ.", "Error", "Alert"]
         eq_count = max(len(ng_equipments), 1)
         total_rows = len(title_lines) + eq_count
         row_h = max(30, win_h // total_rows)
 
-        # 폰트 크기: 행 높이 기준, 너비 초과 방지
+        # Font size: based on row height, capped by window width
         longest_eq = max((len(eq) for eq in ng_equipments), default=1)
         fsize_by_h = int(row_h * 0.7)
         fsize_by_w = max(1, int((win_w - 20) / (longest_eq * 0.65)))
         fsize = max(20, min(fsize_by_h, fsize_by_w, 300))
 
-        # 제목 렌더링
+        # Render title labels
         for w in self._title_frame.winfo_children():
             w.destroy()
         for line in title_lines:
             tk.Label(
                 self._title_frame, text=line,
-                font=("맑은 고딕", fsize, "bold"),
+                font=("Arial", fsize, "bold"),
                 fg="#cc0000", bg="#FFD700",
                 anchor=tk.CENTER,
             ).pack(fill=tk.X)
 
-        # 장비 이름 렌더링
+        # Render equipment names
         for w in self._eq_frame.winfo_children():
             w.destroy()
         for eq in ng_equipments:
             tk.Label(
                 self._eq_frame, text=eq,
-                font=("맑은 고딕", fsize, "bold"),
+                font=("Arial", fsize, "bold"),
                 fg="#cc0000", bg="#FFD700",
-                wraplength=win_w * 10,  # 줄바꿈 사실상 비활성화
+                wraplength=win_w * 10,  # effectively disable line-wrapping
                 justify=tk.CENTER,
                 anchor=tk.CENTER,
             ).pack(fill=tk.BOTH, expand=True)
 
     def _render_equipments(self, ng_equipments: list[str]) -> None:
-        """resize 시 전체 재렌더링."""
+        """Full re-render on resize."""
         self._render_all(ng_equipments)
 
     def _on_resize_debounce(self, _event=None) -> None:
-        """resize 이벤트 debounce - 200ms 후 한 번만 실행."""
+        """Debounce resize events - fires only once after 200 ms."""
         if self._resize_job is not None:
             self._win.after_cancel(self._resize_job)
         self._resize_job = self._win.after(200, self._on_resize_done)
@@ -137,14 +137,14 @@ class NgAlertWindow:
         sw = parent.winfo_screenwidth()
         sh = parent.winfo_screenheight()
 
-        # 전체화면 모서리 기준 배치
-        if position == "우측":
+        # Position the window at a screen edge
+        if position == "right":
             x, y = sw - win_w, 0
-        elif position == "좌측":
+        elif position == "left":
             x, y = 0, 0
-        elif position == "상단":
+        elif position == "top":
             x, y = 0, 0
-        else:  # 하단
+        else:  # bottom
             x, y = 0, sh - win_h
 
         self._win.geometry(f"{win_w}x{win_h}+{x}+{y}")
@@ -176,7 +176,8 @@ class CloudLogViewerGUI:
 
         self._client = LogApiClient()
         self._all_logs: list[dict] = []
-        self._last_seen_timestamp: str = ""  # 마지막으로 확인한 최신 timestamp
+        self._last_seen_timestamp: str = ""  # latest timestamp seen so far
+        self._active_ng_equipments: set[str] = set()  # equipment names currently in NG state
         self._alert_win: NgAlertWindow | None = None
         self._auto_refresh_job = None
         self._countdown_remaining = 0
@@ -184,7 +185,7 @@ class CloudLogViewerGUI:
         self._build_ui()
         self._apply_tags()
 
-        # 자동 갱신 기본 ON
+        # Auto-refresh on by default
         self._auto_refresh_var.set(True)
         self.root.after(300, lambda: self._load_logs())
         self.root.after(600, self._on_auto_refresh_toggle)
@@ -210,19 +211,19 @@ class CloudLogViewerGUI:
 
         ttk.Separator(bar, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y, padx=6)
 
-        ttk.Label(bar, text="날짜:").pack(side=tk.LEFT)
+        ttk.Label(bar, text="Date:").pack(side=tk.LEFT)
         self._date_var = tk.StringVar(value=date.today().strftime("%Y-%m-%d"))
         ttk.Entry(bar, textvariable=self._date_var, width=12).pack(side=tk.LEFT, padx=(4, 4))
 
-        ttk.Label(bar, text="최근").pack(side=tk.LEFT, padx=(8, 2))
+        ttk.Label(bar, text="Last").pack(side=tk.LEFT, padx=(8, 2))
         self._days_var = tk.StringVar(value="1")
         ttk.Spinbox(bar, textvariable=self._days_var, from_=1, to=30, width=4).pack(side=tk.LEFT)
-        ttk.Label(bar, text="일").pack(side=tk.LEFT, padx=(2, 8))
+        ttk.Label(bar, text="days").pack(side=tk.LEFT, padx=(2, 8))
 
-        ttk.Button(bar, text="조회", command=self._load_logs).pack(side=tk.LEFT)
+        ttk.Button(bar, text="Search", command=self._load_logs).pack(side=tk.LEFT)
 
         ttk.Separator(bar, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y, padx=8)
-        ttk.Label(bar, text="필터:").pack(side=tk.LEFT)
+        ttk.Label(bar, text="Filter:").pack(side=tk.LEFT)
         self._filter_var = tk.StringVar()
         self._filter_var.trace_add("write", lambda *_: self._apply_filter())
         ttk.Entry(bar, textvariable=self._filter_var, width=16).pack(side=tk.LEFT, padx=(4, 2))
@@ -234,19 +235,19 @@ class CloudLogViewerGUI:
 
         self._auto_refresh_var = tk.BooleanVar(value=False)
         ttk.Checkbutton(
-            bar, text="자동 갱신",
+            bar, text="Auto Refresh",
             variable=self._auto_refresh_var,
             command=self._on_auto_refresh_toggle,
         ).pack(side=tk.LEFT)
 
-        ttk.Label(bar, text="간격(초):").pack(side=tk.LEFT, padx=(8, 2))
+        ttk.Label(bar, text="Interval (sec):").pack(side=tk.LEFT, padx=(8, 2))
         self._interval_var = tk.StringVar(value=str(_DEFAULT_INTERVAL_SEC))
         ttk.Spinbox(bar, textvariable=self._interval_var, from_=5, to=3600, width=6).pack(side=tk.LEFT)
 
         ttk.Separator(bar, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y, padx=10)
 
-        ttk.Label(bar, text="알림 위치:").pack(side=tk.LEFT)
-        self._position_var = tk.StringVar(value="우측")
+        ttk.Label(bar, text="Alert Position:").pack(side=tk.LEFT)
+        self._position_var = tk.StringVar(value="right")
         ttk.Combobox(
             bar, textvariable=self._position_var,
             values=_POSITIONS, width=6, state="readonly",
@@ -254,7 +255,7 @@ class CloudLogViewerGUI:
 
         ttk.Separator(bar, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y, padx=10)
 
-        ttk.Label(bar, text="알림 크기(화면비율):").pack(side=tk.LEFT)
+        ttk.Label(bar, text="Alert Size (ratio):").pack(side=tk.LEFT)
         self._size_ratio_var = tk.StringVar(value="0.25")
         ttk.Spinbox(
             bar, textvariable=self._size_ratio_var,
@@ -286,7 +287,7 @@ class CloudLogViewerGUI:
         self._tree.bind("<<TreeviewSelect>>", self._on_select)
 
     def _build_detail_panel(self) -> None:
-        panel = ttk.LabelFrame(self.root, text="상세 정보 (equipment_data)", padding=6)
+        panel = ttk.LabelFrame(self.root, text="Detail (equipment_data)", padding=6)
         panel.pack(fill=tk.X, padx=6, pady=4)
 
         self._detail_text = tk.Text(panel, height=6, wrap=tk.WORD, state=tk.DISABLED,
@@ -297,7 +298,7 @@ class CloudLogViewerGUI:
         sb.pack(side=tk.RIGHT, fill=tk.Y)
 
     def _build_statusbar(self) -> None:
-        self._status_var = tk.StringVar(value="준비")
+        self._status_var = tk.StringVar(value="Ready")
         ttk.Label(self.root, textvariable=self._status_var, anchor=tk.W,
                   relief=tk.SUNKEN).pack(fill=tk.X, side=tk.BOTTOM)
 
@@ -332,10 +333,10 @@ class CloudLogViewerGUI:
         if not self._auto_refresh_var.get():
             return
         if self._countdown_remaining <= 0:
-            self._countdown_var.set("갱신 중...")
+            self._countdown_var.set("Refreshing...")
             self._load_logs(auto=True)
         else:
-            self._countdown_var.set(f"다음 갱신: {self._countdown_remaining}초")
+            self._countdown_var.set(f"Next refresh: {self._countdown_remaining}s")
             self._countdown_remaining -= 1
             self._auto_refresh_job = self.root.after(1000, self._tick_countdown)
 
@@ -363,11 +364,12 @@ class CloudLogViewerGUI:
             if self._date_var.get().strip() != today:
                 self._date_var.set(today)
                 self._last_seen_timestamp = ""
+                self._active_ng_equipments.clear()
             query_date = today
         else:
             query_date = self._date_var.get().strip()
 
-        self._status_var.set("조회 중...")
+        self._status_var.set("Loading...")
 
         def _fetch() -> None:
             try:
@@ -384,15 +386,15 @@ class CloudLogViewerGUI:
     def _on_loaded(self, logs: list[dict], auto: bool = False) -> None:
         self._all_logs = sorted(logs, key=lambda l: str(l.get("timestamp", "")), reverse=True)
         self._render_logs(self._all_logs)
-        self._status_var.set(f"총 {len(self._all_logs)}건 조회됨")
+        self._status_var.set(f"Total {len(self._all_logs)} records")
         self._check_ng_alert(self._all_logs)
         if auto:
             self._schedule_next_refresh()
 
     def _on_error(self, msg: str, auto: bool = False) -> None:
-        self._status_var.set(f"오류: {msg}")
+        self._status_var.set(f"Error: {msg}")
         if not auto:
-            messagebox.showerror("조회 실패", msg)
+            messagebox.showerror("Load Failed", msg)
         if auto:
             self._schedule_next_refresh()
 
@@ -404,36 +406,38 @@ class CloudLogViewerGUI:
         if not logs:
             self._close_alert()
             self._last_seen_timestamp = ""
+            self._active_ng_equipments.clear()
             return
 
-        # 새로 갱신된 항목만 추출 (이전에 본 timestamp 이후)
+        # Extract only newly added entries (after the previously seen timestamp)
         if self._last_seen_timestamp:
             new_logs = [l for l in logs if str(l.get("timestamp", "")) > self._last_seen_timestamp]
         else:
-            new_logs = logs  # 최초 로드 시 전체 대상
+            new_logs = logs  # first load: treat all entries as new
 
-        # 다음 갱신을 위해 현재 최신 timestamp 저장
+        # Save the current latest timestamp for the next refresh
         self._last_seen_timestamp = str(logs[0].get("timestamp", ""))
 
-        # 새 데이터가 없으면 알림 상태 유지
+        # If no new data, keep the current alert state
         if not new_logs:
             return
 
-        ng_logs = [l for l in new_logs if l.get("status") == "NG"]
+        # Process oldest-first so the latest status per equipment wins
+        for log in reversed(new_logs):
+            status = log.get("status", "")
+            eq_data = log.get("equipment_data") or {}
+            eq_names = (
+                list(eq_data.keys()) if eq_data
+                else [log.get("image_name") or log.get("reason", "Unknown")]
+            )
+            if status == "NG":
+                self._active_ng_equipments.update(eq_names)
+            else:
+                # OK / UNKNOWN / TIMEOUT: clear NG state for this equipment
+                for name in eq_names:
+                    self._active_ng_equipments.discard(name)
 
-        if ng_logs:
-            # 새 데이터 중 NG가 있으면 알림 표시
-            eq_names: list[str] = []
-            for l in ng_logs:
-                eq_data = l.get("equipment_data") or {}
-                if eq_data:
-                    eq_names.extend(eq_data.keys())
-                else:
-                    eq_names.append(l.get("reason", "NG 발생"))
-            # 중복 제거, 순서 유지
-            seen: set[str] = set()
-            ng_equipments = [x for x in eq_names if not (x in seen or seen.add(x))]
-
+        if self._active_ng_equipments:
             position = self._position_var.get()
             try:
                 ratio = float(self._size_ratio_var.get())
@@ -441,12 +445,12 @@ class CloudLogViewerGUI:
             except ValueError:
                 ratio = 0.25
 
+            ng_equipments = sorted(self._active_ng_equipments)
             if self._alert_win is None or self._alert_win._closed:
                 self._alert_win = NgAlertWindow(self.root, ng_equipments, position, ratio)
             else:
                 self._alert_win.update_message(ng_equipments)
         else:
-            # 새 데이터가 모두 OK면 알림 닫기
             self._close_alert()
 
     def _close_alert(self) -> None:
@@ -489,7 +493,7 @@ class CloudLogViewerGUI:
         if not log:
             return
         eq_data = log.get("equipment_data", {})
-        text = json.dumps(eq_data, ensure_ascii=False, indent=2) if eq_data else "(없음)"
+        text = json.dumps(eq_data, ensure_ascii=False, indent=2) if eq_data else "(none)"
         self._detail_text.configure(state=tk.NORMAL)
         self._detail_text.delete("1.0", tk.END)
         self._detail_text.insert(tk.END, text)
@@ -507,7 +511,7 @@ class CloudLogViewerGUI:
             or keyword in l.get("reason", "").lower()
         ]
         self._render_logs(filtered)
-        self._status_var.set(f"필터 결과: {len(filtered)}건")
+        self._status_var.set(f"Filter results: {len(filtered)}")
 
     def _sort_by(self, col: str) -> None:
         logs = sorted(self._all_logs, key=lambda l: str(l.get(col, "")),
