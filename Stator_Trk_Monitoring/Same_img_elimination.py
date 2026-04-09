@@ -6,23 +6,22 @@ from multiprocessing import Pool, cpu_count
 
 def main(path):
     save_path = r'C:\Users\uiv14247\Downloads\img_diff_test'
-    thr = 0.5
+    thr = 1
     backup_folder = r'C:\Users\uiv14247\Downloads\Stator Monitoring System duplicated drop'
     # remove_duplicate_images(path)
     # analyze_folder_image_differences(path, sample_size=3000, bin_width=0.05, xlim=(0,10), use_log_scale=False)
     # visualize_threshold_matches(path, save_path, threshold=thr, sample_size=2500)
     for _ in range(5):
-        remove_near_duplicate_images_mp(path, backup_folder, threshold=thr)
+        remove_near_duplicate_images_mp(path, threshold=thr)
 
-def remove_near_duplicate_images_mp(folder, backup_folder, threshold=0.1, workers=None):
-    os.makedirs(backup_folder, exist_ok=True)
+def remove_near_duplicate_images_mp(folder, threshold=0.1, workers=None):
 
     img_paths = glob.glob(os.path.join(folder, "*.png"))
     random.shuffle(img_paths)
 
     tasks = []
     for i in range(len(img_paths) - 1):
-        tasks.append((img_paths[i], img_paths[i+1], threshold, backup_folder))
+        tasks.append((img_paths[i], img_paths[i+1], threshold))
 
     if workers is None:
         workers = max(1, cpu_count() - 1)
@@ -36,7 +35,7 @@ def remove_near_duplicate_images_mp(folder, backup_folder, threshold=0.1, worker
 
 def process_pair(args):
     try:
-        img_a, img_b, threshold, backup_folder = args
+        img_a, img_b, threshold = args
         
         if not os.path.exists(img_b):
             return
@@ -62,9 +61,8 @@ def process_pair(args):
             score = mean_nonzero * ratio
         
         if score <= threshold:
-            dst = os.path.join(backup_folder, os.path.basename(img_b))
             if os.path.exists(img_b):
-                shutil.move(img_b, dst)
+                os.remove(img_b)
     except Exception as e:
         pass
 
