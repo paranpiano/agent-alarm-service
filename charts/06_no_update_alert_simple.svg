@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 420" width="700" height="420" font-family="Segoe UI, Arial, sans-serif">
+  <!-- Background -->
+  <rect width="700" height="420" fill="#f8fafc" rx="12"/>
+
+  <!-- Title -->
+  <text x="350" y="36" text-anchor="middle" font-size="17" font-weight="bold" fill="#1e293b">무업데이트 감지 이메일 알림 워크플로우 (간단 버전)</text>
+
+  <!-- Step boxes -->
+  <!-- 1. BackgroundMonitor 폴링 -->
+  <rect x="40" y="70" width="160" height="56" rx="10" fill="#3b82f6" />
+  <text x="120" y="96" text-anchor="middle" font-size="13" font-weight="bold" fill="white">BackgroundMonitor</text>
+  <text x="120" y="114" text-anchor="middle" font-size="12" fill="#dbeafe">30초마다 폴링</text>
+
+  <!-- Arrow 1→2 -->
+  <line x1="200" y1="98" x2="258" y2="98" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 2. API Gateway 조회 -->
+  <rect x="258" y="70" width="160" height="56" rx="10" fill="#8b5cf6"/>
+  <text x="338" y="96" text-anchor="middle" font-size="13" font-weight="bold" fill="white">API Gateway</text>
+  <text x="338" y="114" text-anchor="middle" font-size="12" fill="#ede9fe">DynamoDB 로그 조회</text>
+
+  <!-- Arrow 2→3 -->
+  <line x1="418" y1="98" x2="476" y2="98" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 3. 새 데이터 여부 판단 -->
+  <polygon points="556,70 636,98 556,126 476,98" fill="#f59e0b"/>
+  <text x="556" y="94" text-anchor="middle" font-size="12" font-weight="bold" fill="white">새 데이터</text>
+  <text x="556" y="110" text-anchor="middle" font-size="12" font-weight="bold" fill="white">있음?</text>
+
+  <!-- YES → reset -->
+  <line x1="636" y1="98" x2="660" y2="98" stroke="#22c55e" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <text x="648" y="90" text-anchor="middle" font-size="10" fill="#22c55e">YES</text>
+  <rect x="648" y="108" width="0" height="0"/>
+  <!-- YES label box -->
+  <rect x="648" y="104" width="44" height="28" rx="6" fill="#dcfce7"/>
+  <text x="670" y="122" text-anchor="middle" font-size="11" fill="#166534">타이머</text>
+  <text x="670" y="134" text-anchor="middle" font-size="10" fill="#166534">초기화</text>
+
+  <!-- NO → down -->
+  <line x1="556" y1="126" x2="556" y2="170" stroke="#ef4444" stroke-width="2" marker-end="url(#arrowRed)"/>
+  <text x="568" y="152" font-size="10" fill="#ef4444">NO</text>
+
+  <!-- 4. 60분 초과? -->
+  <polygon points="556,170 636,198 556,226 476,198" fill="#f59e0b"/>
+  <text x="556" y="194" text-anchor="middle" font-size="12" font-weight="bold" fill="white">경과 ≥ 60분</text>
+  <text x="556" y="210" text-anchor="middle" font-size="12" font-weight="bold" fill="white">AND 미발송?</text>
+
+  <!-- NO → skip -->
+  <line x1="476" y1="198" x2="432" y2="198" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowGray)"/>
+  <rect x="340" y="184" width="92" height="28" rx="6" fill="#f1f5f9"/>
+  <text x="386" y="202" text-anchor="middle" font-size="11" fill="#64748b">스킵 (대기)</text>
+
+  <!-- YES → down -->
+  <line x1="556" y1="226" x2="556" y2="270" stroke="#ef4444" stroke-width="2" marker-end="url(#arrowRed)"/>
+  <text x="568" y="252" font-size="10" fill="#ef4444">YES</text>
+
+  <!-- 5. no_update_alert_enabled? -->
+  <polygon points="556,270 636,298 556,326 476,298" fill="#f59e0b"/>
+  <text x="556" y="294" text-anchor="middle" font-size="11" font-weight="bold" fill="white">알림 활성화?</text>
+  <text x="556" y="310" text-anchor="middle" font-size="10" fill="#fef3c7">(no_update_alert_enabled)</text>
+
+  <!-- NO → skip -->
+  <line x1="476" y1="298" x2="432" y2="298" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowGray)"/>
+  <rect x="340" y="284" width="92" height="28" rx="6" fill="#f1f5f9"/>
+  <text x="386" y="302" text-anchor="middle" font-size="11" fill="#64748b">알림 스킵</text>
+
+  <!-- YES → down -->
+  <line x1="556" y1="326" x2="556" y2="360" stroke="#22c55e" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <text x="568" y="347" font-size="10" fill="#22c55e">YES</text>
+
+  <!-- 6. SNS → Email -->
+  <rect x="456" y="360" width="200" height="44" rx="10" fill="#ef4444"/>
+  <text x="556" y="380" text-anchor="middle" font-size="13" font-weight="bold" fill="white">SNS API → 이메일 발송</text>
+  <text x="556" y="396" text-anchor="middle" font-size="11" fill="#fecaca">[AI Alarm Service Off]</text>
+
+  <!-- Arrow markers -->
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#64748b"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#22c55e"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#ef4444"/>
+    </marker>
+    <marker id="arrowGray" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+</svg>

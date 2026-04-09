@@ -1,8 +1,8 @@
-"""Cloud Log Viewer 진입점.
+"""Cloud Log Viewer entry point.
 
-실행:
-    python main.py                  (log_viewer 폴더 안에서)
-    python -m log_viewer.main       (프로젝트 루트에서)
+Usage:
+    python main.py                  (inside the log_viewer folder)
+    python -m log_viewer.main       (from the project root)
 """
 
 import logging
