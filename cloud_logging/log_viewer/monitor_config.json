@@ -10,5 +10,21 @@
   "email_alert_enabled": true,
   "email_topic_arn": "arn:aws:sns:eu-central-1:819319020856:ICH-ALARM-AGENT",
   "sms_alert_enabled": true,
-  "sms_topic_arn": "arn:aws:sns:eu-central-1:819319020856:ICH-ALARM-AGENT-SMS"
+  "sms_topic_arn": "arn:aws:sns:eu-central-1:819319020856:ICH-ALARM-AGENT-SMS",
+  "test_mode": false,
+  "test_mode_ng_equipments": [
+    "EQ-01",
+    "EQ-03"
+  ],
+  "alert_image_path": "./image.png",
+  "alert_image_ratio": 2,
+  "alert_title_ratio": 2,
+  "alert_equipment_ratio": 5,
+  "alert_equipment_slots": 4,
+  "alert_bg_color": "#0074e8",
+  "alert_title_color": "#ff6262",
+  "alert_eq_ok_color": "#4A5568",
+  "alert_eq_ng_color": "#F56565",
+  "alert_font_size": 0,
+  "show_alert_controls": true
 }

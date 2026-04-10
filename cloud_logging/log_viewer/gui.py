@@ -7,10 +7,17 @@ Usage:
 
 import json
 import logging
+import os
 import threading
 import tkinter as tk
 from datetime import date
-from tkinter import messagebox, ttk
+from tkinter import colorchooser, messagebox, ttk
+
+try:
+    from PIL import Image, ImageTk
+    _PIL_AVAILABLE = True
+except ImportError:
+    _PIL_AVAILABLE = False
 
 try:
     from log_viewer.api_client import LogApiClient, DEFAULT_API_URL
@@ -32,122 +39,365 @@ _COL_CFG = [
 _POSITIONS = ["right", "left", "top", "bottom"]
 _DEFAULT_INTERVAL_SEC = 30
 
+# Default alert appearance  (차분한 네이비/슬레이트 계열)
+_DEFAULT_BG        = "#1E2A3A"   # 다크 네이비
+_DEFAULT_TITLE_FG  = "#E8C84A"   # 웜 골드
+_DEFAULT_EQ_OK_FG  = "#4A5568"   # 슬레이트 그레이 (빈 슬롯)
+_DEFAULT_EQ_NG_FG  = "#F56565"   # 소프트 레드
+
+_CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "monitor_config.json")
+
+
+def _resolve_image_path(raw_path: str) -> str:
+    """Resolve image path relative to this file's directory."""
+    if os.path.isabs(raw_path):
+        return raw_path
+    base = os.path.dirname(os.path.abspath(__file__))
+    return os.path.normpath(os.path.join(base, raw_path))
+
+
+def _save_config_keys(updates: dict) -> None:
+    """Merge updates into monitor_config.json and save."""
+    data = {}
+    if os.path.exists(_CONFIG_PATH):
+        try:
+            with open(_CONFIG_PATH, encoding="utf-8") as f:
+                data = json.load(f)
+        except Exception:
+            pass
+    data.update(updates)
+    try:
+        with open(_CONFIG_PATH, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception as exc:
+        logger.warning("config 저장 실패: %s", exc)
+
 
 class NgAlertWindow:
-    """Alert window displayed when an NG event occurs."""
+    """Alert window displayed when an NG event occurs.
+
+    Layout (grid rows, top → bottom):
+        row 0  logo image          (weight = alert_image_ratio)
+        row 1  "순환 에러" text     (weight = alert_title_ratio)
+        row 2  equipment slots     (weight = alert_equipment_ratio, expand)
+        row 3  controls panel      (fixed height, hidden by default)
+    """
+
+    _EQUIPMENT_SLOTS = 6
 
     def __init__(self, parent: tk.Tk, ng_equipments: list[str],
-                 position: str, size_ratio: float) -> None:
-        self._win = tk.Toplevel(parent)
-        self._win.title("⚠ Circulation Error Alert")
-        self._win.attributes("-topmost", True)
-        self._win.resizable(True, True)
-        self._win.protocol("WM_DELETE_WINDOW", self._on_close)
+                 position: str, size_ratio: float,
+                 cfg: dict | None = None) -> None:
+        self._parent = parent
+        self._cfg = cfg or {}
         self._closed = False
-        self._win.configure(bg="#FFD700")
-        self._resize_job = None  # debounce handle
+        self._resize_job = None
+        self._photo_ref = None
 
-        sw = parent.winfo_screenwidth()
-        sh = parent.winfo_screenheight()
+        # Appearance (loaded from cfg, editable via controls)
+        self._bg_color    = self._cfg.get("alert_bg_color",    _DEFAULT_BG)
+        self._title_fg    = self._cfg.get("alert_title_color", _DEFAULT_TITLE_FG)
+        self._eq_ok_fg    = self._cfg.get("alert_eq_ok_color", _DEFAULT_EQ_OK_FG)
+        self._eq_ng_fg    = self._cfg.get("alert_eq_ng_color", _DEFAULT_EQ_NG_FG)
+        self._font_size   = int(self._cfg.get("alert_font_size", 0))
 
-        if position in ("right", "left"):
-            win_w = int(sw * size_ratio)
-            win_h = sh
-        else:
-            win_w = sw
-            win_h = int(sh * size_ratio)
+        # Layout ratios
+        self._img_ratio   = int(self._cfg.get("alert_image_ratio",     2))
+        self._title_ratio = int(self._cfg.get("alert_title_ratio",     2))
+        self._eq_ratio    = int(self._cfg.get("alert_equipment_ratio", 6))
+        self._eq_slots    = int(self._cfg.get("alert_equipment_slots", self._EQUIPMENT_SLOTS))
 
-        # Title frame - dynamic font size fitted to window dimensions
-        self._title_frame = tk.Frame(self._win, bg="#FFD700")
-        self._title_frame.pack(fill=tk.X, pady=(10, 4))
-
-        # Equipment name area
-        self._eq_frame = tk.Frame(self._win, bg="#FFD700")
-        self._eq_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        # Controls visibility: default hidden (False), config can override
+        self._controls_visible = bool(self._cfg.get("show_alert_controls", False))
 
         self._ng_equipments: list[str] = []
 
-        # Render after geometry is finalised
+        # ── Window ──────────────────────────────────────────────────────
+        self._win = tk.Toplevel(parent)
+        self._win.title("⚠ 순환 에러 알람")
+        self._win.attributes("-topmost", True)
+        self._win.resizable(True, True)
+        self._win.protocol("WM_DELETE_WINDOW", self._on_close)
+        self._win.configure(bg=self._bg_color)
+
+        sw = parent.winfo_screenwidth()
+        sh = parent.winfo_screenheight()
+        if position in ("right", "left"):
+            win_w, win_h = int(sw * size_ratio), sh
+        else:
+            win_w, win_h = sw, int(sh * size_ratio)
         self._win.geometry(f"{win_w}x{win_h}")
+
+        # ── Grid layout ─────────────────────────────────────────────────
+        # Main container fills the window
+        self._main = tk.Frame(self._win, bg=self._bg_color)
+        self._main.pack(fill=tk.BOTH, expand=True)
+        self._main.columnconfigure(0, weight=1)
+        # rows 0-2 share space by ratio weights; row 3 is fixed (controls)
+        self._main.rowconfigure(0, weight=self._img_ratio)
+        self._main.rowconfigure(1, weight=self._title_ratio)
+        self._main.rowconfigure(2, weight=self._eq_ratio)
+        self._main.rowconfigure(3, weight=0)  # controls: no expand
+
+        self._img_frame   = tk.Frame(self._main, bg=self._bg_color)
+        self._title_frame = tk.Frame(self._main, bg=self._bg_color)
+        self._eq_frame    = tk.Frame(self._main, bg=self._bg_color)
+        self._ctrl_frame  = tk.Frame(self._main, bg="#e0e0e0", relief=tk.RIDGE, bd=1)
+
+        self._img_frame.grid  (row=0, column=0, sticky="nsew")
+        self._title_frame.grid(row=1, column=0, sticky="nsew")
+        self._eq_frame.grid   (row=2, column=0, sticky="nsew")
+        # ctrl_frame placed in row 3 only when visible
+
+        # Toggle button (always visible, top-right corner)
+        self._toggle_btn = tk.Button(
+            self._win, text="⚙", font=("Arial", 10),
+            bg=self._bg_color, fg="#333333",
+            relief=tk.FLAT, bd=0, cursor="hand2",
+            command=self._toggle_controls,
+        )
+        self._toggle_btn.place(relx=1.0, rely=0.0, anchor="ne", x=-4, y=4)
+
+        self._build_controls()
+        if self._controls_visible:
+            self._ctrl_frame.grid(row=3, column=0, sticky="ew")
+
         self._win.update_idletasks()
         self._place(parent, position, win_w, win_h)
         self._render_all(ng_equipments)
-
-        # Bind resize with debounce to prevent infinite loops
         self._win.bind("<Configure>", self._on_resize_debounce)
 
+    # ──────────────────────────────────────────────────────────────────
+    # Controls toggle
+    # ──────────────────────────────────────────────────────────────────
+
+    def _toggle_controls(self) -> None:
+        self._controls_visible = not self._controls_visible
+        if self._controls_visible:
+            self._ctrl_frame.grid(row=3, column=0, sticky="ew")
+        else:
+            self._ctrl_frame.grid_remove()
+        _save_config_keys({"show_alert_controls": self._controls_visible})
+
+    # ──────────────────────────────────────────────────────────────────
+    # Controls panel
+    # ──────────────────────────────────────────────────────────────────
+
+    def _build_controls(self) -> None:
+        f = self._ctrl_frame
+
+        # ── Row 0: 비율 조정 ────────────────────────────────────────────
+        tk.Label(f, text="비율", bg="#e0e0e0", font=("Arial", 8, "bold")).grid(
+            row=0, column=0, padx=(6, 2), pady=(4, 1), sticky=tk.W)
+
+        self._v_img   = tk.IntVar(value=self._img_ratio)
+        self._v_title = tk.IntVar(value=self._title_ratio)
+        self._v_eq    = tk.IntVar(value=self._eq_ratio)
+
+        for c, var, label in [(1, self._v_img, "이미지"), (3, self._v_title, "제목"), (5, self._v_eq, "장비")]:
+            tk.Label(f, text=label, bg="#e0e0e0", font=("Arial", 8)).grid(row=0, column=c, padx=(6, 0), pady=(4,1))
+            sp = tk.Spinbox(f, textvariable=var, from_=1, to=8, width=3,
+                            command=self._on_ratio_change, font=("Arial", 8))
+            sp.grid(row=0, column=c+1, padx=(2, 4), pady=(4,1))
+            sp.bind("<Return>", lambda _e: self._on_ratio_change())
+
+        # ── Row 1: 색상 조정 ────────────────────────────────────────────
+        tk.Label(f, text="색상", bg="#e0e0e0", font=("Arial", 8, "bold")).grid(
+            row=1, column=0, padx=(6, 2), pady=(1, 4), sticky=tk.W)
+
+        color_items = [
+            ("배경",   lambda: self._pick_bg_color(),    "_bg_btn",    self._bg_color),
+            ("제목",   lambda: self._pick_title_color(), "_title_btn", self._title_fg),
+            ("NG글자", lambda: self._pick_ng_color(),    "_ng_btn",    self._eq_ng_fg),
+        ]
+        for idx, (label, cmd, attr, color) in enumerate(color_items):
+            col = idx * 2 + 1
+            tk.Label(f, text=label, bg="#e0e0e0", font=("Arial", 8)).grid(
+                row=1, column=col, padx=(6, 0), pady=(1, 4))
+            btn = tk.Button(f, bg=color, width=4, relief=tk.RAISED,
+                            command=cmd, font=("Arial", 8))
+            btn.grid(row=1, column=col+1, padx=(2, 4), pady=(1, 4))
+            setattr(self, attr, btn)
+
+    def _on_ratio_change(self) -> None:
+        self._img_ratio   = max(1, self._v_img.get())
+        self._title_ratio = max(1, self._v_title.get())
+        self._eq_ratio    = max(1, self._v_eq.get())
+        self._main.rowconfigure(0, weight=self._img_ratio)
+        self._main.rowconfigure(1, weight=self._title_ratio)
+        self._main.rowconfigure(2, weight=self._eq_ratio)
+        _save_config_keys({
+            "alert_image_ratio":     self._img_ratio,
+            "alert_title_ratio":     self._title_ratio,
+            "alert_equipment_ratio": self._eq_ratio,
+        })
+        self._render_all(self._ng_equipments)
+
+    def _pick_bg_color(self) -> None:
+        color = colorchooser.askcolor(color=self._bg_color, title="배경색 선택")[1]
+        if color:
+            self._bg_color = color
+            self._bg_btn.configure(bg=color)
+            self._win.configure(bg=color)
+            self._main.configure(bg=color)
+            self._img_frame.configure(bg=color)
+            self._title_frame.configure(bg=color)
+            self._eq_frame.configure(bg=color)
+            self._toggle_btn.configure(bg=color)
+            _save_config_keys({"alert_bg_color": color})
+            self._render_all(self._ng_equipments)
+
+    def _pick_title_color(self) -> None:
+        color = colorchooser.askcolor(color=self._title_fg, title="제목 글자색 선택")[1]
+        if color:
+            self._title_fg = color
+            self._title_btn.configure(bg=color)
+            _save_config_keys({"alert_title_color": color})
+            self._render_all(self._ng_equipments)
+
+    def _pick_ng_color(self) -> None:
+        color = colorchooser.askcolor(color=self._eq_ng_fg, title="NG 장비 글자색 선택")[1]
+        if color:
+            self._eq_ng_fg = color
+            self._ng_btn.configure(bg=color)
+            _save_config_keys({"alert_eq_ng_color": color})
+            self._render_all(self._ng_equipments)
+
+    # ──────────────────────────────────────────────────────────────────
+    # Rendering
+    # ──────────────────────────────────────────────────────────────────
+
     def _render_all(self, ng_equipments: list[str]) -> None:
-        """Re-render title and equipment names scaled to the current window size."""
         self._ng_equipments = ng_equipments
-        win_w = self._win.winfo_width() or 400
-        win_h = self._win.winfo_height() or 400
+        win_w = max(self._win.winfo_width(), 100)
+        win_h = max(self._win.winfo_height(), 200)
 
-        # 4 title rows + N equipment rows = (4 + N) total rows dividing the screen
-        title_lines = ["⚠", "순환", "에러"]
-        eq_count = max(len(ng_equipments), 1)
-        total_rows = len(title_lines) + eq_count
-        row_h = max(30, win_h // total_rows)
+        # Estimate heights from grid weights for font sizing
+        ctrl_h = self._ctrl_frame.winfo_height() if self._controls_visible else 0
+        avail_h = max(win_h - ctrl_h, 100)
+        total_ratio = self._img_ratio + self._title_ratio + self._eq_ratio
+        img_h   = int(avail_h * self._img_ratio   / total_ratio)
+        title_h = int(avail_h * self._title_ratio / total_ratio)
+        eq_h    = avail_h - img_h - title_h
 
-        # Font size: based on row height, capped by window width
-        longest_eq = max((len(eq) for eq in ng_equipments), default=1)
-        fsize_by_h = int(row_h * 0.7)
-        fsize_by_w = max(1, int((win_w - 20) / (longest_eq * 0.65)))
-        fsize = max(20, min(fsize_by_h, fsize_by_w, 300))
+        self._img_frame.configure(bg=self._bg_color)
+        self._title_frame.configure(bg=self._bg_color)
+        self._eq_frame.configure(bg=self._bg_color)
 
-        # Render title labels
+        self._render_image(win_w, img_h)
+        self._render_title(win_w, title_h)
+        self._render_equipments(win_w, eq_h, ng_equipments)
+
+    def _render_image(self, win_w: int, img_h: int) -> None:
+        for w in self._img_frame.winfo_children():
+            w.destroy()
+        self._photo_ref = None
+
+        img_path_raw = self._cfg.get("alert_image_path", "./image.png")
+        img_path = _resolve_image_path(img_path_raw)
+
+        if _PIL_AVAILABLE and os.path.exists(img_path) and img_h > 10:
+            try:
+                pil_img = Image.open(img_path)
+                # Scale to fit within frame keeping aspect ratio
+                orig_w, orig_h = pil_img.size
+                scale = min(win_w / orig_w, img_h / orig_h)
+                new_w = max(1, int(orig_w * scale))
+                new_h = max(1, int(orig_h * scale))
+                pil_img = pil_img.resize((new_w, new_h), Image.LANCZOS)
+                self._photo_ref = ImageTk.PhotoImage(pil_img)
+                lbl = tk.Label(self._img_frame, image=self._photo_ref,
+                               bg=self._bg_color, anchor=tk.CENTER)
+                lbl.pack(fill=tk.BOTH, expand=True)
+                return
+            except Exception as exc:
+                logger.warning("이미지 로드 실패: %s", exc)
+
+        # Fallback: colored placeholder
+        tk.Label(self._img_frame, text="[ 이미지 ]",
+                 bg=self._bg_color, fg=self._title_fg,
+                 font=("Arial", max(10, img_h // 4), "bold"),
+                 anchor=tk.CENTER).pack(fill=tk.BOTH, expand=True)
+
+    def _render_title(self, win_w: int, title_h: int) -> None:
         for w in self._title_frame.winfo_children():
             w.destroy()
-        for line in title_lines:
-            tk.Label(
-                self._title_frame, text=line,
-                font=("Arial", fsize, "bold"),
-                fg="#cc0000", bg="#FFD700",
-                anchor=tk.CENTER,
-            ).pack(fill=tk.X)
+        if title_h < 10:
+            return
 
-        # Render equipment names
+        fsize = self._font_size if self._font_size > 0 else max(12, int(title_h * 0.38))
+        fsize = max(10, min(fsize, 300))
+
+        tk.Label(
+            self._title_frame, text="순환 에러",
+            font=("Arial", fsize, "bold"),
+            fg=self._title_fg, bg=self._bg_color,
+            anchor=tk.CENTER,
+        ).pack(fill=tk.BOTH, expand=True)
+
+    def _render_equipments(self, win_w: int, eq_h: int, ng_equipments: list[str]) -> None:
         for w in self._eq_frame.winfo_children():
             w.destroy()
-        for eq in ng_equipments:
+        if eq_h < 10:
+            return
+
+        slots = self._eq_slots
+        slot_h = max(20, eq_h // slots)
+
+        # Auto font size based on slot height and window width
+        longest = max((len(eq) for eq in ng_equipments), default=4)
+        if self._font_size > 0:
+            fsize = self._font_size
+        else:
+            fsize_h = int(slot_h * 0.65)
+            fsize_w = max(1, int((win_w - 20) / max(longest, 4) / 0.65))
+            fsize = max(14, min(fsize_h, fsize_w, 300))
+
+        ng_set = set(ng_equipments)
+        # Fill slots: NG equipments first, then empty
+        slot_labels = list(ng_equipments[:slots]) + [""] * max(0, slots - len(ng_equipments))
+
+        for i in range(slots):
+            text = slot_labels[i] if i < len(slot_labels) else ""
+            is_ng = text in ng_set and text != ""
+            fg = self._eq_ng_fg if is_ng else self._eq_ok_fg
             tk.Label(
-                self._eq_frame, text=eq,
+                self._eq_frame, text=text,
                 font=("Arial", fsize, "bold"),
-                fg="#cc0000", bg="#FFD700",
-                wraplength=win_w * 10,  # effectively disable line-wrapping
-                justify=tk.CENTER,
-                anchor=tk.CENTER,
+                fg=fg, bg=self._bg_color,
+                anchor=tk.CENTER, justify=tk.CENTER,
             ).pack(fill=tk.BOTH, expand=True)
 
-    def _render_equipments(self, ng_equipments: list[str]) -> None:
-        """Full re-render on resize."""
-        self._render_all(ng_equipments)
+    # ──────────────────────────────────────────────────────────────────
+    # Resize / placement
+    # ──────────────────────────────────────────────────────────────────
 
     def _on_resize_debounce(self, _event=None) -> None:
-        """Debounce resize events - fires only once after 200 ms."""
         if self._resize_job is not None:
             self._win.after_cancel(self._resize_job)
         self._resize_job = self._win.after(200, self._on_resize_done)
 
     def _on_resize_done(self) -> None:
         self._resize_job = None
-        if self._ng_equipments and not self._closed:
+        if not self._closed:
             self._render_all(self._ng_equipments)
 
     def _place(self, parent: tk.Tk, position: str, win_w: int, win_h: int) -> None:
         sw = parent.winfo_screenwidth()
         sh = parent.winfo_screenheight()
-
-        # Position the window at a screen edge
         if position == "right":
             x, y = sw - win_w, 0
         elif position == "left":
             x, y = 0, 0
         elif position == "top":
             x, y = 0, 0
-        else:  # bottom
+        else:
             x, y = 0, sh - win_h
-
         self._win.geometry(f"{win_w}x{win_h}+{x}+{y}")
+
+    # ──────────────────────────────────────────────────────────────────
+    # Public API
+    # ──────────────────────────────────────────────────────────────────
 
     def _on_close(self) -> None:
         self._closed = True
@@ -450,6 +700,7 @@ class CloudLogViewerGUI:
                 self._alert_win = NgAlertWindow(self.root, ng_equipments, position, ratio)
             else:
                 self._alert_win.update_message(ng_equipments)
+
         else:
             self._close_alert()
 
