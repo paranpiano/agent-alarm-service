@@ -6,12 +6,12 @@ import requests, serial
 import concurrent.futures
 from PIL import Image, ImageTk
 
-global open_windows, pause_event
+global open_windows
 global Logging_path
 
 # ser = serial.Serial('COM3', 9600, timeout=1)
 
-Logging_path = r''
+Logging_path = os.path.join(os.getcwd(), "Error Log")
 
 user32 = ctypes.windll.user32
 open_windows = {}
@@ -24,9 +24,6 @@ stop_led_events = {}
 
 NG_hwnd = []
 UNKNOWN_hwnd = []
-
-pause_event = threading.Event()
-pause_event.set()
 
 root = tk.Tk()
 root.withdraw()
@@ -146,11 +143,6 @@ def send_http(img):
         logging(str(e))
         return "UNKNOWN"
 
-def pause_timer():
-    print(f"{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}: waiting for 10 min")
-    time.sleep(600)
-    pause_event.set()
-
 def alarm_pop_up(flag, UI_Images, hwnd_list=None):
     global NG_hwnd, UNKNOWN_hwnd, open_windows
     
@@ -261,9 +253,6 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
                 del open_windows[flag]
             win.destroy()
 
-            # pause_event.clear()
-            # threading.Thread(target=pause_timer, daemon=True).start()
-
         btn = tk.Button(win, text="Check", command=on_check, font=("Arial", 40))
         btn.pack(pady=30)
 
@@ -325,9 +314,6 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
                 del open_windows[flag]
             win.destroy()
 
-            # pause_event.clear()
-            # threading.Thread(target=pause_timer, daemon=True).start()
-
         btn = tk.Button(win, text="Check", command=on_check, font=("Arial", 40))
         btn.pack(pady=30)
 
@@ -382,9 +368,6 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
                 del open_windows[flag]
             win.destroy()
 
-            # pause_event.clear()
-            # threading.Thread(target=pause_timer, daemon=True).start()
-
         btn = tk.Button(win, text="Check", command=on_check, font=("Arial", 40))
         btn.pack(pady=30)
     
@@ -404,7 +387,6 @@ def main():
         print(f"NG_hwnd: {NG_hwnd}")
         print(f"UNKNOWN_hwnd: {UNKNOWN_hwnd}")
         
-        # pause_event.wait()
         windows_images = []
         
         ignore_hwnds = [item["hwnd"] for item in NG_hwnd] + [item["hwnd"] for item in UNKNOWN_hwnd]
