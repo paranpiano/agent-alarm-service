@@ -6,12 +6,12 @@ import requests, serial
 import concurrent.futures
 from PIL import Image, ImageTk
 
-global open_windows, pause_event
+global open_windows
 global Logging_path
 
 # ser = serial.Serial('COM3', 9600, timeout=1)
 
-Logging_path = r''
+Logging_path = os.path.join(os.getcwd(), "Error Log")
 
 user32 = ctypes.windll.user32
 open_windows = {}
@@ -24,9 +24,6 @@ stop_led_events = {}
 
 NG_hwnd = []
 UNKNOWN_hwnd = []
-
-pause_event = threading.Event()
-pause_event.set()
 
 root = tk.Tk()
 root.withdraw()
@@ -69,7 +66,7 @@ def loop_sound(flag, sound_path):
         try:
             play_sound(sound_path)
         except Exception as e:
-            logging(e)
+            logging(str(e))
             pass
         time.sleep(7)
 
@@ -117,7 +114,7 @@ def capturing(hwnd):
 
     except Exception as e:
         print(f"{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}: Capture error:", e)
-        logging(e)
+        logging(str(e))
         return None
 
 def send_http(img):
@@ -143,13 +140,8 @@ def send_http(img):
         js = response.json()
         return js.get("status", "UNKNOWN")
     except Exception as e:
-        logging(e)
+        logging(str(e))
         return "UNKNOWN"
-
-def pause_timer():
-    print(f"{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}: waiting for 10 min")
-    time.sleep(600)
-    pause_event.set()
 
 def alarm_pop_up(flag, UI_Images, hwnd_list=None):
     global NG_hwnd, UNKNOWN_hwnd, open_windows
@@ -161,7 +153,7 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
             try:
                 event.set()
             except Exception as e:
-                logging(e)
+                logging(str(e))
                 pass
         stop_sound_events.clear()
         playing_sound_threads.clear()
@@ -175,7 +167,7 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
             try:
                 win.destroy()
             except Exception as e:
-                logging(e)
+                logging(str(e))
                 print(f"{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}: {e}")
         open_windows.clear()
         
@@ -207,7 +199,7 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
             try:
                 open_windows["UNKNOWN"].destroy()
             except Exception as e:
-                logging(e)
+                logging(str(e))
                 pass
             del open_windows["UNKNOWN"]
             
@@ -215,7 +207,7 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
             try:
                 open_windows["Machine_Missing"].destroy()
             except Exception as e:
-                logging(e)
+                logging(str(e))
                 pass
             del open_windows["Machine_Missing"]
 
@@ -261,9 +253,6 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
                 del open_windows[flag]
             win.destroy()
 
-            # pause_event.clear()
-            # threading.Thread(target=pause_timer, daemon=True).start()
-
         btn = tk.Button(win, text="Check", command=on_check, font=("Arial", 40))
         btn.pack(pady=30)
 
@@ -286,7 +275,7 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
             try:
                 open_windows["Machine_Missing"].destroy()
             except Exception as e:
-                logging(e)
+                logging(str(e))
                 pass
             del open_windows["Machine_Missing"]
 
@@ -325,9 +314,6 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
                 del open_windows[flag]
             win.destroy()
 
-            # pause_event.clear()
-            # threading.Thread(target=pause_timer, daemon=True).start()
-
         btn = tk.Button(win, text="Check", command=on_check, font=("Arial", 40))
         btn.pack(pady=30)
 
@@ -350,7 +336,7 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
             try:
                 open_windows["UNKNOWN"].destroy()
             except Exception as e:
-                logging(e)
+                logging(str(e))
                 pass
             del open_windows["UNKNOWN"]
 
@@ -382,9 +368,6 @@ def alarm_pop_up(flag, UI_Images, hwnd_list=None):
                 del open_windows[flag]
             win.destroy()
 
-            # pause_event.clear()
-            # threading.Thread(target=pause_timer, daemon=True).start()
-
         btn = tk.Button(win, text="Check", command=on_check, font=("Arial", 40))
         btn.pack(pady=30)
     
@@ -404,20 +387,19 @@ def main():
         print(f"NG_hwnd: {NG_hwnd}")
         print(f"UNKNOWN_hwnd: {UNKNOWN_hwnd}")
         
-        # pause_event.wait()
         windows_images = []
         
         ignore_hwnds = [item["hwnd"] for item in NG_hwnd] + [item["hwnd"] for item in UNKNOWN_hwnd]
         
         windows = enum_windows()
         windows = [a for a in windows if "hmi_panel" in a[1]]
-        filtered_windows = [w for w in windows if w[0] not in ignore_hwnds]
+        # filtered_windows = [w for w in windows if w[0] not in ignore_hwnds]
 
         if len(windows) < 6:
             alarm_pop_up("Machine_Missing", UI_Images)
         elif len(windows) >= 6:
-            filtered_windows.sort()
-            for w in filtered_windows:
+            windows.sort()
+            for w in windows:
                 # windows_images.append(capturing(w[0]))
                 windows_images.append( (w[0], capturing(w[0])) )  # (hwnd, img)
             # flag = NG_Detecting(windows_images, target_img_list, ref_images)
@@ -433,7 +415,7 @@ def main():
                     try:
                         status = future.result()
                     except Exception as e:
-                        logging(e)
+                        logging(str(e))
                         status = "UNKNOWN"
                 
                     results.append({
@@ -445,6 +427,9 @@ def main():
             
             NG_list = [r["hwnd"] for r in results if r["status"] == "NG"]
             UNKNOWN_list = [r["hwnd"] for r in results if r["status"] == "UNKNOWN"]
+            
+            NG_list = [hwnd for hwnd in NG_list if hwnd not in ignore_hwnds]
+            UNKNOWN_list = [hwnd for hwnd in UNKNOWN_list if hwnd not in ignore_hwnds]
 
             if len(NG_list) > 0:
                 alarm_pop_up("NG", UI_Images, hwnd_list=NG_list)
