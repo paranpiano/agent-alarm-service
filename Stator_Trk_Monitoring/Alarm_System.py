@@ -393,13 +393,13 @@ def main():
         
         windows = enum_windows()
         windows = [a for a in windows if "hmi_panel" in a[1]]
-        filtered_windows = [w for w in windows if w[0] not in ignore_hwnds]
+        # filtered_windows = [w for w in windows if w[0] not in ignore_hwnds]
 
         if len(windows) < 6:
             alarm_pop_up("Machine_Missing", UI_Images)
         elif len(windows) >= 6:
-            filtered_windows.sort()
-            for w in filtered_windows:
+            windows.sort()
+            for w in windows:
                 # windows_images.append(capturing(w[0]))
                 windows_images.append( (w[0], capturing(w[0])) )  # (hwnd, img)
             # flag = NG_Detecting(windows_images, target_img_list, ref_images)
@@ -427,6 +427,9 @@ def main():
             
             NG_list = [r["hwnd"] for r in results if r["status"] == "NG"]
             UNKNOWN_list = [r["hwnd"] for r in results if r["status"] == "UNKNOWN"]
+            
+            NG_list = [hwnd for hwnd in NG_list if hwnd not in ignore_hwnds]
+            UNKNOWN_list = [hwnd for hwnd in UNKNOWN_list if hwnd not in ignore_hwnds]
 
             if len(NG_list) > 0:
                 alarm_pop_up("NG", UI_Images, hwnd_list=NG_list)
