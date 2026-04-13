@@ -74,8 +74,30 @@ class BackgroundMonitor:
         self._no_update_alert_sent: bool = False          # deduplicates the no-update alert
         self._poll_job = None
 
-        # Start the first poll
-        self._root.after(500, self._poll)
+        cfg = load_config()
+        if cfg.get("test_mode", False):
+            # test_mode: show alert window immediately with configured test equipments
+            self._root.after(300, lambda: self._run_test_mode(cfg))
+        else:
+            # Start the first poll
+            self._root.after(500, self._poll)
+
+    def _run_test_mode(self, cfg: dict) -> None:
+        """Show the alert window immediately using test_mode_ng_equipments from config."""
+        ng_equipments = cfg.get("test_mode_ng_equipments", ["TEST-EQ-01", "TEST-EQ-02"])
+        position = cfg.get("alert_position", "right")
+        try:
+            ratio = float(cfg.get("alert_size_ratio", 0.25))
+            ratio = max(0.1, min(0.9, ratio))
+        except (ValueError, TypeError):
+            ratio = 0.25
+
+        logger.info("[TEST MODE] Showing alert window with: %s", ng_equipments)
+        self._active_ng_equipments = set(ng_equipments)
+        if self._alert_win is None or self._alert_win._closed:
+            self._alert_win = NgAlertWindow(self._root, sorted(ng_equipments), position, ratio, cfg=cfg)
+        else:
+            self._alert_win.update_message(sorted(ng_equipments))
 
     # ------------------------------------------------------------------
     # Polling
@@ -162,7 +184,7 @@ class BackgroundMonitor:
 
             ng_equipments = sorted(self._active_ng_equipments)
             if self._alert_win is None or self._alert_win._closed:
-                self._alert_win = NgAlertWindow(self._root, ng_equipments, position, ratio)
+                self._alert_win = NgAlertWindow(self._root, ng_equipments, position, ratio, cfg=cfg)
             else:
                 self._alert_win.update_message(ng_equipments)
         else:
