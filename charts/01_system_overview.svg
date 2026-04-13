@@ -1,149 +1,266 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 680" font-family="'Segoe UI', Arial, sans-serif">
-  <!-- Background -->
-  <rect width="1000" height="680" fill="#f0f4f8"/>
-
-  <!-- Title -->
-  <rect x="0" y="0" width="1000" height="60" fill="#1a2744"/>
-  <text x="500" y="38" text-anchor="middle" fill="white" font-size="22" font-weight="bold">AI Alarm System — 시스템 개요</text>
-
-  <!-- HMI Panel -->
-  <rect x="40" y="100" width="160" height="200" rx="12" fill="#2d6a9f" stroke="#1a4a7a" stroke-width="2"/>
-  <text x="120" y="130" text-anchor="middle" fill="white" font-size="13" font-weight="bold">HMI 패널</text>
-  <text x="120" y="150" text-anchor="middle" fill="#cce0f5" font-size="11">제조 장비 화면</text>
-  <rect x="60" y="165" width="120" height="80" rx="6" fill="#1a4a7a"/>
-  <text x="120" y="185" text-anchor="middle" fill="#7ec8e3" font-size="10">1920 × 1170</text>
-  <text x="120" y="202" text-anchor="middle" fill="white" font-size="10">HMI Screenshot</text>
-  <text x="120" y="219" text-anchor="middle" fill="#aad4f0" font-size="9">S520 | S530</text>
-  <text x="120" y="234" text-anchor="middle" fill="#aad4f0" font-size="9">S540 | S810</text>
-  <text x="120" y="280" text-anchor="middle" fill="#cce0f5" font-size="10">📷 화면 캡처</text>
-
-  <!-- Arrow HMI -> Agent -->
-  <line x1="200" y1="200" x2="270" y2="200" stroke="#f59e0b" stroke-width="3" marker-end="url(#arrow-gold)"/>
-  <text x="235" y="190" text-anchor="middle" fill="#92400e" font-size="10">이미지 전송</text>
-
-  <!-- Agent AI Server Box -->
-  <rect x="270" y="80" width="460" height="380" rx="16" fill="white" stroke="#6366f1" stroke-width="3"/>
-  <rect x="270" y="80" width="460" height="44" rx="16" fill="#6366f1"/>
-  <rect x="270" y="108" width="460" height="16" fill="#6366f1"/>
-  <text x="500" y="108" text-anchor="middle" fill="white" font-size="15" font-weight="bold">🤖 Agent AI Server</text>
-
-  <!-- Step 1: Crop -->
-  <rect x="310" y="140" width="380" height="55" rx="8" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1.5"/>
-  <text x="500" y="162" text-anchor="middle" fill="#5b21b6" font-size="12" font-weight="bold">① 패널 크롭 (1회)</text>
-  <text x="500" y="180" text-anchor="middle" fill="#7c3aed" font-size="11">전체 이미지 → 4개 패널 분할 (top_left / top_right / bottom_left / bottom_right)</text>
-
-  <!-- Arrow down -->
-  <line x1="500" y1="195" x2="500" y2="215" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arrow-purple)"/>
-
-  <!-- Parallel processing -->
-  <rect x="290" y="215" width="180" height="110" rx="8" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
-  <text x="380" y="238" text-anchor="middle" fill="#1e40af" font-size="12" font-weight="bold">② DI Agent</text>
-  <text x="380" y="256" text-anchor="middle" fill="#1d4ed8" font-size="10">Azure Document Intelligence</text>
-  <text x="380" y="273" text-anchor="middle" fill="#1e40af" font-size="10">숫자 추출 (OCR)</text>
-  <text x="380" y="290" text-anchor="middle" fill="#374151" font-size="9">S520: 28값 / S530: 28값</text>
-  <text x="380" y="305" text-anchor="middle" fill="#374151" font-size="9">S810: 30값</text>
-
-  <rect x="490" y="215" width="180" height="110" rx="8" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5"/>
-  <text x="580" y="238" text-anchor="middle" fill="#14532d" font-size="12" font-weight="bold">② LLM Agent</text>
-  <text x="580" y="256" text-anchor="middle" fill="#15803d" font-size="10">Azure OpenAI GPT-4o Vision</text>
-  <text x="580" y="273" text-anchor="middle" fill="#14532d" font-size="10">색상 감지 (Vision)</text>
-  <text x="580" y="290" text-anchor="middle" fill="#374151" font-size="9">S520/S530/S810: 빨간 영역</text>
-  <text x="580" y="305" text-anchor="middle" fill="#374151" font-size="9">S540: 12개 스테이션 색상</text>
-
-  <!-- Parallel label -->
-  <text x="500" y="210" text-anchor="middle" fill="#9333ea" font-size="10" font-style="italic">⚡ 병렬 실행 (동시)</text>
-
-  <!-- Arrows to merge -->
-  <line x1="380" y1="325" x2="380" y2="355" stroke="#6b7280" stroke-width="1.5"/>
-  <line x1="580" y1="325" x2="580" y2="355" stroke="#6b7280" stroke-width="1.5"/>
-  <line x1="380" y1="355" x2="580" y2="355" stroke="#6b7280" stroke-width="1.5"/>
-  <line x1="500" y1="355" x2="500" y2="375" stroke="#6b7280" stroke-width="2" marker-end="url(#arrow-gray)"/>
-
-  <!-- Merge -->
-  <rect x="360" y="375" width="280" height="55" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
-  <text x="500" y="397" text-anchor="middle" fill="#92400e" font-size="12" font-weight="bold">③ 최종 판정 병합</text>
-  <text x="500" y="415" text-anchor="middle" fill="#78350f" font-size="10">숫자 NG (≥3000) + 색상 NG (RED 영역) → OK / NG / UNKNOWN</text>
-
-  <!-- Arrow Agent -> Results -->
-  <line x1="730" y1="270" x2="800" y2="270" stroke="#f59e0b" stroke-width="3" marker-end="url(#arrow-gold)"/>
-
-  <!-- Results -->
-  <rect x="800" y="100" width="160" height="360" rx="12" fill="white" stroke="#d1d5db" stroke-width="2"/>
-  <rect x="800" y="100" width="160" height="36" rx="12" fill="#374151"/>
-  <rect x="800" y="120" width="160" height="16" fill="#374151"/>
-  <text x="880" y="122" text-anchor="middle" fill="white" font-size="12" font-weight="bold">판정 결과</text>
-
-  <rect x="820" y="150" width="120" height="60" rx="8" fill="#dcfce7" stroke="#22c55e" stroke-width="2"/>
-  <text x="880" y="175" text-anchor="middle" fill="#14532d" font-size="20">✅</text>
-  <text x="880" y="198" text-anchor="middle" fill="#14532d" font-size="13" font-weight="bold">OK (정상)</text>
-
-  <rect x="820" y="225" width="120" height="60" rx="8" fill="#fee2e2" stroke="#ef4444" stroke-width="2"/>
-  <text x="880" y="250" text-anchor="middle" fill="#991b1b" font-size="20">❌</text>
-  <text x="880" y="273" text-anchor="middle" fill="#991b1b" font-size="13" font-weight="bold">NG (이상)</text>
-
-  <rect x="820" y="300" width="120" height="60" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
-  <text x="880" y="325" text-anchor="middle" fill="#92400e" font-size="20">⚠️</text>
-  <text x="880" y="348" text-anchor="middle" fill="#92400e" font-size="13" font-weight="bold">UNKNOWN</text>
-
-  <rect x="820" y="375" width="120" height="60" rx="8" fill="#f3f4f6" stroke="#9ca3af" stroke-width="2"/>
-  <text x="880" y="400" text-anchor="middle" fill="#374151" font-size="20">⏱️</text>
-  <text x="880" y="423" text-anchor="middle" fill="#374151" font-size="13" font-weight="bold">TIMEOUT</text>
-
-  <!-- Email notification -->
-  <rect x="800" y="480" width="160" height="50" rx="8" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1.5"/>
-  <text x="880" y="500" text-anchor="middle" fill="#5b21b6" font-size="11">📧 이메일 알림</text>
-  <text x="880" y="518" text-anchor="middle" fill="#7c3aed" font-size="10">UNKNOWN 시 자동 발송</text>
-  <line x1="880" y1="360" x2="880" y2="480" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-purple)"/>
-
-  <!-- Client GUI -->
-  <rect x="40" y="380" width="160" height="120" rx="12" fill="#1e293b" stroke="#475569" stroke-width="2"/>
-  <text x="120" y="408" text-anchor="middle" fill="white" font-size="13" font-weight="bold">Client GUI</text>
-  <text x="120" y="428" text-anchor="middle" fill="#94a3b8" font-size="10">tkinter 모니터링</text>
-  <rect x="60" y="438" width="120" height="45" rx="4" fill="#0f172a"/>
-  <text x="120" y="455" text-anchor="middle" fill="#22c55e" font-size="9">● 단건 분석</text>
-  <text x="120" y="470" text-anchor="middle" fill="#60a5fa" font-size="9">● 주기적 분석 (5s/10s)</text>
-  <text x="120" y="485" text-anchor="middle" fill="#f59e0b" font-size="9">● 이력 CSV 기록</text>
-
-  <!-- Arrow Client -> Agent -->
-  <line x1="200" y1="440" x2="270" y2="350" stroke="#60a5fa" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arrow-blue)"/>
-
-  <!-- Processing time badge -->
-  <rect x="310" y="455" width="360" height="30" rx="6" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
-  <text x="490" y="474" text-anchor="middle" fill="#475569" font-size="11">⏱ 평균 처리 시간: 약 7~9초 (DI + LLM 병렬)</text>
-
-  <!-- Legend -->
-  <rect x="40" y="560" width="920" height="100" rx="10" fill="white" stroke="#e5e7eb" stroke-width="1"/>
-  <text x="500" y="582" text-anchor="middle" fill="#374151" font-size="12" font-weight="bold">기술 스택</text>
-  <rect x="60" y="592" width="12" height="12" fill="#3b82f6"/>
-  <text x="80" y="603" fill="#374151" font-size="10">Azure Document Intelligence (OCR)</text>
-  <rect x="260" y="592" width="12" height="12" fill="#22c55e"/>
-  <text x="280" y="603" fill="#374151" font-size="10">Azure OpenAI GPT-4o Vision (LLM)</text>
-  <rect x="480" y="592" width="12" height="12" fill="#6366f1"/>
-  <text x="500" y="603" fill="#374151" font-size="10">Flask REST API Server (Python)</text>
-  <rect x="700" y="592" width="12" height="12" fill="#1e293b"/>
-  <text x="720" y="603" fill="#374151" font-size="10">tkinter GUI Client</text>
-  <rect x="60" y="618" width="12" height="12" fill="#8b5cf6"/>
-  <text x="80" y="629" fill="#374151" font-size="10">AWS SNS 이메일 알림</text>
-  <rect x="260" y="618" width="12" height="12" fill="#f59e0b"/>
-  <text x="280" y="629" fill="#374151" font-size="10">PyYAML 설정 관리</text>
-  <rect x="480" y="618" width="12" height="12" fill="#ef4444"/>
-  <text x="500" y="629" fill="#374151" font-size="10">pytest 테스트 자동화</text>
-  <rect x="700" y="618" width="12" height="12" fill="#0ea5e9"/>
-  <text x="720" y="629" fill="#374151" font-size="10">CSV 분석 이력 기록</text>
-
-  <!-- Arrow markers -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 780" font-family="'Segoe UI', Arial, sans-serif">
   <defs>
-    <marker id="arrow-gold" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#f59e0b"/>
+    <marker id="arrow-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#00893e"/>
     </marker>
-    <marker id="arrow-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#8b5cf6"/>
+    <marker id="arrow-dark" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#1a2744"/>
     </marker>
     <marker id="arrow-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
       <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/>
     </marker>
-    <marker id="arrow-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#60a5fa"/>
+    <marker id="arrow-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#e8500a"/>
     </marker>
+    <linearGradient id="header-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1a2744"/>
+      <stop offset="100%" stop-color="#00893e"/>
+    </linearGradient>
+    <linearGradient id="agent-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a2744"/>
+      <stop offset="100%" stop-color="#243560"/>
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="2" dy="3" stdDeviation="4" flood-color="#00000022"/>
+    </filter>
   </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="780" fill="#f2f4f7"/>
+
+  <!-- Header -->
+  <rect x="0" y="0" width="1200" height="64" fill="url(#header-grad)"/>
+  <text x="600" y="26" text-anchor="middle" fill="white" font-size="11" letter-spacing="3" opacity="0.7">SCHAEFFLER</text>
+  <text x="600" y="50" text-anchor="middle" fill="white" font-size="20" font-weight="bold" letter-spacing="1">AI-Powered Equipment Alarm Monitoring System</text>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 1: HMI Equipment Panels (left) -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <rect x="28" y="84" width="220" height="580" rx="14" fill="white" stroke="#d0d5dd" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="28" y="84" width="220" height="40" rx="14" fill="#1a2744"/>
+  <rect x="28" y="110" width="220" height="14" fill="#1a2744"/>
+  <text x="138" y="110" text-anchor="middle" fill="white" font-size="13" font-weight="bold">Manufacturing Equipment</text>
+  <text x="138" y="126" text-anchor="middle" fill="#a0aec0" font-size="10">HMI Panel Screens</text>
+
+  <!-- Equipment cards -->
+  <!-- S520 -->
+  <rect x="44" y="140" width="188" height="68" rx="8" fill="#f0f4f8" stroke="#c8d3e0" stroke-width="1"/>
+  <rect x="44" y="140" width="6" height="68" rx="3" fill="#00893e"/>
+  <text x="62" y="160" fill="#1a2744" font-size="12" font-weight="bold">S520</text>
+  <text x="62" y="176" fill="#4a5568" font-size="10">Preheating &amp; Curing</text>
+  <text x="62" y="192" fill="#718096" font-size="9">Red area detection</text>
+  <rect x="192" y="150" width="32" height="16" rx="4" fill="#e8f5ee"/>
+  <text x="208" y="162" text-anchor="middle" fill="#00893e" font-size="9" font-weight="bold">HMI</text>
+
+  <!-- S530 -->
+  <rect x="44" y="218" width="188" height="68" rx="8" fill="#f0f4f8" stroke="#c8d3e0" stroke-width="1"/>
+  <rect x="44" y="218" width="6" height="68" rx="3" fill="#00893e"/>
+  <text x="62" y="238" fill="#1a2744" font-size="12" font-weight="bold">S530</text>
+  <text x="62" y="254" fill="#4a5568" font-size="10">Cooling</text>
+  <text x="62" y="270" fill="#718096" font-size="9">Red area detection</text>
+  <rect x="192" y="228" width="32" height="16" rx="4" fill="#e8f5ee"/>
+  <text x="208" y="240" text-anchor="middle" fill="#00893e" font-size="9" font-weight="bold">HMI</text>
+
+  <!-- S540 -->
+  <rect x="44" y="296" width="188" height="68" rx="8" fill="#f0f4f8" stroke="#c8d3e0" stroke-width="1"/>
+  <rect x="44" y="296" width="6" height="68" rx="3" fill="#1a2744"/>
+  <text x="62" y="316" fill="#1a2744" font-size="12" font-weight="bold">S540</text>
+  <text x="62" y="332" fill="#4a5568" font-size="10">Robot</text>
+  <text x="62" y="348" fill="#718096" font-size="9">12 station color check</text>
+  <rect x="192" y="306" width="32" height="16" rx="4" fill="#e8f5ee"/>
+  <text x="208" y="318" text-anchor="middle" fill="#00893e" font-size="9" font-weight="bold">HMI</text>
+
+  <!-- S510 -->
+  <rect x="44" y="374" width="188" height="68" rx="8" fill="#f0f4f8" stroke="#c8d3e0" stroke-width="1"/>
+  <rect x="44" y="374" width="6" height="68" rx="3" fill="#1a2744"/>
+  <text x="62" y="394" fill="#1a2744" font-size="12" font-weight="bold">S510</text>
+  <text x="62" y="410" fill="#4a5568" font-size="10">Robot 1</text>
+  <text x="62" y="426" fill="#718096" font-size="9">Station color check</text>
+  <rect x="192" y="384" width="32" height="16" rx="4" fill="#e8f5ee"/>
+  <text x="208" y="396" text-anchor="middle" fill="#00893e" font-size="9" font-weight="bold">HMI</text>
+
+  <!-- S310 -->
+  <rect x="44" y="452" width="188" height="68" rx="8" fill="#f0f4f8" stroke="#c8d3e0" stroke-width="1"/>
+  <rect x="44" y="452" width="6" height="68" rx="3" fill="#00893e"/>
+  <text x="62" y="472" fill="#1a2744" font-size="12" font-weight="bold">S310</text>
+  <text x="62" y="488" fill="#4a5568" font-size="10">Hairpin Insertion</text>
+  <text x="62" y="504" fill="#718096" font-size="9">Red area detection</text>
+  <rect x="192" y="462" width="32" height="16" rx="4" fill="#e8f5ee"/>
+  <text x="208" y="474" text-anchor="middle" fill="#00893e" font-size="9" font-weight="bold">HMI</text>
+
+  <!-- S810 -->
+  <rect x="44" y="530" width="188" height="68" rx="8" fill="#f0f4f8" stroke="#c8d3e0" stroke-width="1"/>
+  <rect x="44" y="530" width="6" height="68" rx="3" fill="#00893e"/>
+  <text x="62" y="550" fill="#1a2744" font-size="12" font-weight="bold">S810</text>
+  <text x="62" y="566" fill="#4a5568" font-size="10">Housing Cooling</text>
+  <text x="62" y="582" fill="#718096" font-size="9">Red area detection</text>
+  <rect x="192" y="540" width="32" height="16" rx="4" fill="#e8f5ee"/>
+  <text x="208" y="552" text-anchor="middle" fill="#00893e" font-size="9" font-weight="bold">HMI</text>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- CLIENT GUI (bottom left) -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <rect x="28" y="680" width="220" height="72" rx="12" fill="#1a2744" stroke="#2d3f6e" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="138" y="702" text-anchor="middle" fill="white" font-size="13" font-weight="bold">Client GUI</text>
+  <text x="138" y="718" text-anchor="middle" fill="#a0aec0" font-size="10">tkinter · Captures HMI screenshot</text>
+  <text x="138" y="733" text-anchor="middle" fill="#60a5fa" font-size="9">Single / Batch / Periodic (5s · 10s)</text>
+
+  <!-- Arrow: Client GUI → Agent Server (image upload) -->
+  <path d="M 248 716 Q 340 716 340 640" stroke="#e8500a" stroke-width="2.5" fill="none" stroke-dasharray="7,3" marker-end="url(#arrow-orange)"/>
+  <text x="310" y="710" fill="#e8500a" font-size="9" font-weight="bold">Image Upload</text>
+  <text x="310" y="722" fill="#e8500a" font-size="9">POST /api/v1/analyze</text>
+
+  <!-- Arrow: HMI → Client GUI (screenshot capture) -->
+  <line x1="138" y1="664" x2="138" y2="680" stroke="#1a2744" stroke-width="2" marker-end="url(#arrow-dark)"/>
+  <text x="148" y="675" fill="#1a2744" font-size="9">Screenshot</text>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- AGENT AI SERVER (center) -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <rect x="280" y="84" width="580" height="580" rx="16" fill="white" stroke="#1a2744" stroke-width="2" filter="url(#shadow)"/>
+  <rect x="280" y="84" width="580" height="46" rx="16" fill="url(#agent-grad)"/>
+  <rect x="280" y="114" width="580" height="16" fill="#1a2744"/>
+  <text x="570" y="114" text-anchor="middle" fill="white" font-size="15" font-weight="bold">Agent AI Server</text>
+  <text x="570" y="128" text-anchor="middle" fill="#a0aec0" font-size="10">Flask REST API · Python</text>
+
+  <!-- Step 1: Image Receive -->
+  <rect x="310" y="148" width="520" height="52" rx="8" fill="#f0f4f8" stroke="#c8d3e0" stroke-width="1.5"/>
+  <circle cx="336" cy="174" r="14" fill="#1a2744"/>
+  <text x="336" y="179" text-anchor="middle" fill="white" font-size="12" font-weight="bold">1</text>
+  <text x="370" y="168" fill="#1a2744" font-size="12" font-weight="bold">Receive HMI Panel Image</text>
+  <text x="370" y="186" fill="#4a5568" font-size="10">Client GUI captures HMI screenshot → sends via multipart/form-data</text>
+
+  <!-- Arrow down -->
+  <line x1="570" y1="200" x2="570" y2="218" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow-gray)"/>
+
+  <!-- Step 2: AI Analysis (parallel) -->
+  <rect x="310" y="218" width="520" height="160" rx="8" fill="#f8f9ff" stroke="#1a2744" stroke-width="1.5"/>
+  <circle cx="336" cy="244" r="14" fill="#1a2744"/>
+  <text x="336" y="249" text-anchor="middle" fill="white" font-size="12" font-weight="bold">2</text>
+  <text x="360" y="244" fill="#1a2744" font-size="12" font-weight="bold">AI Visual Analysis</text>
+  <text x="360" y="260" fill="#4a5568" font-size="10">Azure OpenAI GPT-4o Vision</text>
+
+  <!-- LLM box -->
+  <rect x="326" y="272" width="488" height="92" rx="6" fill="white" stroke="#00893e" stroke-width="1.5"/>
+  <text x="570" y="292" text-anchor="middle" fill="#00893e" font-size="11" font-weight="bold">GPT-4o Vision — Color Alarm Detection</text>
+
+  <rect x="340" y="300" width="140" height="52" rx="5" fill="#e8f5ee" stroke="#00893e" stroke-width="1"/>
+  <text x="410" y="318" text-anchor="middle" fill="#1a2744" font-size="10" font-weight="bold">S520 / S530</text>
+  <text x="410" y="332" text-anchor="middle" fill="#4a5568" font-size="9">S310 / S810</text>
+  <text x="410" y="346" text-anchor="middle" fill="#718096" font-size="9">Red area detection</text>
+
+  <rect x="496" y="300" width="140" height="52" rx="5" fill="#e8f5ee" stroke="#00893e" stroke-width="1"/>
+  <text x="566" y="318" text-anchor="middle" fill="#1a2744" font-size="10" font-weight="bold">S540 / S510</text>
+  <text x="566" y="332" text-anchor="middle" fill="#4a5568" font-size="9">Robot Panels</text>
+  <text x="566" y="346" text-anchor="middle" fill="#718096" font-size="9">12-station color check</text>
+
+  <line x1="480" y1="300" x2="496" y2="300" stroke="#c8d3e0" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="480" y1="352" x2="496" y2="352" stroke="#c8d3e0" stroke-width="1" stroke-dasharray="3,2"/>
+
+  <!-- Arrow down -->
+  <line x1="570" y1="378" x2="570" y2="396" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow-gray)"/>
+
+  <!-- Step 3: Judgment -->
+  <rect x="310" y="396" width="520" height="72" rx="8" fill="#f0f4f8" stroke="#c8d3e0" stroke-width="1.5"/>
+  <circle cx="336" cy="432" r="14" fill="#1a2744"/>
+  <text x="336" y="437" text-anchor="middle" fill="white" font-size="12" font-weight="bold">3</text>
+  <text x="360" y="422" fill="#1a2744" font-size="12" font-weight="bold">Final Judgment</text>
+  <text x="360" y="440" fill="#4a5568" font-size="10">Any RED area or alarm station found → NG</text>
+  <text x="360" y="456" fill="#4a5568" font-size="10">No alarm detected → OK   ·   Panel unidentifiable → UNKNOWN</text>
+
+  <!-- Arrow down -->
+  <line x1="570" y1="468" x2="570" y2="486" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow-gray)"/>
+
+  <!-- Step 4: Logging & Alert -->
+  <rect x="310" y="486" width="520" height="60" rx="8" fill="#f0f4f8" stroke="#c8d3e0" stroke-width="1.5"/>
+  <circle cx="336" cy="516" r="14" fill="#1a2744"/>
+  <text x="336" y="521" text-anchor="middle" fill="white" font-size="12" font-weight="bold">4</text>
+  <text x="360" y="510" fill="#1a2744" font-size="12" font-weight="bold">Logging &amp; Notification</text>
+  <text x="360" y="528" fill="#4a5568" font-size="10">Daily log file · JSON result storage · AWS SNS alert on UNKNOWN</text>
+
+  <!-- Arrow down -->
+  <line x1="570" y1="546" x2="570" y2="564" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow-gray)"/>
+
+  <!-- Step 5: Response -->
+  <rect x="310" y="564" width="520" height="52" rx="8" fill="#f0f4f8" stroke="#c8d3e0" stroke-width="1.5"/>
+  <circle cx="336" cy="590" r="14" fill="#00893e"/>
+  <text x="336" y="595" text-anchor="middle" fill="white" font-size="12" font-weight="bold">5</text>
+  <text x="360" y="584" fill="#1a2744" font-size="12" font-weight="bold">Return Result to Client</text>
+  <text x="360" y="602" fill="#4a5568" font-size="10">JSON response: status · reason · equipment_id · processing_time_ms</text>
+
+  <!-- Processing time badge -->
+  <rect x="310" y="630" width="520" height="22" rx="6" fill="#e8f5ee" stroke="#00893e" stroke-width="1"/>
+  <text x="570" y="645" text-anchor="middle" fill="#00893e" font-size="10" font-weight="bold">Avg. Processing Time: ~7–9 sec</text>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- RESULTS (right) -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <rect x="892" y="84" width="280" height="580" rx="14" fill="white" stroke="#d0d5dd" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="892" y="84" width="280" height="40" rx="14" fill="#1a2744"/>
+  <rect x="892" y="110" width="280" height="14" fill="#1a2744"/>
+  <text x="1032" y="110" text-anchor="middle" fill="white" font-size="13" font-weight="bold">Judgment Result</text>
+
+  <!-- OK -->
+  <rect x="910" y="142" width="244" height="100" rx="10" fill="#e8f5ee" stroke="#00893e" stroke-width="2"/>
+  <rect x="910" y="142" width="8" height="100" rx="4" fill="#00893e"/>
+  <text x="940" y="170" fill="#00893e" font-size="28">✓</text>
+  <text x="970" y="168" fill="#1a2744" font-size="16" font-weight="bold">OK</text>
+  <text x="970" y="186" fill="#4a5568" font-size="10">No alarm detected</text>
+  <text x="970" y="202" fill="#718096" font-size="9">All panels normal</text>
+  <text x="970" y="218" fill="#718096" font-size="9">No red areas found</text>
+
+  <!-- NG -->
+  <rect x="910" y="256" width="244" height="100" rx="10" fill="#fff0f0" stroke="#c0392b" stroke-width="2"/>
+  <rect x="910" y="256" width="8" height="100" rx="4" fill="#c0392b"/>
+  <text x="940" y="284" fill="#c0392b" font-size="28">✕</text>
+  <text x="970" y="282" fill="#1a2744" font-size="16" font-weight="bold">NG</text>
+  <text x="970" y="300" fill="#4a5568" font-size="10">Alarm detected</text>
+  <text x="970" y="316" fill="#718096" font-size="9">Red area or alarm station</text>
+  <text x="970" y="332" fill="#718096" font-size="9">found in panel</text>
+
+  <!-- UNKNOWN -->
+  <rect x="910" y="370" width="244" height="100" rx="10" fill="#fffbea" stroke="#e8500a" stroke-width="2"/>
+  <rect x="910" y="370" width="8" height="100" rx="4" fill="#e8500a"/>
+  <text x="940" y="398" fill="#e8500a" font-size="24">?</text>
+  <text x="970" y="396" fill="#1a2744" font-size="16" font-weight="bold">UNKNOWN</text>
+  <text x="970" y="414" fill="#4a5568" font-size="10">Panel unidentifiable</text>
+  <text x="970" y="430" fill="#718096" font-size="9">AWS SNS alert sent</text>
+  <text x="970" y="446" fill="#718096" font-size="9">Image saved for review</text>
+
+  <!-- TIMEOUT -->
+  <rect x="910" y="484" width="244" height="80" rx="10" fill="#f5f5f5" stroke="#9ca3af" stroke-width="1.5"/>
+  <rect x="910" y="484" width="8" height="80" rx="4" fill="#9ca3af"/>
+  <text x="940" y="510" fill="#9ca3af" font-size="22">⏱</text>
+  <text x="970" y="508" fill="#1a2744" font-size="14" font-weight="bold">TIMEOUT</text>
+  <text x="970" y="526" fill="#4a5568" font-size="10">No response within 30s</text>
+  <text x="970" y="542" fill="#718096" font-size="9">Client retries up to 3×</text>
+
+  <!-- SNS Alert note -->
+  <rect x="910" y="578" width="244" height="68" rx="8" fill="#f0f4f8" stroke="#1a2744" stroke-width="1"/>
+  <text x="1032" y="598" text-anchor="middle" fill="#1a2744" font-size="11" font-weight="bold">Cloud Logging</text>
+  <text x="1032" y="614" text-anchor="middle" fill="#4a5568" font-size="9">AWS SNS · Daily log files</text>
+  <text x="1032" y="630" text-anchor="middle" fill="#4a5568" font-size="9">JSON result storage</text>
+  <text x="1032" y="644" text-anchor="middle" fill="#718096" font-size="9">CSV history in Client GUI</text>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ARROWS between sections -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- HMI → Client GUI (screenshot) already drawn above -->
+
+  <!-- Arrow: Agent Server → Results -->
+  <line x1="860" y1="374" x2="892" y2="374" stroke="#1a2744" stroke-width="2.5" marker-end="url(#arrow-dark)"/>
+  <text x="876" y="368" text-anchor="middle" fill="#1a2744" font-size="9">Result</text>
+
+  <!-- Arrow: Client GUI → Agent (already drawn as curved path) -->
+
+  <!-- Arrow: Agent → Client GUI (response back) -->
+  <path d="M 340 660 Q 280 660 248 730" stroke="#00893e" stroke-width="2" fill="none" stroke-dasharray="6,3" marker-end="url(#arrow-green)"/>
+  <text x="268" y="650" fill="#00893e" font-size="9">JSON Response</text>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- FOOTER -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <rect x="0" y="756" width="1200" height="24" fill="#1a2744"/>
+  <text x="600" y="772" text-anchor="middle" fill="#a0aec0" font-size="10">Azure OpenAI GPT-4o Vision  ·  Flask REST API  ·  AWS SNS  ·  tkinter Client GUI  ·  Python</text>
 </svg>

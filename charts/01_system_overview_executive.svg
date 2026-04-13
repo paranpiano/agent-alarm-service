@@ -1,0 +1,192 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 620" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <marker id="arr-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#00893e"/>
+    </marker>
+    <marker id="arr-dark" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#1a2744"/>
+    </marker>
+    <marker id="arr-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#e8500a"/>
+    </marker>
+    <linearGradient id="hdr" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#1a2744"/>
+      <stop offset="100%" stop-color="#00893e"/>
+    </linearGradient>
+    <filter id="sh" x="-5%" y="-5%" width="115%" height="120%">
+      <feDropShadow dx="2" dy="3" stdDeviation="5" flood-color="#00000020"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="620" fill="#eef1f6"/>
+
+  <!-- Header -->
+  <rect x="0" y="0" width="1100" height="70" fill="url(#hdr)"/>
+  <text x="550" y="24" text-anchor="middle" fill="white" font-size="10" letter-spacing="4" opacity="0.65">SCHAEFFLER  ·  MANUFACTURING INTELLIGENCE</text>
+  <text x="550" y="52" text-anchor="middle" fill="white" font-size="22" font-weight="bold" letter-spacing="0.5">AI Alarm Monitoring — Executive Overview</text>
+
+  <!-- ─── COLUMN 1: 6 Equipment ─── -->
+  <rect x="30" y="90" width="200" height="460" rx="14" fill="white" stroke="#c8d3e0" stroke-width="1.5" filter="url(#sh)"/>
+  <rect x="30" y="90" width="200" height="38" rx="14" fill="#1a2744"/>
+  <rect x="30" y="114" width="200" height="14" fill="#1a2744"/>
+  <text x="130" y="116" text-anchor="middle" fill="white" font-size="12" font-weight="bold">6 Equipment Lines</text>
+
+  <!-- Equipment list -->
+  <rect x="46" y="140" width="168" height="56" rx="7" fill="#f0f4f8" stroke="#c8d3e0" stroke-width="1"/>
+  <rect x="46" y="140" width="5" height="56" rx="3" fill="#00893e"/>
+  <text x="64" y="160" fill="#1a2744" font-size="12" font-weight="bold">S520</text>
+  <text x="64" y="176" fill="#4a5568" font-size="10">Preheating &amp; Curing</text>
+  <text x="64" y="190" fill="#9ca3af" font-size="9">Red area detection</text>
+
+  <rect x="46" y="204" width="168" height="56" rx="7" fill="#f0f4f8" stroke="#c8d3e0" stroke-width="1"/>
+  <rect x="46" y="204" width="5" height="56" rx="3" fill="#00893e"/>
+  <text x="64" y="224" fill="#1a2744" font-size="12" font-weight="bold">S530</text>
+  <text x="64" y="240" fill="#4a5568" font-size="10">Cooling</text>
+  <text x="64" y="254" fill="#9ca3af" font-size="9">Red area detection</text>
+
+  <rect x="46" y="268" width="168" height="56" rx="7" fill="#f0f4f8" stroke="#c8d3e0" stroke-width="1"/>
+  <rect x="46" y="268" width="5" height="56" rx="3" fill="#1a2744"/>
+  <text x="64" y="288" fill="#1a2744" font-size="12" font-weight="bold">S540</text>
+  <text x="64" y="304" fill="#4a5568" font-size="10">Robot</text>
+  <text x="64" y="318" fill="#9ca3af" font-size="9">12-station color check</text>
+
+  <rect x="46" y="332" width="168" height="56" rx="7" fill="#f0f4f8" stroke="#c8d3e0" stroke-width="1"/>
+  <rect x="46" y="332" width="5" height="56" rx="3" fill="#1a2744"/>
+  <text x="64" y="352" fill="#1a2744" font-size="12" font-weight="bold">S510</text>
+  <text x="64" y="368" fill="#4a5568" font-size="10">Robot 1</text>
+  <text x="64" y="382" fill="#9ca3af" font-size="9">Station color check</text>
+
+  <rect x="46" y="396" width="168" height="56" rx="7" fill="#f0f4f8" stroke="#c8d3e0" stroke-width="1"/>
+  <rect x="46" y="396" width="5" height="56" rx="3" fill="#00893e"/>
+  <text x="64" y="416" fill="#1a2744" font-size="12" font-weight="bold">S310</text>
+  <text x="64" y="432" fill="#4a5568" font-size="10">Hairpin Insertion</text>
+  <text x="64" y="446" fill="#9ca3af" font-size="9">Red area detection</text>
+
+  <rect x="46" y="460" width="168" height="56" rx="7" fill="#f0f4f8" stroke="#c8d3e0" stroke-width="1"/>
+  <rect x="46" y="460" width="5" height="56" rx="3" fill="#00893e"/>
+  <text x="64" y="480" fill="#1a2744" font-size="12" font-weight="bold">S810</text>
+  <text x="64" y="496" fill="#4a5568" font-size="10">Housing Cooling</text>
+  <text x="64" y="510" fill="#9ca3af" font-size="9">Red area detection</text>
+
+  <!-- ─── COLUMN 2: Client GUI ─── -->
+  <rect x="270" y="200" width="180" height="150" rx="14" fill="white" stroke="#c8d3e0" stroke-width="1.5" filter="url(#sh)"/>
+  <rect x="270" y="200" width="180" height="38" rx="14" fill="#1a2744"/>
+  <rect x="270" y="224" width="180" height="14" fill="#1a2744"/>
+  <text x="360" y="224" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Client GUI</text>
+  <text x="360" y="256" text-anchor="middle" fill="#4a5568" font-size="10">Captures HMI screenshot</text>
+  <text x="360" y="274" text-anchor="middle" fill="#4a5568" font-size="10">Sends image to AI server</text>
+  <text x="360" y="292" text-anchor="middle" fill="#4a5568" font-size="10">Displays result &amp; history</text>
+  <text x="360" y="316" text-anchor="middle" fill="#9ca3af" font-size="9">Periodic: every 5s or 10s</text>
+  <text x="360" y="332" text-anchor="middle" fill="#9ca3af" font-size="9">Batch analysis supported</text>
+
+  <!-- Arrow: Equipment → Client GUI -->
+  <line x1="230" y1="320" x2="268" y2="300" stroke="#1a2744" stroke-width="2" marker-end="url(#arr-dark)"/>
+  <text x="244" y="308" fill="#1a2744" font-size="9">Screenshot</text>
+
+  <!-- Arrow: Client GUI → AI Server -->
+  <line x1="450" y1="275" x2="490" y2="275" stroke="#e8500a" stroke-width="2.5" marker-end="url(#arr-orange)"/>
+  <text x="470" y="268" text-anchor="middle" fill="#e8500a" font-size="9" font-weight="bold">Image</text>
+  <text x="470" y="282" text-anchor="middle" fill="#e8500a" font-size="9">Upload</text>
+
+  <!-- Arrow: AI Server → Client GUI (response) -->
+  <line x1="490" y1="310" x2="450" y2="310" stroke="#00893e" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arr-green)"/>
+  <text x="470" y="328" text-anchor="middle" fill="#00893e" font-size="9">JSON Result</text>
+
+  <!-- ─── COLUMN 3: AI Server ─── -->
+  <rect x="490" y="90" width="280" height="460" rx="14" fill="white" stroke="#1a2744" stroke-width="2" filter="url(#sh)"/>
+  <rect x="490" y="90" width="280" height="38" rx="14" fill="#1a2744"/>
+  <rect x="490" y="114" width="280" height="14" fill="#1a2744"/>
+  <text x="630" y="116" text-anchor="middle" fill="white" font-size="13" font-weight="bold">Agent AI Server</text>
+
+  <!-- AI steps -->
+  <rect x="508" y="142" width="244" height="52" rx="7" fill="#f0f4f8" stroke="#c8d3e0" stroke-width="1"/>
+  <circle cx="528" cy="168" r="12" fill="#1a2744"/>
+  <text x="528" y="173" text-anchor="middle" fill="white" font-size="11" font-weight="bold">1</text>
+  <text x="548" y="163" fill="#1a2744" font-size="11" font-weight="bold">Receive Panel Image</text>
+  <text x="548" y="181" fill="#4a5568" font-size="9">Validate format · Extract metadata</text>
+
+  <line x1="630" y1="194" x2="630" y2="208" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+
+  <rect x="508" y="208" width="244" height="80" rx="7" fill="#e8f5ee" stroke="#00893e" stroke-width="1.5"/>
+  <circle cx="528" cy="248" r="12" fill="#00893e"/>
+  <text x="528" y="253" text-anchor="middle" fill="white" font-size="11" font-weight="bold">2</text>
+  <text x="548" y="232" fill="#1a2744" font-size="11" font-weight="bold">GPT-4o Vision Analysis</text>
+  <text x="548" y="250" fill="#4a5568" font-size="9">Detect RED alarm areas</text>
+  <text x="548" y="266" fill="#4a5568" font-size="9">Check station colors (S540/S510)</text>
+  <text x="548" y="280" fill="#9ca3af" font-size="9">Azure OpenAI · ~7–9 sec</text>
+
+  <line x1="630" y1="288" x2="630" y2="302" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+
+  <rect x="508" y="302" width="244" height="68" rx="7" fill="#f0f4f8" stroke="#c8d3e0" stroke-width="1"/>
+  <circle cx="528" cy="336" r="12" fill="#1a2744"/>
+  <text x="528" y="341" text-anchor="middle" fill="white" font-size="11" font-weight="bold">3</text>
+  <text x="548" y="326" fill="#1a2744" font-size="11" font-weight="bold">Final Judgment</text>
+  <text x="548" y="344" fill="#4a5568" font-size="9">Alarm found → NG</text>
+  <text x="548" y="360" fill="#4a5568" font-size="9">No alarm → OK  ·  Unclear → UNKNOWN</text>
+
+  <line x1="630" y1="370" x2="630" y2="384" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+
+  <rect x="508" y="384" width="244" height="52" rx="7" fill="#f0f4f8" stroke="#c8d3e0" stroke-width="1"/>
+  <circle cx="528" cy="410" r="12" fill="#1a2744"/>
+  <text x="528" y="415" text-anchor="middle" fill="white" font-size="11" font-weight="bold">4</text>
+  <text x="548" y="404" fill="#1a2744" font-size="11" font-weight="bold">Log &amp; Alert</text>
+  <text x="548" y="422" fill="#4a5568" font-size="9">Save result · AWS SNS on UNKNOWN</text>
+
+  <line x1="630" y1="436" x2="630" y2="450" stroke="#9ca3af" stroke-width="1.5" marker-end="url(#arr-dark)"/>
+
+  <rect x="508" y="450" width="244" height="52" rx="7" fill="#e8f5ee" stroke="#00893e" stroke-width="1.5"/>
+  <circle cx="528" cy="476" r="12" fill="#00893e"/>
+  <text x="528" y="481" text-anchor="middle" fill="white" font-size="11" font-weight="bold">5</text>
+  <text x="548" y="470" fill="#1a2744" font-size="11" font-weight="bold">Return Result</text>
+  <text x="548" y="488" fill="#4a5568" font-size="9">JSON: status · reason · equipment_id</text>
+
+  <!-- Arrow: AI Server → Results -->
+  <line x1="770" y1="320" x2="808" y2="320" stroke="#1a2744" stroke-width="2.5" marker-end="url(#arr-dark)"/>
+
+  <!-- ─── COLUMN 4: Results ─── -->
+  <rect x="808" y="90" width="262" height="460" rx="14" fill="white" stroke="#c8d3e0" stroke-width="1.5" filter="url(#sh)"/>
+  <rect x="808" y="90" width="262" height="38" rx="14" fill="#1a2744"/>
+  <rect x="808" y="114" width="262" height="14" fill="#1a2744"/>
+  <text x="939" y="116" text-anchor="middle" fill="white" font-size="13" font-weight="bold">Judgment Outcome</text>
+
+  <!-- OK -->
+  <rect x="824" y="142" width="230" height="88" rx="10" fill="#e8f5ee" stroke="#00893e" stroke-width="2"/>
+  <rect x="824" y="142" width="7" height="88" rx="4" fill="#00893e"/>
+  <text x="856" y="178" fill="#00893e" font-size="32" font-weight="bold">✓</text>
+  <text x="900" y="172" fill="#1a2744" font-size="18" font-weight="bold">OK</text>
+  <text x="900" y="192" fill="#4a5568" font-size="10">No alarm detected</text>
+  <text x="900" y="208" fill="#9ca3af" font-size="9">All panels normal</text>
+  <text x="900" y="222" fill="#9ca3af" font-size="9">No red areas found</text>
+
+  <!-- NG -->
+  <rect x="824" y="244" width="230" height="88" rx="10" fill="#fff0f0" stroke="#c0392b" stroke-width="2"/>
+  <rect x="824" y="244" width="7" height="88" rx="4" fill="#c0392b"/>
+  <text x="856" y="280" fill="#c0392b" font-size="32" font-weight="bold">✕</text>
+  <text x="900" y="274" fill="#1a2744" font-size="18" font-weight="bold">NG</text>
+  <text x="900" y="294" fill="#4a5568" font-size="10">Alarm detected</text>
+  <text x="900" y="310" fill="#9ca3af" font-size="9">Red area or alarm station found</text>
+  <text x="900" y="324" fill="#9ca3af" font-size="9">Immediate attention required</text>
+
+  <!-- UNKNOWN -->
+  <rect x="824" y="346" width="230" height="88" rx="10" fill="#fffbea" stroke="#e8500a" stroke-width="2"/>
+  <rect x="824" y="346" width="7" height="88" rx="4" fill="#e8500a"/>
+  <text x="856" y="382" fill="#e8500a" font-size="30" font-weight="bold">?</text>
+  <text x="900" y="376" fill="#1a2744" font-size="16" font-weight="bold">UNKNOWN</text>
+  <text x="900" y="396" fill="#4a5568" font-size="10">Panel unidentifiable</text>
+  <text x="900" y="412" fill="#9ca3af" font-size="9">AWS SNS alert sent</text>
+  <text x="900" y="426" fill="#9ca3af" font-size="9">Image saved for review</text>
+
+  <!-- TIMEOUT -->
+  <rect x="824" y="448" width="230" height="68" rx="10" fill="#f5f5f5" stroke="#9ca3af" stroke-width="1.5"/>
+  <rect x="824" y="448" width="7" height="68" rx="4" fill="#9ca3af"/>
+  <text x="856" y="480" fill="#9ca3af" font-size="26">⏱</text>
+  <text x="900" y="476" fill="#1a2744" font-size="14" font-weight="bold">TIMEOUT</text>
+  <text x="900" y="494" fill="#4a5568" font-size="10">No response within 30s</text>
+  <text x="900" y="508" fill="#9ca3af" font-size="9">Auto-retry up to 3 times</text>
+
+  <!-- ─── Footer ─── -->
+  <rect x="0" y="572" width="1100" height="48" fill="#1a2744"/>
+  <text x="550" y="591" text-anchor="middle" fill="#a0aec0" font-size="10" letter-spacing="1">KEY TECHNOLOGY</text>
+  <text x="550" y="610" text-anchor="middle" fill="white" font-size="11">OpenAI GPT-4 · Azure AI Document Intelligence · AWS</text>
+</svg>
