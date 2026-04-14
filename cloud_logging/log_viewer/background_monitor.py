@@ -18,7 +18,9 @@ import os
 import sys
 import threading
 import tkinter as tk
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timezone, timedelta
+
+KST = timezone(timedelta(hours=9))
 
 import requests
 
@@ -235,9 +237,9 @@ class BackgroundMonitor:
             logger.info("both email and SMS alerts disabled - skipping")
             return False
 
-        now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+        now_str = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S KST")
         last_str = (
-            self._last_update_time.strftime("%Y-%m-%d %H:%M:%S UTC")
+            self._last_update_time.astimezone(KST).strftime("%Y-%m-%d %H:%M:%S KST")
             if self._last_update_time else "N/A"
         )
         elapsed_int = int(elapsed_minutes)
